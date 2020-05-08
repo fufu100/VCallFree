@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="ufree.call.international.phone.wifi.vcallfree.adapter.BaseAdapter.OnItemClick"/>
+        <variable
+            name="position"
+            type="Integer" />
+        <variable
+            name="onItemClickListener"
+            type="OnItemClick" />
+        <variable
+            name="obj"
+            type="String[]" />
+    </data>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingTop="21dp"
+        android:paddingBottom="21dp"
+        android:paddingStart="13dp"
+        android:paddingEnd="20dp"
+        android:background="@color/bg"
+        android:onClick="@{() -> onItemClickListener.onItemClick(-1,position,obj)}">
+
+        <TextView
+            android:id="@+id/letterTv"
+            android:layout_width="20dp"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/blue" />
+
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="20dp"
+            android:background="@color/blue"
+            app:flag="@{obj[0]}"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:textSize="16sp"
+            android:textColor="@color/text_light"
+            android:text="@{obj[3]}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/text_dark"
+            android:text="@{obj[1]}" />
+    </LinearLayout>
+</layout>

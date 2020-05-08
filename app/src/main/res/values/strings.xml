@@ -1,3 +1,30 @@
 <resources>
     <string name="app_name">VCallFree</string>
+    <string name="tab_contacts">Contacts</string>
+    <string name="tab_recents">Recents</string>
+    <string name="tab_coins">Coins</string>
+    <string name="loading">Loading…</string>
+    <string name="side_invite_friends">Invite Friends</string>
+    <string name="side_call_rate">Call Rate</string>
+    <string name="side_send_feedback">Send Feedback</string>
+    <string name="side_rate_us">Rate Us</string>
+    <string name="side_settings">Settings</string>
+    <string name="hint_search_contacts">Search for contacts</string>
+    <string name="setting">Setting</string>
+    <string name="about">About</string>
+    <string name="about_title">About free calls</string>
+    <string name="about_content">Our products are designed to help you work efficiently and entertain, keep your content organized, help you get answers, keep in touch with others, and develop. Learn more. Download on the App Store and download on Google Play.</string>
+    <string name="setting_play_dial_tone">Play dial tone</string>
+    <string name="setting_display_key_vib">Dialpad key vibration</string>
+    <string name="setting_call">Call</string>
+    <string name="setting_other">Other</string>
+    <string name="setting_about_us">About us</string>
+    <string name="setting_privacy_agreement">Privacy Agreement</string>
+    <string name="choose_country">Choose Country</string>
+    <string name="coin_balance">Coin Balance</string>
+    <string name="call_rate">Call Rate</string>
+    <string name="time_remaining">Time Remaining</string>
+    <string name="choose_a_type">Choose a type</string>
+    <string name="please_enter_your_suggestion">Please enter your suggestion</string>
+    <string name="set_phone_number">Set Phone Number</string>
 </resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+            android:id="@+id/invite"
+            android:icon="@drawable/side_invite_friends"
+
+            android:title="@string/side_invite_friends" />
+
+    <item
+            android:id="@+id/call_rate"
+            android:icon="@drawable/side_call_rate"
+            android:title="@string/side_call_rate" />
+
+    <item
+            android:id="@+id/feedback"
+            android:icon="@drawable/side_feedback"
+            android:title="@string/side_send_feedback" />
+
+    <item
+        android:id="@+id/rate_us"
+        android:icon="@drawable/side_rate_us"
+        android:title="@string/side_rate_us" />
+
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/side_settings"
+        android:title="@string/side_settings" />
+</menu>

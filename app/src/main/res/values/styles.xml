@@ -1,11 +1,59 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="AppTheme.Setting">
+        <item name="colorAccent">@color/blue</item>
+    </style>
+
+    <style name="Tab">
+        <item name="android:button">@null</item>
+        <item name="android:textColor">@color/text_dark</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="DialNumber">
+        <item name="android:textColor">@color/text_normal</item>
+        <item name="android:textSize">30sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">24dp</item>
+    </style>
+    <style name="DialLetter">
+        <item name="android:textColor">@color/text_dark</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:paddingBottom">16dp</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <style name="FeedbackItem">
+        <item name="android:textColor">@color/feedback_text</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/feedback_item</item>
+    </style>
+    <style name="RewardItem">
+        <item name="android:textColor">@color/text_normal</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:drawableStart">@drawable/blue_dot</item>
+        <item name="android:drawablePadding">8dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:layout_columnWeight">1</item>
+        <item name="android:layout_width">0dp</item>
+    </style>
 </resources>

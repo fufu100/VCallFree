@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="activity"
+            type="ufree.call.international.phone.wifi.vcallfree.ui.SetPhoneNumberActivity" />
+        <variable
+            name="country"
+            type="ufree.call.international.phone.wifi.vcallfree.api.Country" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@color/colorPrimary"
+            app:navigationIcon="@drawable/ic_dial_back_arrow"
+            app:contentInsetStartWithNavigation="0dp"
+            app:titleMarginStart="0dp"
+            app:title="@string/set_phone_number"
+            app:titleTextColor="@color/text_normal" />
+
+        <LinearLayout
+            android:id="@+id/country_code"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="44dp"
+            android:paddingEnd="14dp"
+            android:paddingStart="8dp"
+            android:gravity="center"
+            android:background="@drawable/bg_blue_round"
+            android:onClick="@{activity::selectCountry}">
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                app:flag_circle="@{country.iso}"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:gravity="center"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                tools:text="@{`+` + country.code}"
+                android:textColor="@color/text_normal"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/phoneTv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/country_code"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/country_code"
+            app:layout_constraintBottom_toBottomOf="@id/country_code"
+            android:layout_marginEnd="24dp"
+            android:layout_marginStart="15dp"
+            android:textStyle="bold"
+            android:textColor="@color/text_normal"
+            android:textSize="30sp"
+            android:background="@null"
+            tools:text="12134"
+            android:cursorVisible="true" />
+        
+        <View
+            android:id="@+id/line1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            app:layout_constraintTop_toBottomOf="@id/country_code"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="14dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/colorPrimary"/>
+        
+        <EditText
+            android:id="@+id/code_et"
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn"
+            app:layout_constraintTop_toBottomOf="@id/line1"
+            android:textColor="@color/text_search"
+            android:textColorHint="@color/text_search"
+            android:textSize="15sp"
+            android:text="Fill in the verification code"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:background="@null"
+            android:inputType="number"/>
+        
+        <Button
+            android:id="@+id/btn"
+            android:layout_width="100dp"
+            android:layout_height="34dp"
+            app:layout_constraintTop_toTopOf="@id/code_et"
+            app:layout_constraintBottom_toBottomOf="@id/code_et"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/code_et"
+            android:layout_marginEnd="14dp"
+            android:textColor="@color/text_black"
+            android:text="Send Code"
+            android:textAllCaps="false"
+            android:background="@drawable/bg_yellow_btn"/>
+
+        <View
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            app:layout_constraintTop_toBottomOf="@id/code_et"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="14dp"
+            android:background="@color/colorPrimary"/>
+        
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/bg_setting_item"
+            app:layout_constraintTop_toBottomOf="@id/line2"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="14dp"
+            android:layout_marginTop="32dp"
+            android:text="Bind Phone"
+            android:textSize="20sp"
+            android:textColor="@color/text_search"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <import type="ufree.call.international.phone.wifi.vcallfree.adapter.BaseAdapter"/>
+        <import type="android.view.View"/>
+        <variable name="obj" type="BaseAdapter"/>
+    </data>
+    <LinearLayout
+            android:id="@+id/load_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingBottom="12dip"
+            android:paddingTop="12dip">
+
+        <ProgressBar
+                android:id="@+id/progress_wheel"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:visibility="@{obj.isFooterLoading() ? View.VISIBLE : View.GONE}"
+                android:progressTint="@color/text_light"/>
+
+        <TextView
+                android:id="@+id/more_data_msg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_light"
+                android:textSize="16sp"
+                android:layout_marginLeft="10dp"
+                android:visibility="@{obj.isFooterLoading() ? View.VISIBLE : View.GONE}"
+                android:text="@string/loading"/>
+
+        <TextView
+                android:id="@+id/empty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="@{obj.isFooterLoading() ? View.GONE : View.VISIBLE}"
+                android:textColor="@color/text_light"
+                android:textSize="13sp"
+                android:text="没有更多内容了"/>
+    </LinearLayout>
+
+</layout>

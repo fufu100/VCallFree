@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="ufree.call.international.phone.wifi.vcallfree.api.Contact"/>
+        <import type="ufree.call.international.phone.wifi.vcallfree.adapter.BaseAdapter.OnItemClick"/>
+        <variable
+            name="position"
+            type="Integer" />
+        <variable
+            name="onItemClickListener"
+            type="OnItemClick" />
+        <variable
+            name="obj"
+            type="Contact" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/page_padding"
+        android:paddingEnd="@dimen/page_padding"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
+        android:background="@color/bg"
+        android:onClick="@{() -> onItemClickListener.onItemClick(-1,position,obj)}">
+
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/ic_avatar_default"
+            app:contact_photo="@{obj}"/>
+
+        <TextView
+            android:id="@+id/username"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/avatar"
+            app:layout_constraintEnd_toStartOf="@id/invite"
+            app:layout_constraintTop_toTopOf="@id/avatar"
+            app:layout_constraintBottom_toTopOf="@id/phone"
+            android:textColor="@color/text_normal"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginStart="10dp"
+            android:text="@{obj.username}"
+            tools:text="xxx"/>
+
+        <TextView
+            android:id="@+id/phone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/username"
+            app:layout_constraintTop_toTopOf="@id/username"
+            app:layout_constraintBottom_toBottomOf="@id/avatar"
+            android:textColor="@color/text_dark"
+            android:textSize="12sp"
+            android:text="@{obj.phone}"
+            tools:text="xxx"/>
+
+        <ImageView
+            android:id="@+id/invite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:src="@drawable/ic_invite"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
