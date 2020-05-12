@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="dialog"
+            type="ufree.call.international.phone.wifi.vcallfree.ui.RateDialog" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="32dp">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textColor="#010312"
+            android:textSize="16sp"
+            android:text="@string/how_do_you_feel" />
+
+
+        <TextView
+            android:id="@+id/hated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/like"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_marginTop="24dp"
+            android:drawableTop="@drawable/ic_hate"
+            android:drawablePadding="8dp"
+            android:gravity="center_horizontal"
+            android:text="@string/hated"
+            android:textColor="#010312"
+            android:textSize="16sp"
+            android:onClick="@{dialog::hate}"/>
+        <TextView
+            android:id="@+id/like"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/title"
+            app:layout_constraintStart_toEndOf="@id/hated"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_marginTop="24dp"
+            android:drawableTop="@drawable/ic_like"
+            android:drawablePadding="8dp"
+            android:gravity="center_horizontal"
+            android:text="@string/hated"
+            android:textColor="#010312"
+            android:textSize="16sp"
+            android:onClick="@{dialog::like}"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

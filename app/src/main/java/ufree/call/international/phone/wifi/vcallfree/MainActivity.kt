@@ -1,23 +1,34 @@
 package ufree.call.international.phone.wifi.vcallfree
 
 import android.Manifest
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
+import android.view.KeyEvent
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
+import androidx.viewpager.widget.ViewPager
 import com.newmotor.x5.db.DBHelper
 import com.translate.english.voice.lib.App
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import ufree.call.international.phone.wifi.vcallfree.adapter.CacheFragmentStatePagerAdapter
 import ufree.call.international.phone.wifi.vcallfree.api.Api
 import ufree.call.international.phone.wifi.vcallfree.api.Country
 import ufree.call.international.phone.wifi.vcallfree.lib.BaseActivity
+import ufree.call.international.phone.wifi.vcallfree.service.CallService
 import ufree.call.international.phone.wifi.vcallfree.ui.*
 import ufree.call.international.phone.wifi.vcallfree.utils.*
 import java.io.BufferedReader
@@ -25,7 +36,7 @@ import java.io.File
 import java.io.InputStreamReader
 import java.util.*
 
-class MainActivity : BaseActivity() {
+class MainActivity : BaseActivity(),RadioGroup.OnCheckedChangeListener,ViewPager.OnPageChangeListener {
     private val PERMISSION_REQUEST_CODE = 0
 
     // 所需的全部权限
@@ -34,7 +45,8 @@ class MainActivity : BaseActivity() {
         Manifest.permission.READ_CONTACTS
     )
     private val fragments = mutableListOf<Fragment>()
-    private lateinit var tabManager: TabManager
+    private lateinit var conn: ServiceConnection
+    private var callBinder:CallService.CallBinder? = null
     override fun getLayoutRes(): Int = R.layout.activity_main
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +57,13 @@ class MainActivity : BaseActivity() {
         fragments.add(ContractsFragment())
         fragments.add(RecentFragment())
         fragments.add(CoinsFragment())
-        tabManager = TabManager(this, fragments, R.id.content, radioGroup)
+        viewPager.adapter = object :CacheFragmentStatePagerAdapter(supportFragmentManager){
+            override fun createItem(position: Int): Fragment = fragments[position]
+            override fun getCount(): Int = fragments.size
+        }
+        viewPager.addOnPageChangeListener(this)
+        viewPager.offscreenPageLimit = 2
+        radioGroup.setOnCheckedChangeListener(this)
 
         navigationView.itemTextColor = getStateListColor(
             intArrayOf(
@@ -97,6 +115,21 @@ class MainActivity : BaseActivity() {
         println("uuid2=${Build.SERIAL}")
 //        DBHelper.get()
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (lackPermission()) {
+                ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_REQUEST_CODE)
+            }
+        }
+
+        conn = object :ServiceConnection{
+            override fun onServiceDisconnected(name: ComponentName?) {
+
+            }
+            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                callBinder = service as CallService.CallBinder
+            }
+        }
+        bindService(Intent(this,CallService::class.java),conn, Context.BIND_AUTO_CREATE)
         initData()
         test()
     }
@@ -144,6 +177,11 @@ class MainActivity : BaseActivity() {
 
     }
 
+    public fun changeTab(tab:Int){
+        println("Main changeTab $tab")
+        (radioGroup.getChildAt(tab) as RadioButton).isChecked = true
+    }
+
     private fun test(){
         compositeDisposable.add(Api.getApiService().signup(getDeviceId())
             .compose(RxUtils.applySchedulers())
@@ -151,6 +189,7 @@ class MainActivity : BaseActivity() {
                 if(it.errcode == 0){
                     UserManager.get().user = it
                     navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text = it.points.toString()
+                    callBinder?.initAccount()
                 }
             },{
                 it.printStackTrace()
@@ -159,10 +198,13 @@ class MainActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (lackPermission()) {
-                ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_REQUEST_CODE)
-            }
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if(::conn.isInitialized){
+            unbindService(conn)
         }
     }
 
@@ -172,6 +214,10 @@ class MainActivity : BaseActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        //通知到每个fragment
+        fragments.forEach {
+            it.onRequestPermissionsResult(requestCode,permissions,grantResults)
+        }
     }
 
     private fun lackPermission(): Boolean {
@@ -185,5 +231,43 @@ class MainActivity : BaseActivity() {
             }
         }
         return false
+    }
+
+    private var mExitTime: Long = 0
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (System.currentTimeMillis() - mExitTime > 2000) {
+                toast( "再按一次退出程序")
+                mExitTime = System.currentTimeMillis()
+            } else {
+                finish()
+            }
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onCheckedChanged(group: RadioGroup?, checkedId: Int) {
+        when(checkedId){
+            R.id.radio_contacts ->
+                viewPager.currentItem = 0
+            R.id.radio_recents ->
+                viewPager.currentItem = 1
+            R.id.radio_coins ->
+                viewPager.currentItem = 2
+        }
+    }
+
+    override fun onPageScrollStateChanged(state: Int) {
+
+    }
+
+    override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+
+    }
+
+    override fun onPageSelected(position: Int) {
+        (radioGroup.getChildAt(position) as RadioButton).isChecked = true
     }
 }

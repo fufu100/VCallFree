@@ -1,6 +1,7 @@
 package com.newmotor.x5.db
 
 import android.content.ContentValues
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import com.translate.english.voice.lib.App
@@ -56,11 +57,16 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
                     cursor.getLong(cursor.getColumnIndex(RecordTable.PHONE_ID)),
                     cursor.getLong(cursor.getColumnIndex(RecordTable.CONTRACT_ID)),
                     cursor.getString(cursor.getColumnIndex(RecordTable.PHONE)),
+                    cursor.getString(cursor.getColumnIndex(RecordTable.ISO)),
+                    cursor.getString(cursor.getColumnIndex(RecordTable.CODE)),
+                    cursor.getString(cursor.getColumnIndex(RecordTable.PREFIX)),
                     cursor.getString(cursor.getColumnIndex(RecordTable.USERNAME)),
                     cursor.getLong(cursor.getColumnIndex(RecordTable.USER_PHOTO)),
                     cursor.getLong(cursor.getColumnIndex(RecordTable.ADD_TIME)),
                     cursor.getLong(cursor.getColumnIndex(RecordTable.DURATION)),
-                    cursor.getInt(cursor.getColumnIndex(RecordTable.IS_RECEIVED)) == 1
+                    cursor.getInt(cursor.getColumnIndex(RecordTable.RATE)),
+                    cursor.getInt(cursor.getColumnIndex(RecordTable.COIN_COST)),
+                    cursor.getInt(cursor.getColumnIndex(RecordTable.STATE))
                 )
             )
         }
@@ -74,17 +80,27 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         cv.put(RecordTable.USERNAME, record.username)
         cv.put(RecordTable.USER_PHOTO, record.userPhoto)
         cv.put(RecordTable.PHONE, record.phone)
+        cv.put(RecordTable.ISO, record.iso)
+        cv.put(RecordTable.CODE, record.code)
+        cv.put(RecordTable.PREFIX, record.prefix)
         cv.put(RecordTable.PHONE_ID, record.phoneId)
         cv.put(RecordTable.CONTRACT_ID, record.contractId)
         cv.put(RecordTable.ADD_TIME, System.currentTimeMillis())
         cv.put(RecordTable.DURATION, record.duration)
-        cv.put(RecordTable.IS_RECEIVED, if (record.isReceived) 1 else 0)
+        cv.put(RecordTable.RATE, record.rate)
+        cv.put(RecordTable.COIN_COST, record.coinCost)
+        cv.put(RecordTable.STATE, record.state)
         insert(RecordTable.TB_NAME, cv)
     }
 
 
-    fun getAllCountries(): MutableList<Country> {
-        val cursor = queryAll(CountryTable.TB_NAME)
+    fun getAllCountries(keyword:String = ""): MutableList<Country> {
+        val cursor:Cursor
+        if(keyword.isEmpty()){
+            cursor = queryAll(CountryTable.TB_NAME)
+        }else {
+            cursor = queryLike(CountryTable.TB_NAME, null, CountryTable.COUNTRY, keyword)
+        }
         val list = mutableListOf<Country>()
         while (cursor.moveToNext()) {
             list.add(
@@ -100,8 +116,41 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         return list
     }
 
+    fun getCountriesByISOs(isos:Array<String>?):MutableList<Country> {
+        val list = mutableListOf<Country>()
+        if(isos != null) {
+            val cursor = queryInAll(CountryTable.TB_NAME,CountryTable.ISO,isos,null)
+            while (cursor.moveToNext()) {
+                list.add(
+                    Country(
+                        cursor.getString(cursor.getColumnIndex(CountryTable.COUNTRY)),
+                        cursor.getString(cursor.getColumnIndex(CountryTable.ISO)),
+                        cursor.getString(cursor.getColumnIndex(CountryTable.CODE)),
+                        cursor.getInt(cursor.getColumnIndex(CountryTable.LENGTH)),
+                        cursor.getString(cursor.getColumnIndex(CountryTable.PREFIX))
+                    )
+                )
+            }
+        }
+        return list
+    }
+
     fun getCountry(iso:String):Country?{
         val cursor = queryAndAll(CountryTable.TB_NAME,CountryTable.ISO,iso)
+        if(cursor?.moveToNext() == true){
+            return Country(
+                cursor.getString(cursor.getColumnIndex(CountryTable.COUNTRY)),
+                cursor.getString(cursor.getColumnIndex(CountryTable.ISO)),
+                cursor.getString(cursor.getColumnIndex(CountryTable.CODE)),
+                cursor.getInt(cursor.getColumnIndex(CountryTable.LENGTH)),
+                cursor.getString(cursor.getColumnIndex(CountryTable.PREFIX))
+            )
+        }
+        return null
+    }
+
+    fun getCountryByCode(code:String):Country?{
+        val cursor = queryAndAll(CountryTable.TB_NAME,CountryTable.CODE,code)
         if(cursor?.moveToNext() == true){
             return Country(
                 cursor.getString(cursor.getColumnIndex(CountryTable.COUNTRY)),

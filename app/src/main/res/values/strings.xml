@@ -4,6 +4,7 @@
     <string name="tab_recents">Recents</string>
     <string name="tab_coins">Coins</string>
     <string name="loading">Loading…</string>
+    <string name="tip_rate">How do you feel about us? Is this app worth 5-STAR? </string>
     <string name="side_invite_friends">Invite Friends</string>
     <string name="side_call_rate">Call Rate</string>
     <string name="side_send_feedback">Send Feedback</string>
@@ -27,4 +28,11 @@
     <string name="choose_a_type">Choose a type</string>
     <string name="please_enter_your_suggestion">Please enter your suggestion</string>
     <string name="set_phone_number">Set Phone Number</string>
+    <string name="call_result">Call Result</string>
+    <string name="call_detail">Call Detail</string>
+    <string name="coin_cost">Coin Cost</string>
+    <string name="call_duration">Call Duration</string>
+    <string name="invite_text">Hi,highly recommended Free Call to you,no charged required to call your family &amp; friends,Download from Google Play NOW,https://play.google.com/store/apps/details?id=ufree.call.international.phone,wifi.vcallfree&amp;referrer=utm_source</string>
+    <string name="how_do_you_feel">How do you feel about us?</string>
+    <string name="hated">Hated</string>
 </resources>

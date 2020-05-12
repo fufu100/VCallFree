@@ -2,10 +2,7 @@ package ufree.call.international.phone.wifi.vcallfree.widget
 
 import android.animation.*
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
-import android.graphics.RectF
+import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.text.TextPaint
 import android.util.AttributeSet
@@ -26,8 +23,9 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
     var paint:Paint = Paint()
     var textPaint:Paint = Paint()
     val panColors = intArrayOf(0xFFF5CB57.toInt(),0xFFF2A93C.toInt())
+    val panColors2 = intArrayOf(0xFFEEAB41.toInt(),0xFFED9035.toInt())
     val count = 8
-    val texts = arrayOf("THANKS","+500","+5","+10","+200","+50","+20","+100")
+    val texts = arrayOf("+500","THANKS","+5","+10","+200","+50","+20","+100")
     val coinDrawable: Drawable? = context.getDrawable(R.drawable.ic_coin2)
     var rect:RectF = RectF()
     val textPath:Path = Path()
@@ -55,9 +53,26 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
         var startAngle: Float = -mAngle / 2 - 90
         val radius = (width / 2 - 50).toFloat()
         val center = (width / 2).toFloat()
+
+//        paint.style = Paint.Style.STROKE
+//        paint.color = 0x30000000
+//        paint.strokeWidth = context.dip2px(44).toFloat()
+//        canvas?.drawCircle(center,center,radius - context.dip2px(44),paint)
+
+//        startAngle = -mAngle / 2 - 90
         for(i in 0 until count){
             paint.color = panColors[i % 2]
+            paint.strokeWidth = 0f
+            paint.style = Paint.Style.FILL_AND_STROKE
+            rect.set(center - radius,center - radius,center + radius,center + radius)
             canvas?.drawArc(rect,startAngle,mAngle,true,paint)
+
+            paint.style = Paint.Style.STROKE
+            paint.color = panColors2[i % 2]
+            val ringW = context.dip2px(48).toFloat()
+            paint.strokeWidth = ringW
+            rect.set(rect.left + ringW * 0.5f,rect.top + ringW * 0.5f,rect.right - ringW * 0.5f,rect.bottom - ringW * 0.5f)
+            canvas?.drawArc(rect,startAngle,mAngle,false,paint)
 
             val drawableRadisu = radius / 10
             val angle = Math.toRadians((startAngle + mAngle / 2).toDouble())
@@ -66,14 +81,25 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
             coinDrawable?.setBounds((x - drawableRadisu).toInt(),(y - drawableRadisu).toInt(),(x + drawableRadisu).toInt(),(y + drawableRadisu).toInt())
             coinDrawable?.draw(canvas!!)
 
+            rect.set(center - radius,center - radius,center + radius,center + radius)
             textPath.reset()
             textPath.addArc(rect,startAngle,mAngle)
             val textWidth = textPaint.measureText(texts[i])
             val hOffset = Math.toRadians(mAngle.toDouble()) * radius / 2 - textWidth / 2
-            canvas?.drawTextOnPath(texts[i],textPath,hOffset.toFloat(),radius / 4,textPaint)
+            canvas?.drawTextOnPath(texts[i],textPath,hOffset.toFloat(),radius / 4.5f,textPaint)
 
             startAngle += mAngle
         }
+
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = context.dip2px(12).toFloat()
+        val colors = intArrayOf(0xFFEB642C.toInt(),0xFFED6F36.toInt())
+        val radialGrouping = RadialGradient(center,center,radius,colors,null,Shader.TileMode.CLAMP)
+        paint.shader = radialGrouping
+        canvas?.drawCircle(center,center,radius,paint)
+        paint.shader = null
+
+
     }
 
     private var currAngle = 0f

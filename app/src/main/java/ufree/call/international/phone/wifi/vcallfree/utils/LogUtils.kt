@@ -6,6 +6,7 @@ import java.lang.Exception
 
 object LogUtils {
     private val LOG_ON = BuildConfig.DEBUG
+    public val test = false
 
     fun DebugLog(message: String){
         if(LOG_ON) {

@@ -229,3 +229,11 @@ fun Context.getDeviceId():String{
     }
     return savedDeviceId
 }
+
+fun Context.hasPermission(permission:String):Boolean{
+    return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+        ContextCompat.checkSelfPermission(this,permission) == PackageManager.PERMISSION_DENIED
+    }else{
+        true
+    }
+}

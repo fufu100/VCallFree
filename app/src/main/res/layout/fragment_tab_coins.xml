@@ -6,26 +6,84 @@
         <variable
             name="fragment"
             type="ufree.call.international.phone.wifi.vcallfree.ui.CoinsFragment" />
+        <variable
+            name="totalCoins"
+            type="String" />
     </data>
 
-    <LinearLayout
+<!--    <FrameLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent">-->
+    <ufree.call.international.phone.wifi.vcallfree.widget.CoinLayout
+        android:id="@+id/coinLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/bg"
         android:orientation="vertical">
 
-        <ufree.call.international.phone.wifi.vcallfree.widget.WheelPanView
-            android:id="@+id/panView"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="24dp"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_height="match_parent"
+            android:paddingBottom="24dp">
+            <ufree.call.international.phone.wifi.vcallfree.widget.WheelPanView
+                android:id="@+id/panView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginTop="28dp"
+                app:layout_constraintTop_toTopOf="parent" />
+            <ImageView
+                android:id="@+id/goIv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="@id/panView"
+                app:layout_constraintBottom_toBottomOf="@id/panView"
+                app:layout_constraintStart_toStartOf="@id/panView"
+                app:layout_constraintEnd_toEndOf="@id/panView"
+                android:src="@drawable/ic_go"
+                android:onClick="@{fragment::start}"/>
+
+            <TextView
+                android:id="@+id/total_coins_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:paddingRight="10dp"
+                android:gravity="center_vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/panView"
+                android:drawableStart="@drawable/ic_coin2"
+                android:drawablePadding="6dp"
+                android:layout_marginStart="32dp"
+                android:text="@{totalCoins}"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="#FAF2D7"/>
+
+            <TextView
+                android:id="@+id/coin_cost"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:paddingRight="10dp"
+                android:gravity="center_vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/panView"
+                android:drawableStart="@drawable/ic_coin2"
+                android:drawablePadding="6dp"
+                android:layout_marginEnd="32dp"
+                android:text="100/100"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="#FAF2D7"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="@color/colorPrimary"
+            android:clickable="true"
             android:orientation="vertical">
 
             <FrameLayout
@@ -57,7 +115,7 @@
                     android:paddingEnd="12dp"
                     android:text="+10~200"
                     android:textColor="@color/text_yellow2"
-                    android:onClick="@{fragment::start}"/>
+                    />
             </FrameLayout>
 
             <FrameLayout
@@ -88,7 +146,8 @@
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
                     android:text="+10~200"
-                    android:textColor="@color/text_yellow2" />
+                    android:textColor="@color/text_yellow2"
+                    android:onClick="@{fragment::inviteFriends}"/>
             </FrameLayout>
 
             <FrameLayout
@@ -153,7 +212,8 @@
                     android:textColor="@color/text_yellow2"
                     android:onClick="@{fragment::setPhoneNumber}"/>
             </FrameLayout>
-            s
+
         </LinearLayout>
-    </LinearLayout>
+    </ufree.call.international.phone.wifi.vcallfree.widget.CoinLayout>
+<!--    </FrameLayout>-->
 </layout>

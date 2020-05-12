@@ -71,199 +71,257 @@
             android:textColor="@color/text_normal"
             android:textSize="30sp"
             android:background="@null"
-            tools:text="12134"
+            android:text="2134883500"
             android:cursorVisible="true" />
 
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/country_code"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginTop="40dp"
-            android:columnCount="3"
-            android:useDefaultMargins="false">
 
             <TextView
                 style="@style/DialNumber"
-                android:layout_columnWeight="1"
+                app:layout_constraintTop_toTopOf="@id/no2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/no2"
                 android:text="1"
                 android:tag="1"
                 android:onClick="@{activity::onClick}" />
 
             <TextView
+                android:id="@+id/no2"
                 style="@style/DialNumber"
-                android:layout_columnWeight="1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/country_code"
+                app:layout_constraintBottom_toTopOf="@id/no5"
                 android:tag="2"
                 android:text="2"
                 android:onClick="@{activity::onClick}"/>
 
             <TextView
+                android:id="@+id/no3"
                 style="@style/DialNumber"
-                android:layout_columnWeight="1"
+                app:layout_constraintTop_toTopOf="@id/no2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/no2"
                 android:tag="3"
                 android:text="3"
                 android:onClick="@{activity::onClick}"/>
 
-            <TextView
-                style="@style/DialLetter"
-                android:layout_columnWeight="1"
-                android:tag="1"
-                android:text=""
-                android:onClick="@{activity::onClick}"/>
 
             <TextView
-                style="@style/DialLetter"
-                android:layout_columnWeight="1"
-                android:text="ABC"
-                android:tag="2"
-                android:onClick="@{activity::onClick}"/>
-
-            <TextView
-                style="@style/DialLetter"
-                android:layout_columnWeight="1"
-                android:text="DEF"
-                android:tag="3"
-                android:onClick="@{activity::onClick}"/>
-
-            <TextView
+                android:id="@+id/no4"
                 style="@style/DialNumber"
-                android:layout_columnWeight="1"
+                app:layout_constraintTop_toTopOf="@id/no5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/no5"
                 android:text="4"
                 android:tag="4"
                 android:onClick="@{activity::onClick}"/>
 
             <TextView
+                android:id="@+id/no5"
                 style="@style/DialNumber"
-                android:layout_columnWeight="1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/no2"
+                app:layout_constraintBottom_toTopOf="@id/no8"
                 android:text="5"
                 android:tag="5"
                 android:onClick="@{activity::onClick}"/>
 
             <TextView
+                android:id="@+id/no6"
                 style="@style/DialNumber"
-                android:layout_columnWeight="1"
+                app:layout_constraintTop_toTopOf="@id/no5"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/no5"
                 android:text="6"
                 android:tag="6"
                 android:onClick="@{activity::onClick}"/>
 
-            <TextView
-                style="@style/DialLetter"
-                android:layout_columnWeight="1"
-                android:text="GHI"
-                android:tag="4"
-                android:onClick="@{activity::onClick}"/>
 
             <TextView
-                style="@style/DialLetter"
-                android:layout_columnWeight="1"
-                android:text="JKL"
-                android:tag="5"
-                android:onClick="@{activity::onClick}"/>
-
-            <TextView
-                style="@style/DialLetter"
-                android:layout_columnWeight="1"
-                android:text="MNO"
-                android:tag="6"
-                android:onClick="@{activity::onClick}"/>
-
-            <TextView
+                android:id="@+id/no7"
                 style="@style/DialNumber"
-                android:layout_columnWeight="1"
+                app:layout_constraintTop_toTopOf="@id/no8"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/no8"
                 android:text="7"
                 android:tag="7"
                 android:onClick="@{activity::onClick}"/>
 
             <TextView
+                android:id="@+id/no8"
                 style="@style/DialNumber"
-                android:layout_columnWeight="1"
+                app:layout_constraintTop_toBottomOf="@id/no5"
+                app:layout_constraintBottom_toTopOf="@id/no0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 android:text="8"
                 android:tag="8"
                 android:onClick="@{activity::onClick}"/>
 
             <TextView
+                android:id="@+id/no9"
                 style="@style/DialNumber"
-                android:layout_columnWeight="1"
+                app:layout_constraintTop_toTopOf="@id/no8"
+                app:layout_constraintStart_toEndOf="@id/no8"
+                app:layout_constraintEnd_toEndOf="parent"
                 android:text="9"
                 android:tag="9"
                 android:onClick="@{activity::onClick}"/>
 
             <TextView
-                style="@style/DialLetter"
-                android:layout_columnWeight="1"
-                android:text="PQRS"
-                android:tag="7"
-                android:onClick="@{activity::onClick}"/>
-
-            <TextView
-                style="@style/DialLetter"
-                android:layout_columnWeight="1"
-                android:text="TUV"
-                android:tag="8"
-                android:onClick="@{activity::onClick}"/>
-
-            <TextView
-                style="@style/DialLetter"
-                android:layout_columnWeight="1"
-                android:text="WXYZ"
-                android:tag="9"
-                android:onClick="@{activity::onClick}"/>
-
-            <TextView
+                android:id="@+id/star"
                 style="@style/DialNumber"
-                android:layout_columnWeight="1"
-                android:text="" />
+                app:layout_constraintTop_toTopOf="@id/no0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/no8"
+                android:text="*"
+                android:tag="*"
+                android:onClick="@{activity::onClick}"/>
 
             <TextView
+                android:id="@+id/no0"
                 style="@style/DialNumber"
-                android:layout_columnWeight="1"
+                app:layout_constraintTop_toBottomOf="@id/no8"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/call"
                 android:text="0"
                 android:tag="0"
                 android:onClick="@{activity::onClick}"/>
-
             <TextView
+                android:id="@+id/hash"
                 style="@style/DialNumber"
-                android:layout_columnWeight="1"
-                android:text="" />
+                app:layout_constraintTop_toTopOf="@id/no0"
+                app:layout_constraintStart_toEndOf="@id/no0"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:text="#"
+                android:tag="#"
+                android:onClick="@{activity::onClick}"/>
+
 
             <TextView
                 style="@style/DialLetter"
-                android:layout_columnWeight="1"
-                android:text="" />
-
-            <TextView
-                style="@style/DialLetter"
-                android:layout_columnWeight="1"
+                app:layout_constraintTop_toBottomOf="@id/no0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 android:text="+"
                 android:tag="0"
                 android:onClick="@{activity::onClick}"/>
 
-            <TextView
-                style="@style/DialLetter"
-                android:layout_columnWeight="1"
-                android:text="" />
 
             <ImageView
-                android:layout_gravity="fill_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="@id/call"
+                app:layout_constraintBottom_toBottomOf="@id/call"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/call"
+                android:padding="16dp"
                 android:scaleType="center"
-                android:layout_columnWeight="1"
                 android:src="@drawable/ic_dial_back_arrow"
                 android:onClick="@{activity::goBack}"/>
 
             <ImageView
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill_vertical"
+                android:id="@+id/call"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/no0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="24dp"
                 android:scaleType="center"
                 android:src="@drawable/ic_call"
                 android:onClick="@{activity::call}"/>
 
             <ImageView
                 android:id="@+id/del"
-                android:layout_gravity="fill_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="@id/call"
+                app:layout_constraintBottom_toBottomOf="@id/call"
+                app:layout_constraintStart_toEndOf="@id/call"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:padding="16dp"
                 android:scaleType="center"
                 android:layout_columnWeight="1"
                 android:src="@drawable/ic_dial_del"
                 android:onClick="@{activity::del}"/>
-        </GridLayout>
+
+        <TextView
+            style="@style/DialLetter"
+            app:layout_constraintTop_toBottomOf="@id/no2"
+            app:layout_constraintStart_toStartOf="@id/no2"
+            app:layout_constraintEnd_toEndOf="@id/no2"
+            android:text="ABC"
+            android:tag="2"
+            android:onClick="@{activity::onClick}"/>
+
+        <TextView
+            style="@style/DialLetter"
+            app:layout_constraintTop_toBottomOf="@id/no3"
+            app:layout_constraintStart_toStartOf="@id/no3"
+            app:layout_constraintEnd_toEndOf="@id/no3"
+            android:text="DEF"
+            android:tag="3"
+            android:onClick="@{activity::onClick}"/>
+
+        <TextView
+            style="@style/DialLetter"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/no5"
+            app:layout_constraintTop_toBottomOf="@id/no4"
+            android:text="GHI"
+            android:tag="4"
+            android:onClick="@{activity::onClick}"/>
+
+        <TextView
+            style="@style/DialLetter"
+            android:layout_columnWeight="1"
+            app:layout_constraintStart_toStartOf="@id/no5"
+            app:layout_constraintEnd_toEndOf="@id/no5"
+            app:layout_constraintTop_toBottomOf="@id/no5"
+            android:text="JKL"
+            android:tag="5"
+            android:onClick="@{activity::onClick}"/>
+
+        <TextView
+            style="@style/DialLetter"
+            app:layout_constraintTop_toBottomOf="@id/no6"
+            app:layout_constraintStart_toEndOf="@id/no5"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text="MNO"
+            android:tag="6"
+            android:onClick="@{activity::onClick}"/>
+
+        <TextView
+            style="@style/DialLetter"
+            app:layout_constraintTop_toBottomOf="@id/no7"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/no8"
+            android:text="PQRS"
+            android:tag="7"
+            android:onClick="@{activity::onClick}"/>
+
+        <TextView
+            style="@style/DialLetter"
+            app:layout_constraintTop_toBottomOf="@id/no8"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text="TUV"
+            android:tag="8"
+            android:onClick="@{activity::onClick}"/>
+
+        <TextView
+            style="@style/DialLetter"
+            app:layout_constraintTop_toBottomOf="@id/no9"
+            app:layout_constraintStart_toEndOf="@id/no8"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text="WXYZ"
+            android:tag="9"
+            android:onClick="@{activity::onClick}"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

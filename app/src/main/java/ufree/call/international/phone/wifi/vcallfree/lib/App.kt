@@ -19,7 +19,7 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
     var hasResume = false
     var hasPause = false
     override fun onActivityPaused(activity: Activity?) {
-        println("App onActivityPaused")
+        println("App onActivityPaused ${activity?.localClassName}")
         hasPause = activity is MainActivity
     }
 

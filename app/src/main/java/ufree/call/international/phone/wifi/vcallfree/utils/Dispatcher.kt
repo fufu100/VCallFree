@@ -127,7 +127,10 @@ class Dispatcher (private val context: Context?){
         intent.action = action
         return this
     }
-
+    fun type(type: String): Dispatcher {
+        intent.type = type
+        return this
+    }
 
     fun navigate(classes: Class<*>): Dispatcher {
         if(context != null) {

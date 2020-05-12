@@ -1,9 +1,13 @@
 package ufree.call.international.phone.wifi.vcallfree.ui
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.provider.ContactsContract
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,7 +22,7 @@ import ufree.call.international.phone.wifi.vcallfree.utils.Dispatcher
 /**
  * Created by lyf on 2020/4/27.
  */
-class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>(),BaseAdapter.OnItemClick<Contact> {
+class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>(),BaseAdapter.OnItemClick<Contact>,TextWatcher {
     val list: MutableList<Contact> = mutableListOf()
     override fun getLayoutResId(): Int = R.layout.fragment_tab_contracts
 
@@ -32,7 +36,7 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
             mOnItemClickListener = this@ContractsFragment
             mShowFooterItem = false
         }
-
+        dataBinding.search.addTextChangedListener(this)
         GlobalScope.launch {
             println("-----")
             getContacts()
@@ -41,14 +45,41 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
                 dataBinding.recyclerView.adapter?.notifyDataSetChanged()
             }
         }
+
+    }
+    var job:Job? = null
+    fun search(keyword:String){
+        job?.cancel()
+        job = GlobalScope.launch {
+            delay(500)
+            println("搜索$keyword")
+            getContacts(keyword)
+
+            withContext(Dispatchers.Main){
+                dataBinding.recyclerView.adapter?.notifyDataSetChanged()
+            }
+        }
     }
 
-    private suspend fun getContacts(){
+    private fun getContacts(keyword: String = ""){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ActivityCompat.checkSelfPermission(context!!,
                 Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_DENIED){
-            return;
+            return
         }
         list.clear()
+        var where:String? = null
+        var values:Array<String>? = null
+        if(keyword.isNotEmpty()){
+            where = ""
+            where += "${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME} like ?"
+            where += " or "
+            where += "${ContactsContract.CommonDataKinds.Phone.NUMBER} like ?"
+            values = arrayOf("%$keyword%","%$keyword%")
+        }
+        println("搜索条件： $where")
+        values?.forEach {
+            println("values:$it")
+        }
         val phoneCursor = context?.contentResolver?.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
             arrayOf(
@@ -58,7 +89,7 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
                 ContactsContract.CommonDataKinds.Phone.PHOTO_ID,
                 ContactsContract.CommonDataKinds.Phone._ID
             ),
-            null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " COLLATE LOCALIZED"
+            where, values, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " COLLATE LOCALIZED"
         )
         while (phoneCursor?.moveToNext() == true) {
             val phoneId = phoneCursor.getLong(4)
@@ -78,14 +109,32 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         println("ContractsFragment onRequestPermissionsResult $permissions,$grantResults")
+        GlobalScope.launch {
+            println("-----")
+            getContacts()
+            println("+++++")
+            withContext(Dispatchers.Main){
+                dataBinding.recyclerView.adapter?.notifyDataSetChanged()
+            }
+        }
     }
 
     override fun onItemClick(id: Int, position: Int, t: Contact) {
-        Dispatcher.dispatch(context){
-            navigate(DialActivity::class.java)
-            extra("contact",t)
-            defaultAnimate()
-        }.go()
+        if(id == -1){
+            Dispatcher.dispatch(context){
+                navigate(DialActivity::class.java)
+                extra("contact",t)
+                defaultAnimate()
+            }.go()
+        }else if(id == R.id.invite){
+            Dispatcher.dispatch(context){
+                action(Intent.ACTION_SENDTO)
+                data(Uri.parse("smsto:${t.phone}"))
+                extra("sms_body",context?.getString(R.string.invite_text) ?: "")
+                defaultAnimate()
+            }.go()
+        }
+
     }
 
     fun dial(v:View){
@@ -94,5 +143,17 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
             navigate(DialActivity::class.java)
             defaultAnimate()
         }.go()
+    }
+
+    override fun afterTextChanged(s: Editable?) {
+        search(s.toString())
+    }
+
+    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+    }
+
+    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
     }
 }

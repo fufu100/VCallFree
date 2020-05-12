@@ -19,7 +19,7 @@ import java.util.*
 /**
  * Created by lyf on 2020/5/7.
  */
-class CallDialog(context: Context):Dialog(context) {
+class CallDialog(context: Context,val makeCall:(callRate:Int) -> Unit):Dialog(context) {
     var phone :String? = null
     set(value) {
         field = value
@@ -31,6 +31,7 @@ class CallDialog(context: Context):Dialog(context) {
         field = value
         dataBinding.country = value
     }
+    var rate:Int = 0
     var disposable:Disposable? = null
     val dataBinding:DialogCallBinding = DataBindingUtil.inflate(layoutInflater,
         R.layout.dialog_call,null,false)
@@ -54,6 +55,7 @@ class CallDialog(context: Context):Dialog(context) {
             .compose(RxUtils.applySchedulers())
             .subscribe({
                 if(it.errcode == 0){
+                    rate = it.points
                     dataBinding.callRate.text = it.points.toString()
                     dataBinding.timeRemaining.text = ((UserManager.get().user?.points ?: 0) / it.points).toString()
                 }else{
@@ -66,6 +68,8 @@ class CallDialog(context: Context):Dialog(context) {
     }
 
     fun call(v:View){
-
+        makeCall(rate)
+        dismiss()
     }
+
 }

@@ -213,7 +213,7 @@
 {"Ukraine"                      ,"UA"		, "380"     , 9		, "00"  },
 {"United Arab Emirates"	        ,"AE"		, "971"     , 9     , "00"  },
 {"United Kingdom"               ,"GB"		, "44"      , 10	, "00"	},
-{"United States"                ,"US"		, "1"       , 10	, "011" },
+{"United States"                ,"US"		, "1"       , 10	, "00" },
 {"Uruguay"                      ,"UY"		, "598"     , 8		, "00"  },
 {"Uzbekistan"                   ,"UZ"		, "998"     , 9		, "8"	},
 {"Vanuatu"                      ,"VU"		, "678"     , 7	    , "00"  },

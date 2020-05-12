@@ -99,6 +99,15 @@ fun loadFlagCircle(imageView: ImageView,iso:String?){
     }
 }
 
+@BindingAdapter("state")
+fun loadCallState(imageView: ImageView,state:Int){
+    if(state == 1){
+        imageView.setImageResource(R.drawable.ic_call_connect_succ)
+    }else if(state == 2){
+        imageView.setImageResource(R.drawable.ic_call_connect_fail)
+    }
+}
+
 fun getTopApp(context: Context): String {
     val usageStatesManager =
         context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="activity"
+            type="ufree.call.international.phone.wifi.vcallfree.ui.CallActivity" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg">
+
+        <TextView
+            android:id="@+id/phone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="141dp"
+            android:textColor="@color/text_normal"
+            android:textStyle="bold"
+            android:textSize="30sp"
+            tools:text="+1718 "/>
+        <TextView
+            android:id="@+id/duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/phone"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/text_normal"
+            android:textSize="15sp"
+            tools:text="00:00"/>
+
+        <TextView
+            android:id="@+id/time_remaining"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/duration"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/blue"
+            android:textSize="15sp"
+            tools:text="10 min remain"/>
+
+        <ImageView
+            android:id="@+id/mute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="0.62"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="60dp"
+            android:padding="16dp"
+            android:src="@drawable/ic_call_mute"
+            android:onClick="@{activity::mute}"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/mute"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="parent"
+            android:padding="16dp"
+            android:src="@drawable/ic_call_number"
+            android:onClick="@{activity::numberPad}"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/horn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/mute"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="60dp"
+            android:padding="16dp"
+            android:src="@drawable/ic_call_horn"
+            android:onClick="@{activity::horn}"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="0.82"
+            android:padding="20dp"
+            android:src="@drawable/ic_call_suspend"
+            tools:ignore="ContentDescription"
+            android:onClick="@{activity::hangup}"/>
+
+
+        <include
+            android:id="@+id/number_pad"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="156dp"
+            android:visibility="gone"
+            app:activity="@{activity}"
+            layout="@layout/layout_call_dial"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

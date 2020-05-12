@@ -16,16 +16,22 @@ data class Contact(
     val photoId: Long
 ):Parcelable
 
+@Parcelize
 data class Record(
     val phoneId:Long,
     val contractId:Long,
     val phone:String,
+    val iso:String,
+    val code:String,
+    val prefix:String,
     val username: String?,
     val userPhoto:Long?,
     val addTime:Long,
     val duration:Long,
-    val isReceived:Boolean
-)
+    val rate:Int,
+    val coinCost:Int,
+    val state:Int
+):Parcelable
 
 data class Country(
     val country: String,

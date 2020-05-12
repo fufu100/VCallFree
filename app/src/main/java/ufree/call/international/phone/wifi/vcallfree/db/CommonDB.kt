@@ -1146,7 +1146,7 @@ abstract class CommonDB(context: Context, name:String, version:Int) :SQLiteOpenH
      * @param like   值
      * @return
      */
-    fun queryLike(table: String, fields: Array<String>, field: String, like: String): Cursor {
+    fun queryLike(table: String, fields: Array<String>?, field: String, like: String): Cursor {
         open()
         return db.query(table, fields, "$field like ?", arrayOf("%$like%"), null, null, null)
     }
@@ -1213,7 +1213,7 @@ abstract class CommonDB(context: Context, name:String, version:Int) :SQLiteOpenH
      * @param order   排序方式
      * @return
      */
-    fun queryInAll(table: String, field: String, values: Array<String>, order: String): Cursor {
+    fun queryInAll(table: String, field: String, values: Array<String>, order: String?): Cursor {
         open()
         var value = ""
         for (i in values.indices) {

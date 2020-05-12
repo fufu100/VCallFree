@@ -3,7 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-
+        <variable
+            name="activity"
+            type="ufree.call.international.phone.wifi.vcallfree.ui.InviteFriendsActivity" />
     </data>
 
     <LinearLayout
@@ -91,29 +93,6 @@
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:columnCount="3">
-
-            <TextView
-                android:id="@+id/bonus_3000"
-                android:layout_columnWeight="1"
-                android:layout_columnSpan="3"
-                android:textColor="@color/text_normal"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="10dp"
-                android:layout_marginTop="10dp"
-                android:text="Bonus 3000 rewards" />
-
-<!--            <TextView-->
-<!--                style="@style/RewardItem"-->
-<!--                android:text="Kuait" />-->
-
-<!--            <TextView-->
-<!--                style="@style/RewardItem"-->
-<!--                android:text="Kuait" />-->
-
-<!--            <TextView-->
-<!--                style="@style/RewardItem"-->
-<!--                android:text="KuaitKuaitKuaitKuaitKuaitKuait" />-->
         </GridLayout>
 
         <LinearLayout
@@ -125,7 +104,8 @@
             app:layout_constraintTop_toBottomOf="@id/time_remaining_tv"
             android:background="@drawable/bg_green_btn"
             android:layout_marginTop="50dp"
-            android:gravity="center">
+            android:gravity="center"
+            android:onClick="@{activity::invite}">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -142,7 +122,7 @@
                 android:drawablePadding="5dp"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
-                android:text="+10~200"
+                android:text="+1000~6000"
                 android:textColor="@color/text_yellow2" />
         </LinearLayout>
 
