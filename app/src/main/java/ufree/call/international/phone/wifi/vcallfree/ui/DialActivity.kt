@@ -7,9 +7,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.provider.Settings
+import android.text.TextUtils
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.newmotor.x5.db.DBHelper
@@ -20,6 +24,7 @@ import ufree.call.international.phone.wifi.vcallfree.lib.BaseDataBindingActivity
 import ufree.call.international.phone.wifi.vcallfree.service.CallService
 import ufree.call.international.phone.wifi.vcallfree.utils.Dispatcher
 import ufree.call.international.phone.wifi.vcallfree.utils.UserManager
+import kotlin.Exception
 
 /**
  * Created by lyf on 2020/5/6.
@@ -28,6 +33,11 @@ class DialActivity :BaseDataBindingActivity<ActivityDialBinding>(){
     var contact:Contact? = null
     private lateinit var conn: ServiceConnection
     private var callBinder: CallService.CallBinder? = null
+    private val DTMF_DURATION_MS = 120
+    private val mToneGeneratorLock = Any()
+    private var mToneGenerator: ToneGenerator? = null
+    private var mDTMFToneEnabled = false
+    private var mVibrateEnable = false
     override fun getLayoutRes(): Int = R.layout.activity_dial
     override fun initView(savedInstanceState: Bundle?) {
         super.initView(savedInstanceState)
@@ -41,7 +51,7 @@ class DialActivity :BaseDataBindingActivity<ActivityDialBinding>(){
         dataBinding.activity = this
 
         with(intent.getStringExtra("iso")) {
-            if (this == null) {
+            if (TextUtils.isEmpty(this)) {
                 if (UserManager.get().country == null) {
                     UserManager.get().country = DBHelper.get().getCountry("US")
                 }
@@ -49,12 +59,42 @@ class DialActivity :BaseDataBindingActivity<ActivityDialBinding>(){
                 UserManager.get().country = DBHelper.get().getCountry(this)
             }
         }
-
+        intent.getStringExtra("phone")?.also {
+            dataBinding.phoneTv.text = it
+        }
         dataBinding.country = UserManager.get().country
         intent.getParcelableExtra<Contact>("contact")?.also {
             contact = it
-            dataBinding.phoneTv.text = it.phone
+            dataBinding.phoneTv.setText(it.phone)
         }
+
+        try {
+            val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            val ringerMode = audioManager.ringerMode
+            if(ringerMode == AudioManager.RINGER_MODE_SILENT){
+                mDTMFToneEnabled = false
+            }else if(ringerMode == AudioManager.RINGER_MODE_VIBRATE){
+                mVibrateEnable = true
+                mDTMFToneEnabled = false
+            }else {
+                mVibrateEnable = true
+                mDTMFToneEnabled = Settings.System.getInt(
+                    contentResolver,
+                    Settings.System.DTMF_TONE_WHEN_DIALING,
+                    1
+                ) == 1
+            }
+            synchronized(mToneGeneratorLock){
+                if(mDTMFToneEnabled && mToneGenerator == null){
+                    mToneGenerator = ToneGenerator(AudioManager.STREAM_DTMF,80)
+                }
+            }
+        }catch (e:Exception){
+            e.printStackTrace()
+            mDTMFToneEnabled = false
+            mToneGenerator = null
+        }
+
     }
 
     override fun onResume() {
@@ -88,7 +128,18 @@ class DialActivity :BaseDataBindingActivity<ActivityDialBinding>(){
     fun onClick(view: View){
         val number = view.tag.toString()
         println("onClick number=$number")
-        dataBinding.phoneTv.text = dataBinding.phoneTv.text.toString() + number
+//        dataBinding.phoneTv.setText(dataBinding.phoneTv.text.toString() + number)
+        dataBinding.phoneTv.insert(number)
+
+        if(mDTMFToneEnabled){
+            synchronized(mToneGeneratorLock){
+                mToneGenerator?.startTone(when(number){
+                    "*" -> ToneGenerator.TONE_DTMF_S
+                    "#" -> ToneGenerator.TONE_DTMF_P
+                    else -> number.toInt()
+                },DTMF_DURATION_MS)
+            }
+        }
     }
 
     fun goBack(v:View){
@@ -98,7 +149,8 @@ class DialActivity :BaseDataBindingActivity<ActivityDialBinding>(){
     fun del(v:View){
         val phone = dataBinding.phoneTv.text.toString()
         if(phone.isNotEmpty()) {
-            dataBinding.phoneTv.text = phone.dropLast(1)
+//            dataBinding.phoneTv.setText( phone.dropLast(1))
+            dataBinding.phoneTv.delete()
         }
     }
 

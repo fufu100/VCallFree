@@ -19,7 +19,7 @@ import ufree.call.international.phone.wifi.vcallfree.utils.screenWidth
 import kotlin.math.abs
 
 /**
- * Created by lyf on 2019-11-14.
+ * 转盘页面的layout，控制折叠和展开
  */
 class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
     ViewGroup(context, attributeSet, defStyle) {
@@ -58,17 +58,14 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
         drawerHeight = height - mapView.measuredHeight
         drawerLayout.measure(
             widthMeasureSpec,
-            MeasureSpec.makeMeasureSpec(
-                measuredHeight - paddingTop - paddingBottom - drawerHeight,
-                MeasureSpec.EXACTLY
-            )
+            MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST)
         )
         setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec),MeasureSpec.getSize(heightMeasureSpec))
     }
 
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        println("$TAG $changed $l,$t,$r,$b")
+//        println("$TAG $changed $l,$t,$r,$b")
         if (isOpen) {
             mapView.layout(0, t, r - l, b - drawerHeight)
             drawerLayout.layout(
@@ -167,6 +164,7 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                     mapView.foreground = ColorDrawable(0x40000000)
                                 }
+                                checker?.onExpandStateChange(true)
                             }
 
                             override fun onAnimationCancel(animation: Animator?) {
@@ -193,6 +191,7 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                     mapView.foreground = null
                                 }
+                                checker?.onExpandStateChange(false)
                             }
 
                             override fun onAnimationCancel(animation: Animator?) {
@@ -213,6 +212,7 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
 
     interface CanScrollVerticalChecker{
         fun canScrollVertical():Boolean
+        fun onExpandStateChange(expand:Boolean)
     }
 
 

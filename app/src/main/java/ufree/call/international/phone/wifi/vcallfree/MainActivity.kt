@@ -19,6 +19,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
+import com.google.i18n.phonenumbers.PhoneNumberUtil
+import com.google.i18n.phonenumbers.Phonenumber
 import com.newmotor.x5.db.DBHelper
 import com.translate.english.voice.lib.App
 import kotlinx.android.synthetic.main.activity_main.*
@@ -132,6 +134,21 @@ class MainActivity : BaseActivity(),RadioGroup.OnCheckedChangeListener,ViewPager
         bindService(Intent(this,CallService::class.java),conn, Context.BIND_AUTO_CREATE)
         initData()
         test()
+
+        val phoneNumberUtil:PhoneNumberUtil = PhoneNumberUtil.getInstance()
+//        phoneNumberUtil.getRegionCodeForNumber(Phonenumber.PhoneNumber())
+        val phoneNumber = phoneNumberUtil.parse("+12134883500","CH")
+        try {
+            val phoneNumber2 = phoneNumberUtil.parseAndKeepRawInput("+1647-555-0123",null)
+//        phoneNumber2.rawInput = "+12134883500"
+            val iso = phoneNumberUtil.getRegionCodeForNumber(phoneNumber2)
+            val nationalNumber = phoneNumberUtil.getNationalSignificantNumber(phoneNumber2)
+            println("MainActivity phone:${phoneNumber.countryCode},${phoneNumberUtil.isPossibleNumber(phoneNumber2)} ,iso=$iso,nationalNumber=$nationalNumber")
+        }catch (e:Exception){
+            e.printStackTrace()
+        }
+
+
     }
 
     private fun initData() {
@@ -188,6 +205,7 @@ class MainActivity : BaseActivity(),RadioGroup.OnCheckedChangeListener,ViewPager
             .subscribe({
                 if(it.errcode == 0){
                     UserManager.get().user = it
+                    (fragments[2] as CoinsFragment).refreshUser()
                     navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text = it.points.toString()
                     callBinder?.initAccount()
                 }

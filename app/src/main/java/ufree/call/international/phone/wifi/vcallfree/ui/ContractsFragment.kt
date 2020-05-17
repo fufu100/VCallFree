@@ -11,6 +11,7 @@ import android.text.TextWatcher
 import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import kotlinx.coroutines.*
 import ufree.call.international.phone.wifi.vcallfree.R
 import ufree.call.international.phone.wifi.vcallfree.adapter.BaseAdapter
@@ -18,6 +19,7 @@ import ufree.call.international.phone.wifi.vcallfree.api.Contact
 import ufree.call.international.phone.wifi.vcallfree.databinding.FragmentTabContractsBinding
 import ufree.call.international.phone.wifi.vcallfree.lib.BaseDataBindingFragment
 import ufree.call.international.phone.wifi.vcallfree.utils.Dispatcher
+import java.lang.Exception
 
 /**
  * Created by lyf on 2020/4/27.
@@ -121,9 +123,19 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
 
     override fun onItemClick(id: Int, position: Int, t: Contact) {
         if(id == -1){
+            var iso = ""
+            try {
+                val phoneNumberUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
+                val phoneNumber = phoneNumberUtil.parseAndKeepRawInput(t.phone,null)
+                iso = phoneNumberUtil.getRegionCodeForNumber(phoneNumber)
+                t.phone = phoneNumberUtil.getNationalSignificantNumber(phoneNumber)
+            }catch (e:Exception){
+                e.printStackTrace()
+            }
             Dispatcher.dispatch(context){
                 navigate(DialActivity::class.java)
                 extra("contact",t)
+                extra("iso",iso)
                 defaultAnimate()
             }.go()
         }else if(id == R.id.invite){

@@ -98,7 +98,7 @@
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:background="@null"
-            android:inputType="number"/>
+            android:inputType="phone"/>
         
         <Button
             android:id="@+id/btn"
@@ -112,7 +112,8 @@
             android:textColor="@color/text_black"
             android:text="Send Code"
             android:textAllCaps="false"
-            android:background="@drawable/bg_yellow_btn"/>
+            android:background="@drawable/bg_yellow_btn"
+            android:onClick="@{() -> activity.getVerCode()}"/>
 
         <View
             android:id="@+id/line2"
@@ -133,6 +134,7 @@
             android:layout_marginTop="32dp"
             android:text="Bind Phone"
             android:textSize="20sp"
-            android:textColor="@color/text_search"/>
+            android:textColor="@color/text_search"
+            android:onClick="@{() -> activity.bindPhone()}"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -173,7 +173,7 @@ class CallService:Service(),MyAppObserver{
                 ) network_changed = true
                 conn_name = new_con ?: ""
             } else {
-                if (conn_name.equals("", ignoreCase = true)) conn_name = net_info!!.extraInfo
+                if (conn_name.equals("", ignoreCase = true)) conn_name = net_info?.extraInfo?:""
             }
             return network_changed
         }

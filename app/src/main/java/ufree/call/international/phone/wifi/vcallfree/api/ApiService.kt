@@ -17,4 +17,11 @@ interface ApiService {
 
     @GET("vos.php?m=price")
     fun getPrice(@Query("iso") iso:String,@Query("phone") phone:String?):Observable<Price>
+
+    @GET("vos.php?m=addpoints")
+    fun addPoints(@QueryMap map:MutableMap<String,Any>):Observable<AddPointsResp>
+
+
+    @GET("vos.php?m=setphone")
+    fun bindPhone(@Query("sip") iso:String,@Query("phone") phone:String?):Observable<Response<ResponseBody>>
 }

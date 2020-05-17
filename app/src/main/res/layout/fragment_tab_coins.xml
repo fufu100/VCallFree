@@ -41,8 +41,22 @@
                 app:layout_constraintBottom_toBottomOf="@id/panView"
                 app:layout_constraintStart_toStartOf="@id/panView"
                 app:layout_constraintEnd_toEndOf="@id/panView"
-                android:src="@drawable/ic_go"
+                android:src="@drawable/ic_go3"
                 android:onClick="@{fragment::start}"/>
+
+            <TextView
+                android:id="@+id/goTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="@id/panView"
+                app:layout_constraintBottom_toBottomOf="@id/panView"
+                app:layout_constraintStart_toStartOf="@id/panView"
+                app:layout_constraintEnd_toEndOf="@id/panView"
+                android:textColor="#F9F3DB"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                android:layout_marginTop="12dp"
+                android:text="GO"/>
 
             <TextView
                 android:id="@+id/total_coins_tv"
@@ -52,7 +66,7 @@
                 android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/panView"
-                android:drawableStart="@drawable/ic_coin2"
+                android:drawableStart="@drawable/coin"
                 android:drawablePadding="6dp"
                 android:layout_marginStart="32dp"
                 android:text="@{totalCoins}"
@@ -60,21 +74,61 @@
                 android:textSize="13sp"
                 android:textColor="#FAF2D7"/>
 
-            <TextView
-                android:id="@+id/coin_cost"
+            <LinearLayout
+                android:id="@+id/play_count"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
-                android:paddingRight="10dp"
                 android:gravity="center_vertical"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/panView"
-                android:drawableStart="@drawable/ic_coin2"
-                android:drawablePadding="6dp"
                 android:layout_marginEnd="32dp"
-                android:text="100/100"
-                android:textStyle="bold"
-                android:textSize="13sp"
-                android:textColor="#FAF2D7"/>
+                android:paddingRight="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/panView">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_coin_game"/>
+
+                <TextView
+                    android:id="@+id/play_count_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:layout_marginStart="6dp"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_yellow"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="/"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:textColor="#FAF2D7"/>
+                <TextView
+                    android:id="@+id/total_play_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="100"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:textColor="#FAF2D7"/>
+            </LinearLayout>
+<!--            <TextView-->
+<!--                android:id="@+id/play_count_tv"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="30dp"-->
+<!--                android:paddingRight="10dp"-->
+<!--                android:gravity="center_vertical"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@id/panView"-->
+<!--                android:drawableStart="@drawable/ic_coin_game"-->
+<!--                android:drawablePadding="6dp"-->
+<!--                android:layout_marginEnd="32dp"-->
+<!--                android:text="100/100"-->
+<!--                android:textStyle="bold"-->
+<!--                android:textSize="13sp"-->
+<!--                android:textColor="#FAF2D7"/>-->
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -83,8 +137,18 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="@color/colorPrimary"
+            android:paddingBottom="40dp"
             android:clickable="true"
             android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/drawerIv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/up_icon"/>
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -105,16 +169,18 @@
                     android:textSize="15sp"
                     android:textStyle="bold" />
 
-                <Button
+                <TextView
                     android:layout_width="108dp"
                     android:layout_height="34dp"
+                    android:gravity="center"
                     android:layout_gravity="center_vertical|end"
-                    android:background="@drawable/bg_green_btn"
+                    android:background="@drawable/bg_blue_round"
                     android:drawableStart="@drawable/ic_coin3"
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
-                    android:text="+10~200"
-                    android:textColor="@color/text_yellow2"
+                    android:text="+10~500"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_light"
                     />
             </FrameLayout>
 
@@ -124,7 +190,8 @@
                 android:paddingStart="14dp"
                 android:paddingTop="15dp"
                 android:paddingEnd="24dp"
-                android:paddingBottom="15dp">
+                android:paddingBottom="15dp"
+                android:onClick="@{fragment::inviteFriends}">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -137,17 +204,20 @@
                     android:textSize="15sp"
                     android:textStyle="bold" />
 
-                <Button
+                <TextView
                     android:layout_width="108dp"
                     android:layout_height="34dp"
+                    android:gravity="center"
                     android:layout_gravity="center_vertical|end"
-                    android:background="@drawable/bg_green_btn"
+                    android:background="@drawable/bg_blue_round"
                     android:drawableStart="@drawable/ic_coin3"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:text="+10~200"
-                    android:textColor="@color/text_yellow2"
-                    android:onClick="@{fragment::inviteFriends}"/>
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:text="+1000~10000"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_light"
+                    />
             </FrameLayout>
 
             <FrameLayout
@@ -173,12 +243,13 @@
                     android:layout_width="108dp"
                     android:layout_height="34dp"
                     android:layout_gravity="center_vertical|end"
-                    android:background="@drawable/bg_green_btn"
+                    android:background="@drawable/bg_blue_round"
                     android:drawableStart="@drawable/ic_coin3"
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
-                    android:text="+10~200"
-                    android:textColor="@color/text_yellow2" />
+                    android:text="+20~500"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_light" />
             </FrameLayout>
 
             <FrameLayout
@@ -187,7 +258,8 @@
                 android:paddingStart="14dp"
                 android:paddingTop="15dp"
                 android:paddingEnd="24dp"
-                android:paddingBottom="15dp">
+                android:paddingBottom="15dp"
+                android:onClick="@{fragment::setPhoneNumber}">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -200,17 +272,19 @@
                     android:textSize="15sp"
                     android:textStyle="bold" />
 
-                <Button
+                <TextView
                     android:layout_width="108dp"
                     android:layout_height="34dp"
+                    android:gravity="center"
                     android:layout_gravity="center_vertical|end"
-                    android:background="@drawable/bg_green_btn"
+                    android:background="@drawable/bg_blue_round"
                     android:drawableStart="@drawable/ic_coin3"
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
-                    android:text="+10~200"
-                    android:textColor="@color/text_yellow2"
-                    android:onClick="@{fragment::setPhoneNumber}"/>
+                    android:text="+1000"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_light"
+                    />
             </FrameLayout>
 
         </LinearLayout>

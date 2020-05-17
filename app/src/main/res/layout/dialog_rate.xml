@@ -55,7 +55,7 @@
             android:drawableTop="@drawable/ic_like"
             android:drawablePadding="8dp"
             android:gravity="center_horizontal"
-            android:text="@string/hated"
+            android:text="@string/like"
             android:textColor="#010312"
             android:textSize="16sp"
             android:onClick="@{dialog::like}"/>

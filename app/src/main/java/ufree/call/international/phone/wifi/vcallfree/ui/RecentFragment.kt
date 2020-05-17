@@ -67,8 +67,9 @@ class RecentFragment:BaseFragment() ,BaseAdapter.OnItemClick<Record>{
             }.go()
         }else{
             Dispatcher.dispatch(context){
-                navigate(CallDetailActivity::class.java)
-                extra("record",t)
+                navigate(DialActivity::class.java)
+                extra("phone",t.phone)
+                extra("iso",t.iso)
                 defaultAnimate()
             }.go()
         }

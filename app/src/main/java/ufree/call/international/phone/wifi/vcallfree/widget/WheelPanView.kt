@@ -25,8 +25,8 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
     val panColors = intArrayOf(0xFFF5CB57.toInt(),0xFFF2A93C.toInt())
     val panColors2 = intArrayOf(0xFFEEAB41.toInt(),0xFFED9035.toInt())
     val count = 8
-    val texts = arrayOf("+500","THANKS","+5","+10","+200","+50","+20","+100")
-    val coinDrawable: Drawable? = context.getDrawable(R.drawable.ic_coin2)
+    val texts = arrayOf("+500","thanks","+5","+10","+200","+50","+20","+100")
+//    val coinDrawable: Drawable? = context.getDrawable(R.drawable.ic_coin2)
     var rect:RectF = RectF()
     val textPath:Path = Path()
     init {
@@ -35,7 +35,7 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
         textPaint.isAntiAlias = true
         textPaint.color = 0xFFFAF2D7.toInt()
         textPaint.style = Paint.Style.FILL_AND_STROKE
-        textPaint.textSize = context.dip2px(24).toFloat()
+        textPaint.textSize = context.dip2px(22).toFloat()
         textPaint.flags = TextPaint.FAKE_BOLD_TEXT_FLAG
     }
 
@@ -74,12 +74,12 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
             rect.set(rect.left + ringW * 0.5f,rect.top + ringW * 0.5f,rect.right - ringW * 0.5f,rect.bottom - ringW * 0.5f)
             canvas?.drawArc(rect,startAngle,mAngle,false,paint)
 
-            val drawableRadisu = radius / 10
-            val angle = Math.toRadians((startAngle + mAngle / 2).toDouble())
-            val x = (center  + radius * 0.38 * Math.cos(angle)).toFloat()
-            val y = (center  + radius * 0.38 * Math.sin(angle)).toFloat()
-            coinDrawable?.setBounds((x - drawableRadisu).toInt(),(y - drawableRadisu).toInt(),(x + drawableRadisu).toInt(),(y + drawableRadisu).toInt())
-            coinDrawable?.draw(canvas!!)
+//            val drawableRadisu = radius / 10
+//            val angle = Math.toRadians((startAngle + mAngle / 2).toDouble())
+//            val x = (center  + radius * 0.38 * Math.cos(angle)).toFloat()
+//            val y = (center  + radius * 0.38 * Math.sin(angle)).toFloat()
+//            coinDrawable?.setBounds((x - drawableRadisu).toInt(),(y - drawableRadisu).toInt(),(x + drawableRadisu).toInt(),(y + drawableRadisu).toInt())
+//            coinDrawable?.draw(canvas!!)
 
             rect.set(center - radius,center - radius,center + radius,center + radius)
             textPath.reset()

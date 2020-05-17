@@ -62,4 +62,6 @@
         <item name="android:layout_columnWeight">1</item>
         <item name="android:layout_width">0dp</item>
     </style>
+    <style name="CustomDialog" parent="Theme.AppCompat.Dialog.Alert">
+    </style>
 </resources>

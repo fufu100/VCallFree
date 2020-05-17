@@ -63,7 +63,7 @@
             app:layout_constraintTop_toTopOf="@id/recyclerView"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="13sp"
-            android:text="A"
+            android:text=""
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/blue" />

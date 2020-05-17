@@ -15,7 +15,7 @@ import ufree.call.international.phone.wifi.vcallfree.utils.Dispatcher
 /**
  * Created by lyf on 2020/5/12.
  */
-class RateDialog(context: Context):Dialog(context) {
+class RateDialog(context: Context):Dialog(context,R.style.CustomDialog) {
     val dataBinding:DialogRateBinding = DataBindingUtil.inflate(layoutInflater, R.layout.dialog_rate,null,false)
 
     init {
@@ -28,7 +28,7 @@ class RateDialog(context: Context):Dialog(context) {
         intent.type = "message/rfc822" // 设置邮件格式
         intent.putExtra(Intent.EXTRA_EMAIL, "rxjava@qq.com") // 接收人
         intent.putExtra(Intent.EXTRA_SUBJECT, "这是邮件的主题部分") // 主题
-        intent.putExtra(Intent.EXTRA_TEXT, "这是邮件的正文部分") // 正文
+        intent.putExtra(Intent.EXTRA_TEXT, "这是要反馈的内容") // 正文
         context.startActivity(Intent.createChooser(intent, "请选择邮件类应用"))
         dismiss()
     }

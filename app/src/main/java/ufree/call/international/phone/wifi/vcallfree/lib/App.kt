@@ -93,8 +93,8 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
 
         registerActivityLifecycleCallbacks(this)
 
-//        CrashHandler.getInstance().apply {
-//            init(applicationContext)
-//        }
+        CrashHandler.getInstance().apply {
+            init(applicationContext)
+        }
     }
 }

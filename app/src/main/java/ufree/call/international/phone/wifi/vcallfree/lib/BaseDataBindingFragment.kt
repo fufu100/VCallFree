@@ -14,4 +14,8 @@ abstract class BaseDataBindingFragment<T:ViewDataBinding>:BaseFragment() {
         dataBinding = DataBindingUtil.inflate(inflater,getLayoutResId(),container,false)
         return dataBinding.root
     }
+
+    fun isDataBindingInitialized():Boolean{
+        return ::dataBinding.isInitialized
+    }
 }

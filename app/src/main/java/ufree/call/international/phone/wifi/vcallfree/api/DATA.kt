@@ -9,11 +9,11 @@ import kotlinx.android.parcel.Parcelize
  */
 @Parcelize
 data class Contact(
-    val phoneId: Long,
-    val contractId: Long,
-    val username: String,
-    val phone: String,
-    val photoId: Long
+    var phoneId: Long,
+    var contractId: Long,
+    var username: String,
+    var phone: String,
+    var photoId: Long
 ):Parcelable
 
 @Parcelize
@@ -88,7 +88,7 @@ data class InviteCountryPoints(
 data class User(
     val errcode:Int,
     val sip:String,
-    val points:Int,
+    var points:Int,
     val passwd:String,
     val servers:List<Server>,
     val invite_points:Int,
@@ -119,5 +119,11 @@ data class Price(
     val type:String,
     val geo:String,
     val carrier:String
+)
 
+data class AddPointsResp(
+    val errcode:Int,
+    val errormsg:String,
+    val sip:String,
+    val points:Int
 )

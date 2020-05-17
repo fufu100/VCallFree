@@ -94,6 +94,7 @@ class CallRatesActivity : BaseBackActivity<ActivityCallRatesBinding>() {
                     list.clear()
                     list.addAll(it.rates)
                     dataBinding.recyclerView.adapter?.notifyDataSetChanged()
+                    dataBinding.pinnedLetter.text = list[0][3].substring(0, 1)
                 }
             }, {
                 it.printStackTrace()

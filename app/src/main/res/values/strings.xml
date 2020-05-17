@@ -35,4 +35,7 @@
     <string name="invite_text">Hi,highly recommended Free Call to you,no charged required to call your family &amp; friends,Download from Google Play NOW,https://play.google.com/store/apps/details?id=ufree.call.international.phone,wifi.vcallfree&amp;referrer=utm_source</string>
     <string name="how_do_you_feel">How do you feel about us?</string>
     <string name="hated">Hated</string>
+    <string name="like">Like</string>
+    <string name="tip_phone_is_empty">The phone number is invalid</string>
+    <string name="tip_select_subject">Please choose a type</string>
 </resources>
