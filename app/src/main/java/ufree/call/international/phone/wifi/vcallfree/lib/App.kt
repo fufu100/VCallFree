@@ -1,19 +1,22 @@
-package com.translate.english.voice.lib
+package ufree.call.international.phone.wifi.vcallfree.lib
 
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
-import ufree.call.international.phone.wifi.vcallfree.utils.Prefs
-import ufree.call.international.phone.wifi.vcallfree.utils.firstInstallTime
-import ufree.call.international.phone.wifi.vcallfree.utils.getVersionName
-import ufree.call.international.phone.wifi.vcallfree.utils.readManifestKey
+import android.util.Log
+import com.newmotor.x5.db.DBHelper
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import ufree.call.international.phone.wifi.vcallfree.MainActivity
-import ufree.call.international.phone.wifi.vcallfree.utils.CrashHandler
+import ufree.call.international.phone.wifi.vcallfree.api.Country
+import ufree.call.international.phone.wifi.vcallfree.utils.*
+import java.io.BufferedReader
 import java.io.File
+import java.io.InputStreamReader
 import java.util.*
-
+//5ec6a4d1978eea0864b20201
 val prefs: Prefs by lazy { App.prefs!! }
 class App : Application(),Application.ActivityLifecycleCallbacks{
     var hasResume = false
@@ -96,5 +99,49 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
         CrashHandler.getInstance().apply {
             init(applicationContext)
         }
+        initData()
+    }
+
+    private fun initData() {
+        GlobalScope.launch {
+            val count = DBHelper.get().getCountryCount()
+            println("count=$count")
+            if (count == 0) {
+                val inputStream = assets.open("dial_plan.txt")
+                val br: BufferedReader = BufferedReader(InputStreamReader(inputStream))
+                var line: String? = null
+
+                do {
+                    line = br.readLine()
+                    if (line != null) {
+                        val regex = Regex("(\\{|\\}|\\s|\")+")
+                        line = line.replace(regex, "")
+                        println("$line")
+                        val array = line.split(",")
+                        if (array.size > 4) {
+                            val country =
+                                Country(array[0], array[1], array[2], array[3].toInt(), array[4])
+                            DBHelper.get().addCountry(country)
+                        }
+                    }
+                } while (line != null)
+            }
+            val dest = appCacheDirectory + "flags.zip"
+            val flagDirectory = File(appCacheDirectory + "flags")
+            if(!flagDirectory.exists()){
+                FileUtils.copyFromAssets(assets,"flags.zip",dest,false)
+                UnZip.unzip(dest, appCacheDirectory)
+                Log.d("MainActivity","国旗解压缩成功")
+            }else{
+                if((flagDirectory.listFiles()?.size ?: 0) < 224){
+                    flagDirectory.delete()
+                    FileUtils.copyFromAssets(assets,"flags.zip",dest,false)
+                    UnZip.unzip(dest, appCacheDirectory)
+                    Log.d("MainActivity","国旗有缺失，已重新解压缩")
+                }
+            }
+
+        }
+
     }
 }

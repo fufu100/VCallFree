@@ -1,7 +1,7 @@
 package ufree.call.international.phone.wifi.vcallfree.utils
 
 import com.newmotor.x5.db.DBHelper
-import com.translate.english.voice.lib.prefs
+import ufree.call.international.phone.wifi.vcallfree.lib.prefs
 import ufree.call.international.phone.wifi.vcallfree.api.Country
 import ufree.call.international.phone.wifi.vcallfree.api.User
 

@@ -96,6 +96,7 @@ data class User(
     val new_user:Int,
     val mode:String,
     val max_wheel:Int,
+    val wheel_points:Int,
     val max_rate:Float,
     val reward_points:Int,
     val interval:Int,

@@ -8,7 +8,7 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Binder
 import android.os.IBinder
-import com.translate.english.voice.lib.App
+import ufree.call.international.phone.wifi.vcallfree.lib.App
 import org.pjsip.pjsua2.*
 import ufree.call.international.phone.wifi.vcallfree.pjsua.*
 import ufree.call.international.phone.wifi.vcallfree.utils.LogUtils

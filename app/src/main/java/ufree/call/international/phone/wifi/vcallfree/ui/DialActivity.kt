@@ -9,14 +9,14 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.media.ToneGenerator
-import android.os.Build
-import android.os.Bundle
-import android.os.IBinder
+import android.os.*
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.View
 import androidx.core.content.ContextCompat
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.newmotor.x5.db.DBHelper
+import ufree.call.international.phone.wifi.vcallfree.lib.prefs
 import ufree.call.international.phone.wifi.vcallfree.R
 import ufree.call.international.phone.wifi.vcallfree.api.Contact
 import ufree.call.international.phone.wifi.vcallfree.databinding.ActivityDialBinding
@@ -24,6 +24,7 @@ import ufree.call.international.phone.wifi.vcallfree.lib.BaseDataBindingActivity
 import ufree.call.international.phone.wifi.vcallfree.service.CallService
 import ufree.call.international.phone.wifi.vcallfree.utils.Dispatcher
 import ufree.call.international.phone.wifi.vcallfree.utils.UserManager
+import ufree.call.international.phone.wifi.vcallfree.utils.toast
 import kotlin.Exception
 
 /**
@@ -38,6 +39,8 @@ class DialActivity :BaseDataBindingActivity<ActivityDialBinding>(){
     private var mToneGenerator: ToneGenerator? = null
     private var mDTMFToneEnabled = false
     private var mVibrateEnable = false
+    private var vibrator: Vibrator? = null
+    private var canVibrator:Boolean = false
     override fun getLayoutRes(): Int = R.layout.activity_dial
     override fun initView(savedInstanceState: Bundle?) {
         super.initView(savedInstanceState)
@@ -67,32 +70,34 @@ class DialActivity :BaseDataBindingActivity<ActivityDialBinding>(){
             contact = it
             dataBinding.phoneTv.setText(it.phone)
         }
-
-        try {
-            val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            val ringerMode = audioManager.ringerMode
-            if(ringerMode == AudioManager.RINGER_MODE_SILENT){
-                mDTMFToneEnabled = false
-            }else if(ringerMode == AudioManager.RINGER_MODE_VIBRATE){
-                mVibrateEnable = true
-                mDTMFToneEnabled = false
-            }else {
-                mVibrateEnable = true
-                mDTMFToneEnabled = Settings.System.getInt(
-                    contentResolver,
-                    Settings.System.DTMF_TONE_WHEN_DIALING,
-                    1
-                ) == 1
-            }
-            synchronized(mToneGeneratorLock){
-                if(mDTMFToneEnabled && mToneGenerator == null){
-                    mToneGenerator = ToneGenerator(AudioManager.STREAM_DTMF,80)
+        canVibrator = prefs.getBooleanValue("vibration",false)
+        if(prefs.getBooleanValue("play_tone",true)) {
+            try {
+                val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                val ringerMode = audioManager.ringerMode
+                if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
+                    mDTMFToneEnabled = false
+                } else if (ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
+                    mVibrateEnable = true
+                    mDTMFToneEnabled = false
+                } else {
+                    mVibrateEnable = true
+                    mDTMFToneEnabled = Settings.System.getInt(
+                        contentResolver,
+                        Settings.System.DTMF_TONE_WHEN_DIALING,
+                        1
+                    ) == 1
                 }
+                synchronized(mToneGeneratorLock) {
+                    if (mDTMFToneEnabled && mToneGenerator == null) {
+                        mToneGenerator = ToneGenerator(AudioManager.STREAM_DTMF, 80)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                mDTMFToneEnabled = false
+                mToneGenerator = null
             }
-        }catch (e:Exception){
-            e.printStackTrace()
-            mDTMFToneEnabled = false
-            mToneGenerator = null
         }
 
     }
@@ -140,6 +145,9 @@ class DialActivity :BaseDataBindingActivity<ActivityDialBinding>(){
                 },DTMF_DURATION_MS)
             }
         }
+        if(canVibrator){
+            vibrate(80)
+        }
     }
 
     fun goBack(v:View){
@@ -164,10 +172,13 @@ class DialActivity :BaseDataBindingActivity<ActivityDialBinding>(){
             }
         }
         val phone = dataBinding.phoneTv.text.toString()
-        if(phone.isNotEmpty()) {
+        val phoneNumberUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
+        val phoneNumber = phoneNumberUtil.parseAndKeepRawInput("+${UserManager.get().country!!.code}$phone",null)
+        if(phoneNumberUtil.isValidNumber(phoneNumber)) {
             val dialog = CallDialog(this) {
+                val e164 = phoneNumberUtil.format(phoneNumber, PhoneNumberUtil.PhoneNumberFormat.E164).replace("+",UserManager.get().country!!.prefix)
                 val flag =
-                    callBinder?.makeCall("${UserManager.get().country!!.prefix}${UserManager.get().country!!.code}$phone")
+                    callBinder?.makeCall(e164)
                 if (flag == true) {
                     Dispatcher.dispatch(this) {
                         navigate(CallActivity::class.java)
@@ -182,6 +193,24 @@ class DialActivity :BaseDataBindingActivity<ActivityDialBinding>(){
                 getCallRate()
             }
             dialog.show()
+        }else{
+            toast(R.string.tip_invalid_number)
+        }
+    }
+
+    fun vibrate(time:Long){
+        if(vibrator == null){
+            vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator?.vibrate(
+                VibrationEffect.createOneShot(
+                    time,
+                    VibrationEffect.DEFAULT_AMPLITUDE
+                )
+            )
+        }else{
+            vibrator?.vibrate(time)
         }
     }
 

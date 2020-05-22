@@ -3,8 +3,11 @@ package ufree.call.international.phone.wifi.vcallfree.ui
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.ContentObserver
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.provider.ContactsContract
 import android.text.Editable
 import android.text.TextWatcher
@@ -26,6 +29,7 @@ import java.lang.Exception
  */
 class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>(),BaseAdapter.OnItemClick<Contact>,TextWatcher {
     val list: MutableList<Contact> = mutableListOf()
+    var contractsObserver:ContractsObserver? = null
     override fun getLayoutResId(): Int = R.layout.fragment_tab_contracts
 
     override fun initView(v: View) {
@@ -82,6 +86,10 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
         values?.forEach {
             println("values:$it")
         }
+        if(contractsObserver == null){
+            contractsObserver = ContractsObserver(Handler(Looper.getMainLooper()))
+        }
+        context?.contentResolver?.registerContentObserver(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,true,contractsObserver!!)
         val phoneCursor = context?.contentResolver?.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
             arrayOf(
@@ -102,6 +110,11 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
             list.add(Contact(phoneId,contactId, username, phone, photoId))
         }
         phoneCursor?.close()
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        context?.contentResolver?.unregisterContentObserver(contractsObserver!!)
     }
 
     override fun onRequestPermissionsResult(
@@ -167,5 +180,12 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
+    }
+
+    inner class ContractsObserver(handler:Handler):ContentObserver(handler){
+        override fun onChange(selfChange: Boolean) {
+            println("ContractFragment ContractsObserver onChange $selfChange")
+            search("")
+        }
     }
 }

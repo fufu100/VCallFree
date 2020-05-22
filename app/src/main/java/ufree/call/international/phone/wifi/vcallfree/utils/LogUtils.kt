@@ -1,12 +1,13 @@
 package ufree.call.international.phone.wifi.vcallfree.utils
 
+import android.os.Build
 import android.util.Log
 import ufree.call.international.phone.wifi.vcallfree.BuildConfig
 import java.lang.Exception
 
 object LogUtils {
     private val LOG_ON = BuildConfig.DEBUG
-    public val test = false
+    public val test = Build.SUPPORTED_ABIS.contains("x86")
 
     fun DebugLog(message: String){
         if(LOG_ON) {

@@ -13,12 +13,14 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.newmotor.x5.db.DBHelper
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_call.*
+import kotlinx.android.synthetic.main.side_header.*
 import org.pjsip.pjsua2.*
 import org.pjsip.pjsua2.pjmedia_type
 import org.pjsip.pjsua2.pjsua_call_media_status
@@ -59,12 +61,14 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         dataBinding.activity = this
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
         audioManager.isSpeakerphoneOn = false
-        val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
-        maxmiumDistance = sensor.maximumRange
-        sensorManager.registerListener(this,sensor,SensorManager.SENSOR_DELAY_NORMAL)
+        if(!LogUtils.test) {
+            sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
+            maxmiumDistance = sensor.maximumRange
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        }
         conn = object : ServiceConnection {
             override fun onServiceDisconnected(name: ComponentName?) {}
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -102,10 +106,12 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             disposable?.dispose()
         }
         unregisterReceiver(headsetPlugReceiver)
-        sensorManager.unregisterListener(this)
-        toneGeneratorHelper.stopRingingTone()
+        toneGeneratorHelper?.stopRingingTone()
         if(disposable?.isDisposed == false){
             disposable?.dispose()
+        }
+        if(!LogUtils.test){
+            sensorManager.unregisterListener(this)
         }
     }
 
@@ -135,7 +141,8 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         }
     }
 
-    fun hangup(v: View) {
+    fun hangup(flag:Boolean = true) {
+        println("hangup flat=$flag")
         callBinder?.hangup()
         val state =
             if (callBinder?.getCurrentCall()?.info?.state == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED) 1 else 2
@@ -155,19 +162,30 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             coin_cost,
             state
         )
+        UserManager.get().user!!.points -= coin_cost
         DBHelper.get().addCallRecord(record)
-        Dispatcher.dispatch(this) {
-            navigate(CallResultActivity::class.java)
-            extra("record", record)
-            defaultAnimate()
-        }.go()
-        finish()
+        if(flag) {
+            Dispatcher.dispatch(this) {
+                navigate(CallResultActivity::class.java)
+                extra("record", record)
+                defaultAnimate()
+            }.go()
+            finish()
+        }
     }
 
     fun del(v: View) {
 
     }
-    val toneGeneratorHelper = ToneGenerateHelper()
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if(keyCode == KeyEvent.KEYCODE_BACK){
+
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+    val toneGeneratorHelper = if(LogUtils.test) null else ToneGenerateHelper()
     override fun onCallStateChange(callInfo: CallInfo?) {
         if(callInfo != null) {
             runOnUiThread {
@@ -180,13 +198,13 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
                         callState = callInfo.stateText
                         println("$TAG 对方未接")
                         if(callInfo.state == pjsip_inv_state.PJSIP_INV_STATE_EARLY) {
-                            toneGeneratorHelper.startRingingTone()
+                            toneGeneratorHelper?.startRingingTone()
                         }
                     }
                 } else if (callInfo.state
                         .swigValue() >= pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED.swigValue()
                 ) {
-                    toneGeneratorHelper.stopRingingTone()
+                    toneGeneratorHelper?.stopRingingTone()
                     callState = callInfo.stateText
                     if (callInfo.state === pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED) {
                         Log.d(TAG, "已接听")

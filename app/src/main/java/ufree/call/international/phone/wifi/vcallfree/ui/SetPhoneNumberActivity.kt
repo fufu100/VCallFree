@@ -35,7 +35,7 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>() {
 
     fun selectCountry(v: View){
         Dispatcher.dispatch(this){
-            navigate(CountriesActivity::class.java)
+            navigate(CallRatesActivity::class.java)
             requestCode(1)
             defaultAnimate()
         }.go()

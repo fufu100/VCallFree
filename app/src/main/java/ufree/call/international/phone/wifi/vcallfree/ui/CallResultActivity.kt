@@ -25,7 +25,7 @@ class CallResultActivity:BaseBackActivity<ActivityCallResultBinding>() {
         dataBinding.duration.text = String.format(Locale.getDefault(),"%d:%02d min",record.duration / 60,record.duration % 60)
 
         println("CallResultActivity duration=${record.duration}")
-        if(record.duration > 10){
+        if(record.duration > 30){
             RateDialog(this).show()
         }
     }

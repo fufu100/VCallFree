@@ -25,7 +25,7 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
     val panColors = intArrayOf(0xFFF5CB57.toInt(),0xFFF2A93C.toInt())
     val panColors2 = intArrayOf(0xFFEEAB41.toInt(),0xFFED9035.toInt())
     val count = 8
-    val texts = arrayOf("+500","thanks","+5","+10","+200","+50","+20","+100")
+    val texts = arrayOf("thanks","+5","+10","+20","+50","+100","+200","+500")
 //    val coinDrawable: Drawable? = context.getDrawable(R.drawable.ic_coin2)
     var rect:RectF = RectF()
     val textPath:Path = Path()
@@ -108,7 +108,7 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
     private val rotateListener: RotateListener? = null
     //记录上次的位置
     private var lastPosition = 0
-    fun startRotate(pos: Int) {
+    fun startRotate(pos: Int,callback:() -> Unit) {
         val mAngle = 360.0f / count
         //最低圈数是mMinTimes圈
         val newAngle:Float =
@@ -149,6 +149,7 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
 //                        rotateListener.rotateEnd(pos, "")
 //                    }
                 }
+                callback()
             }
         })
         // 正式开始启动执行动画

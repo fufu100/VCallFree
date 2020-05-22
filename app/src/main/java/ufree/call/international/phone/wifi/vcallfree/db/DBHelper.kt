@@ -3,12 +3,14 @@ package com.newmotor.x5.db
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import android.net.Uri
-import com.translate.english.voice.lib.App
+import ufree.call.international.phone.wifi.vcallfree.lib.App
 import ufree.call.international.phone.wifi.vcallfree.api.Country
 import ufree.call.international.phone.wifi.vcallfree.api.Record
 import ufree.call.international.phone.wifi.vcallfree.db.CountryTable
+import ufree.call.international.phone.wifi.vcallfree.db.PlayCountTable
 import ufree.call.international.phone.wifi.vcallfree.db.RecordTable
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Created by lyf on 2019-11-29.
@@ -18,6 +20,7 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
     override fun onCreate(db: SQLiteDatabase?) {
         db?.execSQL(RecordTable.newCreateTableString())
         db?.execSQL(CountryTable.newCreateTableString())
+        db?.execSQL(PlayCountTable.newCreateTableString())
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
@@ -26,11 +29,16 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
 
         db?.execSQL(CountryTable.newDeleteTableString())
         db?.execSQL(CountryTable.newCreateTableString())
+
+        db?.execSQL(PlayCountTable.newDeleteTableString())
+        db?.execSQL(PlayCountTable.newCreateTableString())
+
+        println("DBHelper onUpgrade $oldVersion $newVersion")
     }
 
     companion object {
         private val DATABASE_NAME = "vcallfree_database.db"  //数据库名
-        private val DATABASE_VERSION = 1    //数据库版本
+        private val DATABASE_VERSION = 5    //数据库版本
         var instance: DBHelper? = null
             get() {
                 if (field == null) {
@@ -116,6 +124,27 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         return list
     }
 
+    fun getAllCountries2(keyword:String = ""): MutableList<Array<String>> {
+        val cursor:Cursor
+        if(keyword.isEmpty()){
+            cursor = queryAll(CountryTable.TB_NAME)
+        }else {
+            cursor = queryLike(CountryTable.TB_NAME, null, CountryTable.COUNTRY, keyword)
+        }
+        val list = mutableListOf<Array<String>>()
+        while (cursor.moveToNext()) {
+            list.add(
+                arrayOf(
+                    cursor.getString(cursor.getColumnIndex(CountryTable.ISO)),
+                    cursor.getString(cursor.getColumnIndex(CountryTable.CODE)),
+                    cursor.getString(cursor.getColumnIndex(CountryTable.CODE)),
+                    cursor.getString(cursor.getColumnIndex(CountryTable.COUNTRY))
+                )
+            )
+        }
+        return list
+    }
+
     fun getCountriesByISOs(isos:Array<String>?):MutableList<Country> {
         val list = mutableListOf<Country>()
         if(isos != null) {
@@ -175,5 +204,23 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         cv.put(CountryTable.LENGTH, country.length)
         cv.put(CountryTable.PREFIX, country.prefix)
         insert(CountryTable.TB_NAME, cv)
+    }
+
+    fun addPlayCount(count:Int){
+        val cv = ContentValues()
+        val format = SimpleDateFormat("yyyyMMdd",Locale.ENGLISH)
+        cv.put(PlayCountTable.COUNT,count)
+        cv.put(PlayCountTable.DATE,format.format(Date()))
+        updateOrInsert(PlayCountTable.TB_NAME,cv,PlayCountTable.DATE)
+    }
+    fun getPlayCount():Int{
+        val format = SimpleDateFormat("yyyyMMdd",Locale.ENGLISH)
+        val date = format.format(Date())
+        println("getPlayCount date=$date")
+        val cursor = queryAndAll(PlayCountTable.TB_NAME,PlayCountTable.DATE,date)
+        if(cursor?.moveToNext() == true){
+            return cursor.getInt(cursor.getColumnIndex(PlayCountTable.COUNT))
+        }
+        return 0
     }
 }

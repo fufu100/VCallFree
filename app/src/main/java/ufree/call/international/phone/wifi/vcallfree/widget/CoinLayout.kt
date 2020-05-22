@@ -160,11 +160,14 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
                             }
 
                             override fun onAnimationEnd(animation: Animator?) {
+                                if(!isOpen){
+                                    checker?.onExpandStateChange(true)
+                                }
                                 isOpen = true
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                     mapView.foreground = ColorDrawable(0x40000000)
                                 }
-                                checker?.onExpandStateChange(true)
+
                             }
 
                             override fun onAnimationCancel(animation: Animator?) {
@@ -187,11 +190,14 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
                             }
 
                             override fun onAnimationEnd(animation: Animator?) {
+                                if(isOpen){
+                                    checker?.onExpandStateChange(false)
+                                }
                                 isOpen = false
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                     mapView.foreground = null
                                 }
-                                checker?.onExpandStateChange(false)
+
                             }
 
                             override fun onAnimationCancel(animation: Animator?) {

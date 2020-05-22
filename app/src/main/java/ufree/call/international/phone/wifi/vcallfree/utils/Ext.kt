@@ -16,7 +16,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.google.android.material.snackbar.Snackbar
-import com.translate.english.voice.lib.prefs
+import ufree.call.international.phone.wifi.vcallfree.lib.prefs
 import java.util.*
 
 fun Context.getVersionName():String{

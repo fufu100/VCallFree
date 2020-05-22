@@ -1,23 +1,16 @@
 package ufree.call.international.phone.wifi.vcallfree.utils
 
-import android.Manifest
 import android.app.usage.UsageStatsManager
 import android.content.Context
-import com.google.gson.Gson
-import org.json.JSONObject
 import android.app.ActivityManager
 import android.content.ContentUris
-import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.net.Uri
-import android.os.Build
 import android.provider.ContactsContract
 import android.widget.ImageView
-import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
-import com.translate.english.voice.lib.App
-import kotlinx.android.synthetic.main.fragment_tab_contracts.*
+import ufree.call.international.phone.wifi.vcallfree.lib.App
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

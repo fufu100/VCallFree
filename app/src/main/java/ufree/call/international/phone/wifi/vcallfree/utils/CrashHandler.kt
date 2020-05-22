@@ -3,7 +3,7 @@ package ufree.call.international.phone.wifi.vcallfree.utils
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Environment
-import com.translate.english.voice.lib.App
+import ufree.call.international.phone.wifi.vcallfree.lib.App
 import java.io.File
 import java.io.FileOutputStream
 import java.io.PrintWriter

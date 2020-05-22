@@ -99,7 +99,7 @@
             android:padding="20dp"
             android:src="@drawable/ic_call_suspend"
             tools:ignore="ContentDescription"
-            android:onClick="@{activity::hangup}"/>
+            android:onClick="@{() -> activity.hangup(true)}"/>
 
 
         <include

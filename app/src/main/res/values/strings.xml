@@ -38,4 +38,6 @@
     <string name="like">Like</string>
     <string name="tip_phone_is_empty">The phone number is invalid</string>
     <string name="tip_select_subject">Please choose a type</string>
+    <string name="jump">跳过</string>
+    <string name="tip_invalid_number">Invalid phone number</string>
 </resources>

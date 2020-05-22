@@ -6,11 +6,15 @@ import android.graphics.Color
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.core.animation.addListener
+import com.newmotor.x5.db.DBHelper
+import kotlinx.android.synthetic.main.side_header.*
 import kotlinx.coroutines.*
 import ufree.call.international.phone.wifi.vcallfree.MainActivity
 import ufree.call.international.phone.wifi.vcallfree.R
 import ufree.call.international.phone.wifi.vcallfree.api.Api
+import ufree.call.international.phone.wifi.vcallfree.api.User
 import ufree.call.international.phone.wifi.vcallfree.databinding.FragmentTabCoinsBinding
 import ufree.call.international.phone.wifi.vcallfree.lib.BaseDataBindingFragment
 import ufree.call.international.phone.wifi.vcallfree.utils.*
@@ -21,12 +25,14 @@ import ufree.call.international.phone.wifi.vcallfree.widget.CoinLayout
  */
 class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayout.CanScrollVerticalChecker {
     var playCount = 0
+    var strategy:PointStrategy? = null
+    var job:Job? = null
     override fun getLayoutResId(): Int = R.layout.fragment_tab_coins
     override fun initView(v: View) {
         dataBinding.fragment = this
         dataBinding.coinLayout.checker = this
 
-        dataBinding.totalCoins= UserManager.get().user?.points.toString()
+
         dataBinding.totalPlayCount.text = UserManager.get().user?.max_wheel.toString()
         val drawable = DrawableUtils.generate {
             solidColor(context!!.getColorFromRes(R.color.colorPrimary))
@@ -36,10 +42,18 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         dataBinding.totalCoinsTv.background = drawable
         dataBinding.playCount.background = drawable
 
-//        dataBinding.goTv.paint.strokeWidth = 3f
-//        dataBinding.goTv.paint.color = Color.GREEN
+        playCount = DBHelper.get().getPlayCount()
+        dataBinding.playCountTv.text = playCount.toString()
+    }
 
-        println("CoinsFragment initView--")
+    override fun onResume() {
+        super.onResume()
+        dataBinding.totalCoins= UserManager.get().user?.points.toString()
+    }
+
+    override fun onDestroy() {
+        job?.cancel()
+        super.onDestroy()
     }
 
     fun inviteFriends(v: View){
@@ -50,6 +64,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
     }
 
     fun start(v: View){
+        val endPos = getPoints()
         val animatorSet = AnimatorSet()
         animatorSet.playTogether(
             ObjectAnimator.ofFloat(dataBinding.goIv,"scaleX",1f,1.2f,0.9f ,1.0f),
@@ -57,28 +72,54 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             ObjectAnimator.ofFloat(dataBinding.goIv,"scaleY",1f,1.2f,0.9f ,1.0f),
             ObjectAnimator.ofFloat(dataBinding.goTv,"scaleY",1f,1.2f,0.9f ,1.0f))
         animatorSet.duration = 300
-        animatorSet.addListener({
-            Api.getApiService().addPoints(mutableMapOf("uuid" to context!!.getDeviceId(),"type" to "wheel","ts" to System.currentTimeMillis(),"points" to "500"))
-                .compose(RxUtils.applySchedulers())
-                .subscribe({
-                    if(it.errcode == 0){
-                        UserManager.get().user?.points = it.points
-                        dataBinding.totalCoins = UserManager.get().user!!.points.toString()
-                    }else{
-                        context?.toast(it.errormsg)
-                    }
-                },{
-                    it.printStackTrace()
-                })
-        },{},{},{})
         animatorSet.start()
-        dataBinding.panView.startRotate(3)
+        dataBinding.panView.startRotate(PointStrategy.points.size - endPos + 1){
+            v.isClickable = true
+            if(endPos != 0) {
+                showObtainCoinsAlert(endPos)
+            }
+        }
         playCount++
+        DBHelper.get().addPlayCount(playCount)
         dataBinding.playCountTv.text = playCount.toString()
-
         v.isClickable = false
+
+    }
+
+    private fun showObtainCoinsAlert(pos:Int){
+        AlertDialog.Builder(context!!)
+            .setMessage("您获得了${PointStrategy.points[pos]}个金币")
+            .setNegativeButton("放弃",null)
+            .setPositiveButton("Get it"){_,_ ->
+                Api.getApiService().addPoints(
+                    mutableMapOf(
+                        "uuid" to context!!.getDeviceId(),
+                        "type" to "wheel",
+                        "ts" to System.currentTimeMillis(),
+                        "points" to PointStrategy.points[pos]
+                    )
+                )
+                    .compose(RxUtils.applySchedulers())
+                    .subscribe({
+                        if (it.errcode == 0) {
+                            UserManager.get().user?.points = it.points
+                            dataBinding.totalCoins = UserManager.get().user!!.points.toString()
+                            startTimeCount()
+                        } else {
+                            context?.toast(it.errormsg)
+                        }
+                    }, {
+                        it.printStackTrace()
+                    })
+            }
+            .create()
+            .show()
+    }
+
+    private fun startTimeCount(){
+        dataBinding.goIv.isClickable = false
         dataBinding.goIv.setImageResource(R.drawable.ic_go2)
-        GlobalScope.launch {
+        job = GlobalScope.launch {
             for(i in UserManager.get().user!!.interval downTo  0){
                 withContext(Dispatchers.Main){
                     dataBinding.goTv.text = i.toString()
@@ -89,7 +130,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             withContext(Dispatchers.Main) {
                 dataBinding.goTv.text = "GO"
                 if(playCount < UserManager.get().user!!.max_wheel){
-                    v.isClickable = true
+                    dataBinding.goIv.isClickable = true
                     dataBinding.goIv.setImageResource(R.drawable.ic_go3)
                 }
             }
@@ -109,6 +150,18 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             navigate(SetPhoneNumberActivity::class.java)
             defaultAnimate()
         }.go()
+    }
+
+    fun getPoints():Int{
+        if(UserManager.get().user != null) {
+            val x = UserManager.get().user!!.wheel_points / UserManager.get().user!!.max_wheel
+            if(strategy == null){
+                strategy = PointStrategy()
+            }
+            return strategy!!.getRandom(if(x < 50) PointStrategy.pointStrategy1 else PointStrategy.pointStrategy2)
+        }else{
+            return 0
+        }
     }
 
     override fun canScrollVertical(): Boolean = true

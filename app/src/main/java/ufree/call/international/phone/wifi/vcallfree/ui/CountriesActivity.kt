@@ -66,18 +66,6 @@ class CountriesActivity:BaseBackActivity<ActivityCoutriesBinding>(),BaseAdapter.
         }
     }
 
-    private fun getNextGroupPosition(firstPosition: Int): Int {
-        var destPosition = -1
-        println("getNextGroupPosition,firstPosition=$firstPosition")
-        for (i in firstPosition..1 + firstPosition) {
-            if (i < dataBinding.recyclerView.adapter?.itemCount!! ) {
-                destPosition = i
-                break
-            }
-        }
-        return destPosition
-    }
-
     var job:Job? = null
 
     private fun search(keyword: String){
