@@ -54,6 +54,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
     var wakeLock: PowerManager.WakeLock? = null
     var headsetPlugReceiver:HeadsetPluginReceiver? = null
     var maxmiumDistance = 0f
+    var dialEffectHelper:DialEffectHelper? = null
     override fun getLayoutRes(): Int = R.layout.activity_call
     @SuppressLint("InvalidWakeLockTag")
     override fun initView(savedInstanceState: Bundle?) {
@@ -79,7 +80,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             }
         }
         bindService(Intent(this, CallService::class.java), conn, Context.BIND_AUTO_CREATE)
-
+        dialEffectHelper = DialEffectHelper(this)
         headsetPlugReceiver = HeadsetPluginReceiver()
         registerReceiver(headsetPlugReceiver,IntentFilter().apply {
             addAction(Intent.ACTION_HEADSET_PLUG)
@@ -116,7 +117,13 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
     }
 
     fun onClick(v: View) {
-
+        val number = v.tag.toString()
+        println("onClick number=$number")
+        dataBinding.phone2.insert(number)
+        dialEffectHelper?.dialNumber(number)
+        if(!LogUtils.test){
+            callBinder?.getCurrentCall()?.dialDtmf(number)
+        }
     }
 
     fun mute(v: View) {
@@ -132,12 +139,15 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         if (expand) {
             expand = false
             number_pad.visibility = View.GONE
-            (dataBinding.phone.layoutParams as ConstraintLayout.LayoutParams).topMargin =
-                dip2px(141)
+            dataBinding.phone.visibility = View.VISIBLE
+            dataBinding.scrollView.visibility = View.GONE
+            (dataBinding.duration.layoutParams as ConstraintLayout.LayoutParams).topToBottom = R.id.phone
         } else {
             expand = true
             number_pad.visibility = View.VISIBLE
-            (dataBinding.phone.layoutParams as ConstraintLayout.LayoutParams).topMargin = dip2px(41)
+            dataBinding.phone.visibility = View.GONE
+            dataBinding.scrollView.visibility = View.VISIBLE
+            (dataBinding.duration.layoutParams as ConstraintLayout.LayoutParams).topToBottom = R.id.scrollView
         }
     }
 

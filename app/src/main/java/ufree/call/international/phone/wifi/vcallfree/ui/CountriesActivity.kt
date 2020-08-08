@@ -5,9 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.newmotor.x5.db.DBHelper
+import kotlinx.android.synthetic.main.activity_coutries.*
 import kotlinx.coroutines.*
 import ufree.call.international.phone.wifi.vcallfree.R
 import ufree.call.international.phone.wifi.vcallfree.adapter.BaseAdapter
@@ -35,9 +37,13 @@ class CountriesActivity:BaseBackActivity<ActivityCoutriesBinding>(),BaseAdapter.
             onBindView = { dataBinding, position ->
                 val binding: ItemCountryBinding = dataBinding as ItemCountryBinding
                 if (position == 0) {
-                    binding.letterTv.text = list[position].country.subSequence(0,1)
+                    if(list[position].isHot){
+                        binding.letterTv.text = "H"
+                    }else {
+                        binding.letterTv.text = list[position].country.subSequence(0, 1)
+                    }
                 } else {
-                    if (list[position - 1].country.first() != list[position].country.first()) {
+                    if (list[position - 1].country.first() != list[position].country.first() && !list[position].isHot) {
                         binding.letterTv.text = list[position].country.substring(0, 1)
                     } else {
                         binding.letterTv.text = ""
@@ -45,7 +51,7 @@ class CountriesActivity:BaseBackActivity<ActivityCoutriesBinding>(),BaseAdapter.
                 }
             }
         }
-
+        dataBinding.pinnedLetter.text = "Hot"
         dataBinding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener(){
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             }
@@ -53,7 +59,14 @@ class CountriesActivity:BaseBackActivity<ActivityCoutriesBinding>(),BaseAdapter.
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
                 val firstPosition = linearLayoutManager.findFirstVisibleItemPosition()
-                dataBinding.pinnedLetter.text = list[firstPosition].country.first().toString()
+                if(firstPosition != -1) {
+                    if(list[firstPosition].isHot){
+                        dataBinding.pinnedLetter.text = "Hot"
+                    }else {
+                        dataBinding.pinnedLetter.text =
+                            list[firstPosition].country.first().toString()
+                    }
+                }
             }
         })
         dataBinding.search.addTextChangedListener(this)
@@ -75,12 +88,21 @@ class CountriesActivity:BaseBackActivity<ActivityCoutriesBinding>(),BaseAdapter.
             loadData(keyword)
             withContext(Dispatchers.Main){
                 dataBinding.recyclerView.adapter?.notifyDataSetChanged()
+                if(list.size == 0){
+                    pinned_letter.visibility = View.GONE
+                }else {
+                    pinned_letter.visibility = View.VISIBLE
+                }
             }
         }
     }
 
     private fun loadData(keyword: String = "") {
         list.clear()
+        list.addAll(DBHelper.get().getCountriesByISOs(arrayOf("IN","PK","BD","ID","US","CO","MY","AU","BR","GB","DE")).map {
+            it.isHot = true
+            it
+        })
         list.addAll(DBHelper.get().getAllCountries(keyword))
     }
 

@@ -7,10 +7,13 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import com.newmotor.x5.db.DBHelper
+import com.umeng.analytics.MobclickAgent
+import com.umeng.commonsdk.UMConfigure
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import ufree.call.international.phone.wifi.vcallfree.MainActivity
 import ufree.call.international.phone.wifi.vcallfree.api.Country
+import ufree.call.international.phone.wifi.vcallfree.service.CallService
 import ufree.call.international.phone.wifi.vcallfree.utils.*
 import java.io.BufferedReader
 import java.io.File
@@ -19,51 +22,51 @@ import java.util.*
 //5ec6a4d1978eea0864b20201
 val prefs: Prefs by lazy { App.prefs!! }
 class App : Application(),Application.ActivityLifecycleCallbacks{
-    var hasResume = false
-    var hasPause = false
+    var start = 0
+    var stop = 0
+    var isInBackgrounnd = false
     override fun onActivityPaused(activity: Activity?) {
         println("App onActivityPaused ${activity?.localClassName}")
-        hasPause = activity is MainActivity
     }
 
     override fun onActivityResumed(activity: Activity?) {
-        println("App onActivityResumed")
-        hasResume = activity is MainActivity
-        if(hasResume and hasPause){
+        println("App onActivityResumed ${activity!!::class.java.canonicalName} ")
+        if(isInBackgrounnd){
 //            toast("应用从后台回来了")
-//            ActivityUtils.from(applicationContext)
-//                .action(TranslateService.ACTION_SHOW_AD)
-//                .send()
+            isInBackgrounnd = false
+            Dispatcher.dispatch(applicationContext){
+                action(CallService.ACTION_SHOW_AD)
+            }.send()
         }
 
     }
 
     override fun onActivityStarted(activity: Activity?) {
-        println("App onActivityStarted")
-
+        println("App onActivityStarted ${activity!!::class.java.canonicalName}")
+        println("App stop=$stop start=$start")
+        start++
     }
 
     override fun onActivityDestroyed(activity: Activity?) {
         println("App onActivityDestroyed")
-        hasResume = false
-        hasPause = false
     }
 
     override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {
-        println("App onActivitySaveInstanceState")
+        println("App onActivitySaveInstanceState ${activity!!::class.java.canonicalName}")
     }
 
     override fun onActivityStopped(activity: Activity?) {
-        println("App onActivityStopped")
-//        if(Utils.getTopApp(applicationContext) != packageName){
+        println("App onActivityStopped ${activity!!::class.java.canonicalName}")
+        stop++
+        println("App stop=$stop start=$start")
+        if(start == stop){
+            isInBackgrounnd = true
 //            toast("应用到后台了")
-//        }
+        }
     }
 
     override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
         println("App onActivityCreated")
-        hasResume = false
-        hasPause = false
     }
 
     companion object{
@@ -99,6 +102,15 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
         CrashHandler.getInstance().apply {
             init(applicationContext)
         }
+        UMConfigure.setLogEnabled(true)
+        UMConfigure.init(
+            this,
+            "5ec6a4d1978eea0864b20201",
+            "umeng",
+            UMConfigure.DEVICE_TYPE_PHONE,
+            null
+        )
+        MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL)
         initData()
     }
 

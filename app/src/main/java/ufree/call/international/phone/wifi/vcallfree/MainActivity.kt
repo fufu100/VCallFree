@@ -1,6 +1,7 @@
 package ufree.call.international.phone.wifi.vcallfree
 
 import android.Manifest
+import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -15,6 +16,7 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
+import androidx.core.app.BundleCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -22,6 +24,7 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.dialog_call.*
 import ufree.call.international.phone.wifi.vcallfree.adapter.CacheFragmentStatePagerAdapter
 import ufree.call.international.phone.wifi.vcallfree.api.Api
 import ufree.call.international.phone.wifi.vcallfree.lib.BaseActivity
@@ -30,7 +33,7 @@ import ufree.call.international.phone.wifi.vcallfree.ui.*
 import ufree.call.international.phone.wifi.vcallfree.utils.*
 import java.util.*
 
-class MainActivity : BaseActivity(),RadioGroup.OnCheckedChangeListener,ViewPager.OnPageChangeListener {
+class MainActivity : BaseActivity() {
     private val PERMISSION_REQUEST_CODE = 0
 
     // 所需的全部权限
@@ -38,9 +41,9 @@ class MainActivity : BaseActivity(),RadioGroup.OnCheckedChangeListener,ViewPager
         Manifest.permission.READ_PHONE_STATE,
         Manifest.permission.READ_CONTACTS
     )
-    private val fragments = mutableListOf<Fragment>()
+
     private lateinit var conn: ServiceConnection
-    private var callBinder:CallService.CallBinder? = null
+    private var callBinder: CallService.CallBinder? = null
     override fun getLayoutRes(): Int = R.layout.activity_main
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,25 +51,18 @@ class MainActivity : BaseActivity(),RadioGroup.OnCheckedChangeListener,ViewPager
         toolbar.setNavigationOnClickListener {
             drawerLayout.openDrawer(GravityCompat.START)
         }
-        fragments.add(ContractsFragment())
-        fragments.add(RecentFragment())
-        fragments.add(CoinsFragment())
-        viewPager.adapter = object :CacheFragmentStatePagerAdapter(supportFragmentManager){
-            override fun createItem(position: Int): Fragment = fragments[position]
-            override fun getCount(): Int = fragments.size
-        }
-        viewPager.addOnPageChangeListener(this)
-        viewPager.offscreenPageLimit = 2
-        radioGroup.setOnCheckedChangeListener(this)
-        drawerLayout.addDrawerListener(object :DrawerLayout.DrawerListener{
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.frameLayout, IndexFragment(), "Index").commit()
+        drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
             override fun onDrawerStateChanged(newState: Int) {}
 
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
 
-            override fun onDrawerClosed(drawerView: View) { }
+            override fun onDrawerClosed(drawerView: View) {}
 
             override fun onDrawerOpened(drawerView: View) {
-                navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text = UserManager.get().user?.points.toString()
+                navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text =
+                    UserManager.get().user?.points.toString()
             }
 
         })
@@ -83,7 +79,6 @@ class MainActivity : BaseActivity(),RadioGroup.OnCheckedChangeListener,ViewPager
                 R.id.invite ->
                     Dispatcher.dispatch(this) {
                         navigate(InviteFriendsActivity::class.java)
-                        requestCode(1)
                         defaultAnimate()
                     }.go()
                 R.id.call_rate ->
@@ -121,56 +116,60 @@ class MainActivity : BaseActivity(),RadioGroup.OnCheckedChangeListener,ViewPager
         println("uuid2=${Build.SERIAL}")
 //        DBHelper.get()
 
-        conn = object :ServiceConnection{
+        conn = object : ServiceConnection {
             override fun onServiceDisconnected(name: ComponentName?) {
 
             }
+
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 callBinder = service as CallService.CallBinder
             }
         }
-        bindService(Intent(this,CallService::class.java),conn, Context.BIND_AUTO_CREATE)
+        bindService(Intent(this, CallService::class.java), conn, Context.BIND_AUTO_CREATE)
         test()
 
-        val phoneNumberUtil:PhoneNumberUtil = PhoneNumberUtil.getInstance()
+        val phoneNumberUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
 //        phoneNumberUtil.getRegionCodeForNumber(Phonenumber.PhoneNumber())
-        val phoneNumber = phoneNumberUtil.parse("+12134883500","CH")
+        val phoneNumber = phoneNumberUtil.parse("+12134883500", "CH")
         try {
-            val phoneNumber2 = phoneNumberUtil.parseAndKeepRawInput("+1647-555-0123",null)
+            val phoneNumber2 = phoneNumberUtil.parseAndKeepRawInput("+1647-555-0123", null)
 //        phoneNumber2.rawInput = "+12134883500"
             val iso = phoneNumberUtil.getRegionCodeForNumber(phoneNumber2)
             val nationalNumber = phoneNumberUtil.getNationalSignificantNumber(phoneNumber2)
-            println("MainActivity phone:${phoneNumber.countryCode},${phoneNumberUtil.isPossibleNumber(phoneNumber2)} ,iso=$iso,nationalNumber=$nationalNumber")
-        }catch (e:Exception){
+            println(
+                "MainActivity phone:${phoneNumber.countryCode},${phoneNumberUtil.isPossibleNumber(
+                    phoneNumber2
+                )} ,iso=$iso,nationalNumber=$nationalNumber"
+            )
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (lackPermission()) {
-                ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_REQUEST_CODE)
-            }
-        }
+
 
     }
 
-    public fun changeTab(tab:Int){
+    public fun changeTab(tab: Int) {
         println("Main changeTab $tab")
-        (radioGroup.getChildAt(tab) as RadioButton).isChecked = true
+//        (radioGroup.getChildAt(tab) as RadioButton).isChecked = true
     }
 
-    private fun test(){
+    private fun test() {
         compositeDisposable.add(Api.getApiService().signup(getDeviceId())
             .compose(RxUtils.applySchedulers())
             .subscribe({
-                if(it.errcode == 0){
+                if (it.errcode == 0) {
                     UserManager.get().user = it
-                    (fragments[2] as CoinsFragment).refreshUser()
-                    navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text = it.points.toString()
+//                    (fragments[2] as CoinsFragment).refreshUser()
+                    (supportFragmentManager.findFragmentByTag("Index") as IndexFragment).refreshUser()
+                    navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text =
+                        it.points.toString()
                     callBinder?.initAccount()
                 }
-            },{
+            }, {
                 it.printStackTrace()
-            }))
+            })
+        )
     }
 
     override fun onResume() {
@@ -180,9 +179,14 @@ class MainActivity : BaseActivity(),RadioGroup.OnCheckedChangeListener,ViewPager
 
     override fun onDestroy() {
         super.onDestroy()
-        if(::conn.isInitialized){
+        if (::conn.isInitialized) {
             unbindService(conn)
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        supportFragmentManager.findFragmentByTag("Dial")?.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onRequestPermissionsResult(
@@ -192,9 +196,9 @@ class MainActivity : BaseActivity(),RadioGroup.OnCheckedChangeListener,ViewPager
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         //通知到每个fragment
-        fragments.forEach {
-            it.onRequestPermissionsResult(requestCode,permissions,grantResults)
-        }
+//        fragments.forEach {
+//            it.onRequestPermissionsResult(requestCode,permissions,grantResults)
+//        }
     }
 
     private fun lackPermission(): Boolean {
@@ -214,37 +218,42 @@ class MainActivity : BaseActivity(),RadioGroup.OnCheckedChangeListener,ViewPager
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (System.currentTimeMillis() - mExitTime > 2000) {
-                toast( "再按一次退出程序")
-                mExitTime = System.currentTimeMillis()
-            } else {
-                finish()
+            if(supportFragmentManager.findFragmentByTag("Dial")  != null){
+                goBack()
+            }else {
+                if (System.currentTimeMillis() - mExitTime > 2000) {
+                    toast("再按一次退出程序")
+                    mExitTime = System.currentTimeMillis()
+                } else {
+                    finish()
+                }
             }
             return true
         }
         return super.onKeyDown(keyCode, event)
     }
 
-    override fun onCheckedChanged(group: RadioGroup?, checkedId: Int) {
-        when(checkedId){
-            R.id.radio_contacts ->
-                viewPager.currentItem = 0
-            R.id.radio_recents ->
-                viewPager.currentItem = 1
-            R.id.radio_coins ->
-                viewPager.currentItem = 2
-        }
+    fun dial(phone: String? = "", isoStr: String? = "US") {
+        val ft = supportFragmentManager.beginTransaction()
+        ft.setCustomAnimations(
+            R.anim.bootom_slide_enter,
+            R.anim.top_slide_exit,
+            0,
+            R.anim.bootom_slide_exit
+        )
+        ft.add(
+            R.id.frameLayout,
+            DialFragment().apply {
+                arguments = Bundle().apply { putString("phone", phone);putString("iso", isoStr); }
+            },
+            "Dial"
+        )
+        ft.addToBackStack("Dial")
+        ft.commit()
     }
 
-    override fun onPageScrollStateChanged(state: Int) {
-
+    fun goBack() {
+        supportFragmentManager.popBackStack()
     }
 
-    override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-
-    }
-
-    override fun onPageSelected(position: Int) {
-        (radioGroup.getChildAt(position) as RadioButton).isChecked = true
-    }
 }

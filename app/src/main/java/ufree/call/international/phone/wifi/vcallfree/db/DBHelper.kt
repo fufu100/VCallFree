@@ -57,7 +57,7 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
     }
 
     fun getCallRecords(): MutableList<Record> {
-        val cursor = queryAll(RecordTable.TB_NAME)
+        val cursor = queryAll(RecordTable.TB_NAME,RecordTable.ADD_TIME + " desc")
         val list = mutableListOf<Record>()
         while (cursor.moveToNext()) {
             list.add(

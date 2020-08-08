@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +21,7 @@ import ufree.call.international.phone.wifi.vcallfree.databinding.ItemCallRateBin
 import ufree.call.international.phone.wifi.vcallfree.lib.BaseBackActivity
 import ufree.call.international.phone.wifi.vcallfree.utils.RxUtils
 import ufree.call.international.phone.wifi.vcallfree.utils.UserManager
+import ufree.call.international.phone.wifi.vcallfree.utils.closeKeyBoard
 
 /**
  * Created by lyf on 2020/5/7.
@@ -54,7 +56,7 @@ class CallRatesActivity : BaseBackActivity<ActivityCallRatesBinding>() , TextWat
         dataBinding.recyclerView.addOnScrollListener(object :RecyclerView.OnScrollListener(){
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if(newState == RecyclerView.SCROLL_STATE_DRAGGING){
-                    closeKeyboard()
+                    closeKeyBoard()
                 }
             }
         })
@@ -73,32 +75,6 @@ class CallRatesActivity : BaseBackActivity<ActivityCallRatesBinding>() , TextWat
         requestData()
     }
 
-//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-//        menuInflater.inflate(R.menu.menu_call_rates, menu)
-//        return true
-//    }
-//
-//    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
-//        R.id.reset -> {
-//            iso = ""
-//            requestData()
-//            true
-//        }
-//        else -> super.onOptionsItemSelected(item)
-//    }
-
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-//        if (resultCode == Activity.RESULT_OK) {
-//            if (requestCode == 1) {
-//                val str = data?.getStringExtra("iso") ?: ""
-//                if (str != iso) {
-//                    iso = str
-//                    requestData()
-//                }
-//            }
-//        }
-//    }
     var job: Job? = null
     private fun requestData() {
         dataBinding.loading.show()
@@ -145,10 +121,7 @@ class CallRatesActivity : BaseBackActivity<ActivityCallRatesBinding>() , TextWat
         }
     }
 
-    fun closeKeyboard() {
-        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(window.decorView.windowToken, 0)
-    }
+
 
     override fun afterTextChanged(s: Editable?) {
         requestData()

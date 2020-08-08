@@ -13,9 +13,11 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import kotlinx.coroutines.*
+import ufree.call.international.phone.wifi.vcallfree.MainActivity
 import ufree.call.international.phone.wifi.vcallfree.R
 import ufree.call.international.phone.wifi.vcallfree.adapter.BaseAdapter
 import ufree.call.international.phone.wifi.vcallfree.api.Contact
@@ -23,6 +25,7 @@ import ufree.call.international.phone.wifi.vcallfree.databinding.FragmentTabCont
 import ufree.call.international.phone.wifi.vcallfree.lib.BaseDataBindingFragment
 import ufree.call.international.phone.wifi.vcallfree.utils.Dispatcher
 import java.lang.Exception
+import java.util.*
 
 /**
  * Created by lyf on 2020/4/27.
@@ -30,6 +33,10 @@ import java.lang.Exception
 class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>(),BaseAdapter.OnItemClick<Contact>,TextWatcher {
     val list: MutableList<Contact> = mutableListOf()
     var contractsObserver:ContractsObserver? = null
+    private val PERMISSIONS = arrayOf(
+        Manifest.permission.READ_PHONE_STATE,
+        Manifest.permission.READ_CONTACTS
+    )
     override fun getLayoutResId(): Int = R.layout.fragment_tab_contracts
 
     override fun initView(v: View) {
@@ -68,8 +75,14 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
     }
 
     private fun getContacts(keyword: String = ""){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ActivityCompat.checkSelfPermission(context!!,
+        println("getContact ${context != null}")
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && ActivityCompat.checkSelfPermission(context!!,
                 Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_DENIED){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (lackPermission()) {
+                    requestPermissions( PERMISSIONS, 0)
+                }
+            }
             return
         }
         list.clear()
@@ -114,7 +127,9 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
 
     override fun onDetach() {
         super.onDetach()
-        context?.contentResolver?.unregisterContentObserver(contractsObserver!!)
+        if(contractsObserver != null) {
+            context?.contentResolver?.unregisterContentObserver(contractsObserver!!)
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -137,20 +152,17 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
     override fun onItemClick(id: Int, position: Int, t: Contact) {
         if(id == -1){
             var iso = ""
+            var phone = t.phone
+            println("onItemClick ${Locale.getDefault().country}")
             try {
                 val phoneNumberUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
-                val phoneNumber = phoneNumberUtil.parseAndKeepRawInput(t.phone,null)
+                val phoneNumber = phoneNumberUtil.parse(t.phone, Locale.getDefault().country)
                 iso = phoneNumberUtil.getRegionCodeForNumber(phoneNumber)
-                t.phone = phoneNumberUtil.getNationalSignificantNumber(phoneNumber)
+                phone = phoneNumberUtil.getNationalSignificantNumber(phoneNumber)
             }catch (e:Exception){
                 e.printStackTrace()
             }
-            Dispatcher.dispatch(context){
-                navigate(DialActivity::class.java)
-                extra("contact",t)
-                extra("iso",iso)
-                defaultAnimate()
-            }.go()
+            (activity as MainActivity).dial(phone,iso)
         }else if(id == R.id.invite){
             Dispatcher.dispatch(context){
                 action(Intent.ACTION_SENDTO)
@@ -163,11 +175,7 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
     }
 
     fun dial(v:View){
-        println("跳转--")
-        Dispatcher.dispatch(context){
-            navigate(DialActivity::class.java)
-            defaultAnimate()
-        }.go()
+        (activity as MainActivity).dial()
     }
 
     override fun afterTextChanged(s: Editable?) {
@@ -181,6 +189,20 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
     }
+
+    private fun lackPermission(): Boolean {
+        for (permission in PERMISSIONS) {
+            if (ContextCompat.checkSelfPermission(
+                    context!!,
+                    permission
+                ) == PackageManager.PERMISSION_DENIED
+            ) {
+                return true
+            }
+        }
+        return false
+    }
+
 
     inner class ContractsObserver(handler:Handler):ContentObserver(handler){
         override fun onChange(selfChange: Boolean) {

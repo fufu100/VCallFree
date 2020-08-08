@@ -26,6 +26,32 @@
             android:textStyle="bold"
             android:textSize="30sp"
             tools:text="+1718 "/>
+
+        <HorizontalScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="41dp"
+            android:visibility="gone"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:scrollbars="none">
+
+        <ufree.call.international.phone.wifi.vcallfree.widget.PhoneNumberTextView
+            android:id="@+id/phone2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textColor="@color/text_normal"
+            android:textStyle="bold"
+            android:textSize="30sp"
+            tools:text="+17183 "/>
+        </HorizontalScrollView>
         <TextView
             android:id="@+id/duration"
             android:layout_width="wrap_content"

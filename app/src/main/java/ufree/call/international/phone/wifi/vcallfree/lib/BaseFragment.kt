@@ -5,11 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.umeng.analytics.MobclickAgent
 
 /**
  * Created by lyf on 2020/4/27.
  */
 abstract class BaseFragment: Fragment() {
+    val fragmentTag = javaClass.name.substringAfterLast(".")
     abstract fun getLayoutResId():Int
     abstract fun initView(v: View)
 
@@ -24,4 +26,14 @@ abstract class BaseFragment: Fragment() {
         initView(view)
     }
 
+    override fun onPause() {
+        super.onPause()
+        println("fragment onPause $fragmentTag")
+        MobclickAgent.onPageEnd(fragmentTag)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        MobclickAgent.onPageStart(fragmentTag)
+    }
 }

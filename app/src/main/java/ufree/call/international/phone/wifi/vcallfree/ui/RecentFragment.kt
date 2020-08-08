@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ufree.call.international.phone.wifi.vcallfree.MainActivity
 import ufree.call.international.phone.wifi.vcallfree.R
 import ufree.call.international.phone.wifi.vcallfree.adapter.BaseAdapter
 import ufree.call.international.phone.wifi.vcallfree.api.Record
@@ -66,19 +67,11 @@ class RecentFragment:BaseFragment() ,BaseAdapter.OnItemClick<Record>{
                 defaultAnimate()
             }.go()
         }else{
-            Dispatcher.dispatch(context){
-                navigate(DialActivity::class.java)
-                extra("phone",t.phone)
-                extra("iso",t.iso)
-                defaultAnimate()
-            }.go()
+            (activity as MainActivity).dial(t.phone,t.iso)
         }
     }
 
     private fun dial(){
-        Dispatcher.dispatch(context){
-            navigate(DialActivity::class.java)
-            defaultAnimate()
-        }.go()
+        (activity as MainActivity).dial()
     }
 }

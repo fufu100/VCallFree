@@ -12,6 +12,7 @@ import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.DisplayMetrics
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
@@ -236,4 +237,9 @@ fun Context.hasPermission(permission:String):Boolean{
     }else{
         true
     }
+}
+
+fun Activity.closeKeyBoard(){
+    val imm: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(window.decorView.windowToken, 0)
 }

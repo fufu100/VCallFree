@@ -8,6 +8,12 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Binder
 import android.os.IBinder
+import android.util.Log
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.InterstitialAd
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import ufree.call.international.phone.wifi.vcallfree.lib.App
 import org.pjsip.pjsua2.*
 import ufree.call.international.phone.wifi.vcallfree.pjsua.*
@@ -24,6 +30,8 @@ class CallService:Service(),MyAppObserver{
     var accCfg:AccountConfig? = null
     var receiver:MyBroadcastReceiver? = null
     private val lastRegStatus = ""
+    private var showAdOnLoad = true
+    private lateinit var mInterstitialAd: InterstitialAd
     val callStateChangeListeners:MutableList<CallStateChange> = mutableListOf()
     override fun onBind(intent: Intent?): IBinder? {
         return CallBinder()
@@ -38,6 +46,7 @@ class CallService:Service(),MyAppObserver{
         const val BUDDY_STATE = 4
         const val CALL_MEDIA_STATE = 5
         const val CHANGE_NETWORK = 6
+        const val ACTION_SHOW_AD = "action_show_ad"
     }
 
     override fun onCreate() {
@@ -46,7 +55,9 @@ class CallService:Service(),MyAppObserver{
         val intentFilter = IntentFilter(
             ConnectivityManager.CONNECTIVITY_ACTION
         )
+        intentFilter.addAction(ACTION_SHOW_AD)
         registerReceiver(receiver, intentFilter)
+
     }
 
     override fun onDestroy() {
@@ -60,29 +71,32 @@ class CallService:Service(),MyAppObserver{
     inner class CallBinder:Binder(){
         fun initAccount(){
             if(!LogUtils.test) {
-                if (app == null) {
-                    app = MyApp()
-                }
-                try {
-                    Thread.sleep(5000)
-                } catch (e: InterruptedException) {
-                }
-                app?.init(this@CallService, App.appCacheDirectory)
-                UserManager.get().user?.also {
-                    accCfg = AccountConfig()
-                    accCfg?.idUri = "sip:${it.sip}@${it.servers[0].host}:${it.servers[0].port}"
-                    accCfg?.regConfig?.registrarUri =
-                        "sip:${it.servers[0].host}:${it.servers[0].port}"
-                    val creds: AuthCredInfoVector? = accCfg?.sipConfig?.authCreds
-                    creds?.clear()
-                    creds?.add(AuthCredInfo("Digest", "*", it.sip, 0, it.passwd))
-                    accCfg?.natConfig?.iceEnabled = true
-                    accCfg?.videoConfig?.autoShowIncoming = true
-                    accCfg?.videoConfig?.autoShowIncoming = true
-                    accout = app?.addAcc(accCfg)
+                GlobalScope.launch {
+                    if (app == null) {
+                        app = MyApp()
+                    }
+                    try {
+                        Thread.sleep(5000)
+                    } catch (e: InterruptedException) {
+                    }
+                    app?.init(this@CallService, App.appCacheDirectory)
+                    UserManager.get().user?.also {
+                        accCfg = AccountConfig()
+                        accCfg?.idUri = "sip:${it.sip}@${it.servers[0].host}:${it.servers[0].port}"
+                        accCfg?.regConfig?.registrarUri =
+                            "sip:${it.servers[0].host}:${it.servers[0].port}"
+                        val creds: AuthCredInfoVector? = accCfg?.sipConfig?.authCreds
+                        creds?.clear()
+                        creds?.add(AuthCredInfo("Digest", "*", it.sip, 0, it.passwd))
+                        accCfg?.natConfig?.iceEnabled = true
+                        accCfg?.videoConfig?.autoShowIncoming = true
+                        accCfg?.videoConfig?.autoShowIncoming = true
+                        accout = app?.addAcc(accCfg)
 
-                    println("$TAG initAccount 成功 ${accCfg?.idUri},${accCfg?.regConfig}")
+                        println("$TAG initAccount 成功 ${accCfg?.idUri},${accCfg?.regConfig}")
+                    }
                 }
+
             }
         }
 
@@ -143,6 +157,54 @@ class CallService:Service(),MyAppObserver{
             return currentCall
         }
 
+        fun initInterstitialAd(autoLoadAd:Boolean){
+            mInterstitialAd = InterstitialAd(this@CallService).apply {
+                adUnitId = "ca-app-pub-3940256099942544/1033173712"
+                adListener = object : AdListener() {
+                    override fun onAdLoaded() {
+                        // Code to be executed when an ad finishes loading.
+                        Log.d(TAG, "onAdLoaded--- ")
+                        if (mInterstitialAd.isLoaded) {
+                            mInterstitialAd.show()
+                        }
+                    }
+
+                    override fun onAdFailedToLoad(errorCode: Int) {
+                        // Code to be executed when an ad request fails.
+                        Log.d(TAG, "onAdFailedToLoad,errorCode=$errorCode")
+                    }
+
+                    override fun onAdOpened() {
+                        // Code to be executed when the ad is displayed.
+                    }
+
+                    override fun onAdClosed() {
+                        super.onAdClosed()
+                        Log.d(TAG, "onAdClosed---")
+                    }
+                }
+
+            }
+            if(autoLoadAd){
+                mInterstitialAd.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
+            }
+        }
+
+        fun setShowAdOnLoad(f:Boolean){
+            showAdOnLoad = f
+        }
+
+        fun showFullScreenAd(){
+            if(mInterstitialAd.isLoaded){
+                mInterstitialAd.show()
+            }
+        }
+        fun hideFullScreenAd(){
+//            if(mInterstitialAd.isLoaded){
+//                mInterstitialAd.
+//            }
+        }
+        fun isInterstitialAdLoaded() = mInterstitialAd.isLoaded
     }
 
     inner class MyBroadcastReceiver : BroadcastReceiver() {
@@ -151,8 +213,15 @@ class CallService:Service(),MyAppObserver{
             context: Context,
             intent: Intent
         ) {
-            if (isNetworkChange(context)) {
-                notifyChangeNetwork()
+            println("MyBroadcastReceiver ${intent.action}")
+            if(intent.action == ACTION_SHOW_AD){
+                if(!mInterstitialAd.isLoading){
+                    mInterstitialAd.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
+                }
+            }else {
+                if (isNetworkChange(context)) {
+                    notifyChangeNetwork()
+                }
             }
         }
 

@@ -4,6 +4,7 @@ import android.content.res.AssetManager
 import android.util.Log
 import ufree.call.international.phone.wifi.vcallfree.lib.App.Companion.appCacheDirectory
 import java.io.*
+import java.nio.charset.Charset
 
 object FileUtils {
     fun saveDataAsFile(d: Any, fileName: String) {
@@ -124,6 +125,35 @@ object FileUtils {
                 e.printStackTrace()
             }
         }
+    }
+
+    fun readStringFromInputStream(`in`: InputStream): String? {
+        var res: String? = null
+        val length: Int
+        try {
+            length = `in`.available()
+            if (length > 0) {
+                val buffer = ByteArray(length)
+                `in`.read(buffer)
+                res = String(buffer, Charset.forName("utf-8"))
+            }
+            `in`.close()
+        } catch (e: IOException) {
+            // TODO Auto-generated catch block
+            e.printStackTrace()
+        }
+
+        return res
+    }
+
+    fun readStringFromAssetFile(am: AssetManager, file: String): String? {
+        try {
+            return readStringFromInputStream(am.open(file))
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return ""
     }
 
 }

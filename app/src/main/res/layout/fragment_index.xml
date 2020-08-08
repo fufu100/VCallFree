@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/bg">
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <RadioGroup
+            android:id="@+id/radioGroup"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/bottom_bar_height"
+            android:orientation="horizontal"
+            android:paddingTop="3dp"
+            android:background="@color/colorPrimary">
+            <RadioButton
+                android:id="@+id/radio_contacts"
+                style="@style/Tab"
+                android:checked="true"
+                android:drawableTop="@drawable/tab_contacts"
+                android:text="@string/tab_contacts"/>
+            <RadioButton
+                android:id="@+id/radio_recents"
+                style="@style/Tab"
+                android:drawableTop="@drawable/tab_recents"
+                android:text="@string/tab_recents"/>
+            <RadioButton
+                android:id="@+id/radio_coins"
+                style="@style/Tab"
+                android:drawableTop="@drawable/tab_coins"
+                android:text="@string/tab_coins"/>
+        </RadioGroup>
+    </LinearLayout>
+</layout>

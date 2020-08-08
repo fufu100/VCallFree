@@ -9,6 +9,7 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.animation.addListener
 import com.newmotor.x5.db.DBHelper
+import kotlinx.android.synthetic.main.fragment_tab_coins.*
 import kotlinx.android.synthetic.main.side_header.*
 import kotlinx.coroutines.*
 import ufree.call.international.phone.wifi.vcallfree.MainActivity
@@ -34,14 +35,6 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
 
         dataBinding.totalPlayCount.text = UserManager.get().user?.max_wheel.toString()
-        val drawable = DrawableUtils.generate {
-            solidColor(context!!.getColorFromRes(R.color.colorPrimary))
-            radius(context!!.dip2px(15))
-            build()
-        }
-        dataBinding.totalCoinsTv.background = drawable
-        dataBinding.playCount.background = drawable
-
         playCount = DBHelper.get().getPlayCount()
         dataBinding.playCountTv.text = playCount.toString()
     }
@@ -63,34 +56,41 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         }.go()
     }
 
-    fun start(v: View){
-        val endPos = getPoints()
-        val animatorSet = AnimatorSet()
-        animatorSet.playTogether(
-            ObjectAnimator.ofFloat(dataBinding.goIv,"scaleX",1f,1.2f,0.9f ,1.0f),
-            ObjectAnimator.ofFloat(dataBinding.goTv,"scaleX",1f,1.2f,0.9f ,1.0f),
-            ObjectAnimator.ofFloat(dataBinding.goIv,"scaleY",1f,1.2f,0.9f ,1.0f),
-            ObjectAnimator.ofFloat(dataBinding.goTv,"scaleY",1f,1.2f,0.9f ,1.0f))
-        animatorSet.duration = 300
-        animatorSet.start()
-        dataBinding.panView.startRotate(PointStrategy.points.size - endPos + 1){
-            v.isClickable = true
-            if(endPos != 0) {
-                showObtainCoinsAlert(endPos)
-            }
-        }
-        playCount++
-        DBHelper.get().addPlayCount(playCount)
-        dataBinding.playCountTv.text = playCount.toString()
-        v.isClickable = false
+    fun signIn(v:View){
+        SignInDialog(context!!).show()
+    }
 
+    fun start(v: View){
+        if(!dataBinding.coinLayout.isOpen) {
+            val endPos = getPoints()
+            val animatorSet = AnimatorSet()
+            animatorSet.playTogether(
+                ObjectAnimator.ofFloat(dataBinding.goIv, "scaleX", 1f, 1.2f, 0.9f, 1.0f),
+                ObjectAnimator.ofFloat(dataBinding.goTv, "scaleX", 1f, 1.2f, 0.9f, 1.0f),
+                ObjectAnimator.ofFloat(dataBinding.goIv, "scaleY", 1f, 1.2f, 0.9f, 1.0f),
+                ObjectAnimator.ofFloat(dataBinding.goTv, "scaleY", 1f, 1.2f, 0.9f, 1.0f)
+            )
+            animatorSet.duration = 300
+            animatorSet.start()
+            dataBinding.panView.startRotate(PointStrategy.points.size - endPos + 1) {
+                if (endPos != 0) {
+                    showObtainCoinsAlert(endPos)
+                }
+            }
+            v.isClickable = false
+        }
     }
 
     private fun showObtainCoinsAlert(pos:Int){
         AlertDialog.Builder(context!!)
             .setMessage("您获得了${PointStrategy.points[pos]}个金币")
-            .setNegativeButton("放弃",null)
+            .setNegativeButton("放弃"){_,_->
+                goIv.isClickable = true
+            }
             .setPositiveButton("Get it"){_,_ ->
+                playCount++
+                DBHelper.get().addPlayCount(playCount)
+                dataBinding.playCountTv.text = playCount.toString()
                 Api.getApiService().addPoints(
                     mutableMapOf(
                         "uuid" to context!!.getDeviceId(),
@@ -106,12 +106,15 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                             dataBinding.totalCoins = UserManager.get().user!!.points.toString()
                             startTimeCount()
                         } else {
+                            goIv.isClickable = true
                             context?.toast(it.errormsg)
                         }
                     }, {
+                        goIv.isClickable = true
                         it.printStackTrace()
                     })
             }
+            .setCancelable(false)
             .create()
             .show()
     }

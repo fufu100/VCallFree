@@ -38,7 +38,8 @@ data class Country(
     val iso:String,
     val code:String,
     val length:Int,
-    val prefix:String
+    val prefix:String,
+    var isHot:Boolean = false
 )
 
 data class RateResp(

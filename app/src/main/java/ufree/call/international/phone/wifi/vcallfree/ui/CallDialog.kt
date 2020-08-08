@@ -51,12 +51,10 @@ class CallDialog(context: Context,val makeCall:(callRate:Int) -> Unit):Dialog(co
     }
 
     fun getCallRate(){
-        dataBinding.call.isClickable = false
         disposable = Api.getApiService().getPrice(country!!.iso,country?.code + phone)
             .compose(RxUtils.applySchedulers())
             .subscribe({
                 if(it.errcode == 0){
-                    dataBinding.call.isClickable = true
                     rate = it.points
                     dataBinding.callRate.text = it.points.toString()
                     dataBinding.timeRemaining.text = ((UserManager.get().user?.points ?: 0) / it.points).toString()
@@ -70,8 +68,11 @@ class CallDialog(context: Context,val makeCall:(callRate:Int) -> Unit):Dialog(co
     }
 
     fun call(v:View){
-        makeCall(rate)
-        dismiss()
+        println("call-$rate")
+        if(rate != 0) {
+            makeCall(rate)
+            dismiss()
+        }
     }
 
 }

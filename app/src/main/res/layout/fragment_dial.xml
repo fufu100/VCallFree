@@ -5,7 +5,7 @@
 
     <data>
         <variable
-            name="activity"
+            name="fragment"
             type="ufree.call.international.phone.wifi.vcallfree.ui.DialFragment" />
         <variable
             name="country"
@@ -15,6 +15,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:onClick="@{fragment.bgClick}"
         android:background="@color/bg">
 
 
@@ -30,7 +31,7 @@
             android:paddingStart="8dp"
             android:gravity="center"
             android:background="@drawable/bg_blue_round"
-            android:onClick="@{activity::selectCountry}">
+            android:onClick="@{fragment::selectCountry}">
 
             <ImageView
                 android:layout_width="26dp"
@@ -81,7 +82,7 @@
             app:layout_constraintEnd_toStartOf="@id/no2"
             android:text="1"
             android:tag="1"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             android:id="@+id/no2"
@@ -92,7 +93,7 @@
             app:layout_constraintBottom_toTopOf="@id/no5"
             android:tag="2"
             android:text="2"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             android:id="@+id/no3"
@@ -102,7 +103,7 @@
             app:layout_constraintStart_toEndOf="@id/no2"
             android:tag="3"
             android:text="3"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
 
         <TextView
@@ -113,7 +114,7 @@
             app:layout_constraintEnd_toStartOf="@id/no5"
             android:text="4"
             android:tag="4"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             android:id="@+id/no5"
@@ -124,7 +125,7 @@
             app:layout_constraintBottom_toTopOf="@id/no8"
             android:text="5"
             android:tag="5"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             android:id="@+id/no6"
@@ -134,7 +135,7 @@
             app:layout_constraintStart_toEndOf="@id/no5"
             android:text="6"
             android:tag="6"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
 
         <TextView
@@ -145,7 +146,7 @@
             app:layout_constraintEnd_toStartOf="@id/no8"
             android:text="7"
             android:tag="7"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             android:id="@+id/no8"
@@ -156,7 +157,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:text="8"
             android:tag="8"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             android:id="@+id/no9"
@@ -166,7 +167,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:text="9"
             android:tag="9"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             android:id="@+id/star"
@@ -176,7 +177,7 @@
             app:layout_constraintEnd_toStartOf="@id/no8"
             android:text="*"
             android:tag="*"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             android:id="@+id/no0"
@@ -187,7 +188,7 @@
             app:layout_constraintBottom_toTopOf="@id/call"
             android:text="0"
             android:tag="0"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             android:id="@+id/hash"
@@ -197,7 +198,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:text="#"
             android:tag="#"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
 
         <TextView
@@ -207,7 +208,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:text="+"
             android:tag="0"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
 
         <ImageView
@@ -220,7 +221,7 @@
             android:padding="16dp"
             android:scaleType="center"
             android:src="@drawable/ic_dial_back_arrow"
-            android:onClick="@{activity::goBack}" />
+            android:onClick="@{fragment::goBack}" />
 
         <ImageView
             android:id="@+id/call"
@@ -234,7 +235,7 @@
             android:layout_marginBottom="24dp"
             android:scaleType="center"
             android:src="@drawable/ic_call"
-            android:onClick="@{activity::call}" />
+            android:onClick="@{fragment::call}" />
 
         <ImageView
             android:id="@+id/del"
@@ -248,7 +249,7 @@
             android:scaleType="center"
             android:layout_columnWeight="1"
             android:src="@drawable/ic_dial_del"
-            android:onClick="@{activity::del}" />
+            android:onClick="@{fragment::del}" />
 
         <TextView
             style="@style/DialLetter"
@@ -257,7 +258,7 @@
             app:layout_constraintEnd_toEndOf="@id/no2"
             android:text="ABC"
             android:tag="2"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             style="@style/DialLetter"
@@ -266,7 +267,7 @@
             app:layout_constraintEnd_toEndOf="@id/no3"
             android:text="DEF"
             android:tag="3"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             style="@style/DialLetter"
@@ -275,7 +276,7 @@
             app:layout_constraintTop_toBottomOf="@id/no4"
             android:text="GHI"
             android:tag="4"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             style="@style/DialLetter"
@@ -285,7 +286,7 @@
             app:layout_constraintTop_toBottomOf="@id/no5"
             android:text="JKL"
             android:tag="5"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             style="@style/DialLetter"
@@ -294,7 +295,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:text="MNO"
             android:tag="6"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             style="@style/DialLetter"
@@ -303,7 +304,7 @@
             app:layout_constraintEnd_toStartOf="@id/no8"
             android:text="PQRS"
             android:tag="7"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             style="@style/DialLetter"
@@ -312,7 +313,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:text="TUV"
             android:tag="8"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
         <TextView
             style="@style/DialLetter"
@@ -321,7 +322,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:text="WXYZ"
             android:tag="9"
-            android:onClick="@{activity::onClick}" />
+            android:onClick="@{fragment::onClick}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
