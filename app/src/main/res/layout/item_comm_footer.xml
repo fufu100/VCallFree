@@ -2,7 +2,7 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
-        <import type="ufree.call.international.phone.wifi.vcallfree.adapter.BaseAdapter"/>
+        <import type="vcall.free.international.phone.wifi.calling.adapter.BaseAdapter"/>
         <import type="android.view.View"/>
         <variable name="obj" type="BaseAdapter"/>
     </data>

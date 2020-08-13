@@ -5,7 +5,7 @@
     <data>
         <variable
             name="activity"
-            type="ufree.call.international.phone.wifi.vcallfree.ui.InviteFriendsActivity" />
+            type="vcall.free.international.phone.wifi.calling.ui.InviteFriendsActivity" />
     </data>
 
     <LinearLayout

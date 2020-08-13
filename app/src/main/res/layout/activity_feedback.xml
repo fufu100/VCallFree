@@ -5,7 +5,7 @@
     <data>
         <variable
             name="activity"
-            type="ufree.call.international.phone.wifi.vcallfree.ui.FeedbackActivity" />
+            type="vcall.free.international.phone.wifi.calling.ui.FeedbackActivity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

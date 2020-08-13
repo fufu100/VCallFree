@@ -6,7 +6,7 @@
     <data>
         <variable
             name="country"
-            type="ufree.call.international.phone.wifi.vcallfree.api.Country" />
+            type="vcall.free.international.phone.wifi.calling.api.Country" />
         <variable
             name="date"
             type="String" />

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="ufree.call.international.phone.wifi.vcallfree">
+    package="vcall.free.international.phone.wifi.calling">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -26,7 +26,7 @@
         android:glEsVersion="0x00020000"
         android:required="false" />
     <application
-        android:name=".lib.App"
+        android:name="vcall.free.international.phone.wifi.calling.lib.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -35,7 +35,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="UnusedAttribute">
         <activity
-            android:name=".ui.SplashActivity"
+            android:name="vcall.free.international.phone.wifi.calling.ui.SplashActivity"
             android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,43 +45,43 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name="vcall.free.international.phone.wifi.calling.MainActivity"
             android:configChanges="screenLayout|orientation"
             android:launchMode="singleTask"
             android:windowSoftInputMode="stateHidden|adjustNothing" />
         <activity
-            android:name=".ui.SettingActivity"
+            android:name="vcall.free.international.phone.wifi.calling.ui.SettingActivity"
             android:configChanges="screenLayout|orientation"
             android:theme="@style/AppTheme.Setting" />
         <activity
-            android:name=".ui.AboutActivity"
+            android:name="vcall.free.international.phone.wifi.calling.ui.AboutActivity"
             android:configChanges="screenLayout|orientation" />
         <activity
-            android:name=".ui.CountriesActivity"
+            android:name="vcall.free.international.phone.wifi.calling.ui.CountriesActivity"
             android:configChanges="screenLayout|orientation" />
         <activity
-            android:name=".ui.CallRatesActivity"
+            android:name="vcall.free.international.phone.wifi.calling.ui.CallRatesActivity"
             android:configChanges="screenLayout|orientation"
             android:windowSoftInputMode="stateHidden|adjustNothing" />
         <activity
-            android:name=".ui.CallDetailActivity"
+            android:name="vcall.free.international.phone.wifi.calling.ui.CallDetailActivity"
             android:configChanges="screenLayout|orientation" />
         <activity
-            android:name=".ui.FeedbackActivity"
+            android:name="vcall.free.international.phone.wifi.calling.ui.FeedbackActivity"
             android:configChanges="screenLayout|orientation"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name=".ui.SetPhoneNumberActivity"
+            android:name="vcall.free.international.phone.wifi.calling.ui.SetPhoneNumberActivity"
             android:windowSoftInputMode="stateHidden" />
-        <activity android:name=".ui.InviteFriendsActivity" />
+        <activity android:name="vcall.free.international.phone.wifi.calling.ui.InviteFriendsActivity" />
         <activity
-            android:name=".ui.CallActivity"
+            android:name="vcall.free.international.phone.wifi.calling.ui.CallActivity"
             android:configChanges="screenLayout|orientation" />
         <activity
-            android:name=".ui.CallResultActivity"
+            android:name="vcall.free.international.phone.wifi.calling.ui.CallResultActivity"
             android:configChanges="screenLayout|orientation" />
 
-        <service android:name=".service.CallService" />
+        <service android:name="vcall.free.international.phone.wifi.calling.service.CallService" />
 
         <meta-data
             android:name="CHANNEL"

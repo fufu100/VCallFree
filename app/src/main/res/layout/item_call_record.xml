@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="ufree.call.international.phone.wifi.vcallfree.api.Record"/>
-        <import type="ufree.call.international.phone.wifi.vcallfree.adapter.BaseAdapter.OnItemClick"/>
-        <import type="ufree.call.international.phone.wifi.vcallfree.utils.UtilsKt"/>
+        <import type="vcall.free.international.phone.wifi.calling.api.Record"/>
+        <import type="vcall.free.international.phone.wifi.calling.adapter.BaseAdapter.OnItemClick"/>
+        <import type="vcall.free.international.phone.wifi.calling.utils.UtilsKt"/>
         <variable
             name="position"
             type="Integer" />

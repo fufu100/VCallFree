@@ -5,7 +5,7 @@
     <data>
         <variable
             name="fragment"
-            type="ufree.call.international.phone.wifi.vcallfree.ui.CoinsFragment" />
+            type="vcall.free.international.phone.wifi.calling.ui.CoinsFragment" />
         <variable
             name="totalCoins"
             type="String" />
@@ -14,7 +14,7 @@
 <!--    <FrameLayout-->
 <!--        android:layout_width="match_parent"-->
 <!--        android:layout_height="match_parent">-->
-    <ufree.call.international.phone.wifi.vcallfree.widget.CoinLayout
+    <vcall.free.international.phone.wifi.calling.widget.CoinLayout
         android:id="@+id/coinLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -25,7 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingBottom="24dp">
-            <ufree.call.international.phone.wifi.vcallfree.widget.WheelPanView
+            <vcall.free.international.phone.wifi.calling.widget.WheelPanView
                 android:id="@+id/panView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -292,6 +292,6 @@
             </FrameLayout>
 
         </LinearLayout>
-    </ufree.call.international.phone.wifi.vcallfree.widget.CoinLayout>
+    </vcall.free.international.phone.wifi.calling.widget.CoinLayout>
 <!--    </FrameLayout>-->
 </layout>

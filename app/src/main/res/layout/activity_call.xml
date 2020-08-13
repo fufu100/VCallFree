@@ -6,7 +6,7 @@
     <data>
         <variable
             name="activity"
-            type="ufree.call.international.phone.wifi.vcallfree.ui.CallActivity" />
+            type="vcall.free.international.phone.wifi.calling.ui.CallActivity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -40,7 +40,7 @@
             android:paddingEnd="16dp"
             android:scrollbars="none">
 
-        <ufree.call.international.phone.wifi.vcallfree.widget.PhoneNumberTextView
+        <vcall.free.international.phone.wifi.calling.widget.PhoneNumberTextView
             android:id="@+id/phone2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

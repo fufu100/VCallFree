@@ -5,7 +5,7 @@
     <data>
         <variable
             name="dialog"
-            type="ufree.call.international.phone.wifi.vcallfree.ui.RateDialog" />
+            type="vcall.free.international.phone.wifi.calling.ui.RateDialog" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

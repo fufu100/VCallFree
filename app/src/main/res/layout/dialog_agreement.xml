@@ -3,7 +3,7 @@
 
     <data>
 
-        <import type="ufree.call.international.phone.wifi.vcallfree.ui.AgreementDialog" />
+        <import type="vcall.free.international.phone.wifi.calling.ui.AgreementDialog" />
 
         <variable
             name="dialog"

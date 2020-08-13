@@ -6,10 +6,10 @@
     <data>
         <variable
             name="activity"
-            type="ufree.call.international.phone.wifi.vcallfree.ui.SetPhoneNumberActivity" />
+            type="vcall.free.international.phone.wifi.calling.ui.SetPhoneNumberActivity" />
         <variable
             name="country"
-            type="ufree.call.international.phone.wifi.vcallfree.api.Country" />
+            type="vcall.free.international.phone.wifi.calling.api.Country" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

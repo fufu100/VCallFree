@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <import type="ufree.call.international.phone.wifi.vcallfree.api.Country"/>
-        <import type="ufree.call.international.phone.wifi.vcallfree.adapter.BaseAdapter.OnItemClick"/>
+        <import type="vcall.free.international.phone.wifi.calling.api.Country"/>
+        <import type="vcall.free.international.phone.wifi.calling.adapter.BaseAdapter.OnItemClick"/>
         <variable
             name="position"
             type="Integer" />

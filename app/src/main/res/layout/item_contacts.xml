@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="ufree.call.international.phone.wifi.vcallfree.api.Contact"/>
-        <import type="ufree.call.international.phone.wifi.vcallfree.adapter.BaseAdapter.OnItemClick"/>
+        <import type="vcall.free.international.phone.wifi.calling.api.Contact"/>
+        <import type="vcall.free.international.phone.wifi.calling.adapter.BaseAdapter.OnItemClick"/>
         <variable
             name="position"
             type="Integer" />
