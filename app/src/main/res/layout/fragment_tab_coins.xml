@@ -158,7 +158,8 @@
                 android:paddingStart="14dp"
                 android:paddingTop="15dp"
                 android:paddingEnd="24dp"
-                android:paddingBottom="15dp">
+                android:paddingBottom="15dp"
+                android:onClick="@{fragment.showRewardedAd}">
 
                 <TextView
                     android:layout_width="wrap_content"

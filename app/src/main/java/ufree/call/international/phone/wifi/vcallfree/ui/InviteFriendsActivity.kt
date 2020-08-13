@@ -120,7 +120,7 @@ class InviteFriendsActivity:BaseBackActivity<ActivityInviteFriendsBinding>() {
     fun invite(v: View){
         val textIntent = Intent(Intent.ACTION_SEND)
         textIntent.type = "text/plain"
-        textIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.invite_text))
+        textIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.invite_text,UserManager.get().user?.invite ?: ""))
         startActivity(Intent.createChooser(textIntent, "Invite Friends"))
     }
 }

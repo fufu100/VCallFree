@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object Api {
-    private const val baseUrl = "http://neutryflyzjx.com/"
+    private const val baseUrl = "http://vcallfree.com"
     private var mRetrofit:Retrofit? = null
 
     fun getApiService():ApiService{

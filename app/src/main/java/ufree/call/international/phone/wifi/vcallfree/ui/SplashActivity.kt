@@ -1,9 +1,6 @@
 package ufree.call.international.phone.wifi.vcallfree.ui
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -30,6 +27,7 @@ import java.util.concurrent.TimeUnit
  * Created by lyf on 2020/5/19.
  */
 class SplashActivity:BaseActivity() {
+    private var isAdShowing = false
     private lateinit var conn: ServiceConnection
     private var callBinder: CallService.CallBinder? = null
     override fun getLayoutRes(): Int = R.layout.activity_splash
@@ -48,7 +46,7 @@ class SplashActivity:BaseActivity() {
             radius(dip2px(16))
             build()
         }
-        if(!prefs.getBooleanValue("is_first",true)) {
+        if(!prefs.getBooleanValue("is_first1",true)) {
             startCountDownTime(5)
         }else{
             AgreementDialog(this){
@@ -67,36 +65,64 @@ class SplashActivity:BaseActivity() {
             override fun onServiceDisconnected(name: ComponentName?) {}
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 callBinder = service as CallService.CallBinder
-                callBinder?.initInterstitialAd(!prefs.getBooleanValue("is_first",true))
+                callBinder?.initInterstitialAd()
+                if(prefs.getBooleanValue("is_first1",true)){
+                    callBinder?.setShowAdOnLoad(false)
+                }
             }
         }
         bindService(Intent(this, CallService::class.java), conn, Context.BIND_AUTO_CREATE)
+        registerReceiver(receiver,IntentFilter().apply {
+            addAction(CallService.ACTION_ON_AD_CLOSE)
+            addAction(CallService.ACTION_ON_AD_SHOW)
+        })
     }
 
     override fun onDestroy() {
         super.onDestroy()
         unbindService(conn)
+        unregisterReceiver(receiver)
+    }
+
+    private val receiver:BroadcastReceiver = object :BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if(CallService.ACTION_ON_AD_SHOW == intent?.action){
+                isAdShowing = true
+                compositeDisposable.dispose()
+                jumpBtn.visibility = View.GONE
+            }else if(CallService.ACTION_ON_AD_CLOSE == intent?.action){
+                isAdShowing = false
+                Dispatcher.dispatch(this@SplashActivity) {
+                    navigate(MainActivity::class.java)
+                    defaultAnimate()
+                }.go()
+                finish()
+            }
+        }
+
     }
 
     private fun startCountDownTime(time: Long) {
-        jumpBtn.visibility = View.VISIBLE
-        compositeDisposable.add(Observable.interval(0, 1, TimeUnit.SECONDS)//设置0延迟，每隔一秒发送一条数据
+        compositeDisposable.add(Observable.interval(1500, 1000, TimeUnit.MILLISECONDS)//设置0延迟，每隔一秒发送一条数据
             .take(time + 1) //设置循环次数
             .map {
                 time - it
             }
             .observeOn(AndroidSchedulers.mainThread())//操作UI主要在UI线程
             .subscribe({ it ->
+                jumpBtn.visibility = View.VISIBLE
                 jumpBtn.text = "${it}秒跳过"
             }, {
                 it.printStackTrace()
             }, {
-//                handler.removeMessages(0)
-                Dispatcher.dispatch(this) {
-                    navigate(MainActivity::class.java)
-                    defaultAnimate()
-                }.go()
-                finish()
+                if(!isAdShowing) {
+                    callBinder?.setShowAdOnLoad(false)
+                    Dispatcher.dispatch(this) {
+                        navigate(MainActivity::class.java)
+                        defaultAnimate()
+                    }.go()
+                    finish()
+                }
             })
         )
     }

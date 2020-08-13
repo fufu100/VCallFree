@@ -24,6 +24,7 @@ import ufree.call.international.phone.wifi.vcallfree.api.Contact
 import ufree.call.international.phone.wifi.vcallfree.databinding.FragmentTabContractsBinding
 import ufree.call.international.phone.wifi.vcallfree.lib.BaseDataBindingFragment
 import ufree.call.international.phone.wifi.vcallfree.utils.Dispatcher
+import ufree.call.international.phone.wifi.vcallfree.utils.UserManager
 import java.lang.Exception
 import java.util.*
 
@@ -167,7 +168,7 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
             Dispatcher.dispatch(context){
                 action(Intent.ACTION_SENDTO)
                 data(Uri.parse("smsto:${t.phone}"))
-                extra("sms_body",context?.getString(R.string.invite_text) ?: "")
+                extra("sms_body",context?.getString(R.string.invite_text,UserManager.get().user?.invite ?: "") ?: "")
                 defaultAnimate()
             }.go()
         }

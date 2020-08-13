@@ -16,6 +16,7 @@ import ufree.call.international.phone.wifi.vcallfree.adapter.BaseAdapter
 import ufree.call.international.phone.wifi.vcallfree.api.Record
 import ufree.call.international.phone.wifi.vcallfree.lib.BaseFragment
 import ufree.call.international.phone.wifi.vcallfree.utils.Dispatcher
+import ufree.call.international.phone.wifi.vcallfree.utils.UserManager
 
 /**
  * Created by lyf on 2020/4/28.
@@ -63,7 +64,8 @@ class RecentFragment:BaseFragment() ,BaseAdapter.OnItemClick<Record>{
             Dispatcher.dispatch(context){
                 action(Intent.ACTION_SENDTO)
                 data(Uri.parse("smsto:${t.phone}"))
-                extra("sms_body",context?.getString(R.string.invite_text) ?: "")
+                extra("sms_body",context?.getString(R.string.invite_text,
+                    UserManager.get().user?.invite ?: "") ?: "")
                 defaultAnimate()
             }.go()
         }else{

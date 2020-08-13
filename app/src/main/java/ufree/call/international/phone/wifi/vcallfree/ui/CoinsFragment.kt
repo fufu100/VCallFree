@@ -5,9 +5,15 @@ import android.animation.ObjectAnimator
 import android.graphics.Color
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.animation.addListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.rewarded.RewardItem
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdCallback
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.newmotor.x5.db.DBHelper
 import kotlinx.android.synthetic.main.fragment_tab_coins.*
 import kotlinx.android.synthetic.main.side_header.*
@@ -28,6 +34,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
     var playCount = 0
     var strategy:PointStrategy? = null
     var job:Job? = null
+    var rewardedAd:RewardedAd? = null
     override fun getLayoutResId(): Int = R.layout.fragment_tab_coins
     override fun initView(v: View) {
         dataBinding.fragment = this
@@ -37,6 +44,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         dataBinding.totalPlayCount.text = UserManager.get().user?.max_wheel.toString()
         playCount = DBHelper.get().getPlayCount()
         dataBinding.playCountTv.text = playCount.toString()
+        rewardedAd = createAndLoadRewardedAd()
     }
 
     override fun onResume() {
@@ -49,6 +57,22 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         super.onDestroy()
     }
 
+    fun showRewardedAd(v:View){
+        if(rewardedAd?.isLoaded == true) {
+            rewardedAd?.show(activity, object : RewardedAdCallback() {
+                override fun onUserEarnedReward(p0: RewardItem) {
+                    Log.d(fragmentTag, "onUserEarnedReward $p0 ")
+                }
+
+                override fun onRewardedAdClosed() {
+                    rewardedAd = createAndLoadRewardedAd()
+                }
+            })
+        }else{
+            Log.d(fragmentTag, "showRewardedAd-- not load ")
+        }
+    }
+
     fun inviteFriends(v: View){
         Dispatcher.dispatch(context){
             navigate(InviteFriendsActivity::class.java)
@@ -58,6 +82,19 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
     fun signIn(v:View){
         SignInDialog(context!!).show()
+    }
+
+    private fun createAndLoadRewardedAd():RewardedAd{
+        val rewardedAd = RewardedAd(context,"ca-app-pub-3940256099942544/5224354917")
+        rewardedAd.loadAd(AdRequest.Builder().build(),object :RewardedAdLoadCallback(){
+            override fun onRewardedAdLoaded() {
+                Log.d(fragmentTag, "onRewardedAdLoaded-- ")
+            }
+            override fun onRewardedAdFailedToLoad(errorCode: Int) {
+                Log.d(fragmentTag, "onRewardedAdFailedToLoad-- $errorCode")
+            }
+        })
+        return rewardedAd
     }
 
     fun start(v: View){

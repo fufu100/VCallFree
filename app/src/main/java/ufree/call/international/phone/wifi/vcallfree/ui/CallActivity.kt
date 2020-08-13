@@ -39,7 +39,8 @@ import kotlin.math.ceil
 /**
  * Created by lyf on 2020/5/10.
  */
-class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallStateChange ,SensorEventListener{
+class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallStateChange,
+    SensorEventListener {
     private val TAG = "CallActivity"
     private lateinit var conn: ServiceConnection
     private var callBinder: CallService.CallBinder? = null
@@ -47,15 +48,17 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
     var phone: String? = ""
     var rate: Int = 0
     var count = 0L
+    var record: Record? = null
     var disposable: Disposable? = null
-    lateinit var audioManager:AudioManager
+    lateinit var audioManager: AudioManager
     lateinit var powerManager: PowerManager
-    lateinit var sensorManager:SensorManager
+    lateinit var sensorManager: SensorManager
     var wakeLock: PowerManager.WakeLock? = null
-    var headsetPlugReceiver:HeadsetPluginReceiver? = null
+    var headsetPlugReceiver: HeadsetPluginReceiver? = null
     var maxmiumDistance = 0f
-    var dialEffectHelper:DialEffectHelper? = null
+    var dialEffectHelper: DialEffectHelper? = null
     override fun getLayoutRes(): Int = R.layout.activity_call
+
     @SuppressLint("InvalidWakeLockTag")
     override fun initView(savedInstanceState: Bundle?) {
         super.initView(savedInstanceState)
@@ -64,7 +67,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
         audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
         audioManager.isSpeakerphoneOn = false
-        if(!LogUtils.test) {
+        if (!LogUtils.test) {
             sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
             val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
             maxmiumDistance = sensor.maximumRange
@@ -82,8 +85,10 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         bindService(Intent(this, CallService::class.java), conn, Context.BIND_AUTO_CREATE)
         dialEffectHelper = DialEffectHelper(this)
         headsetPlugReceiver = HeadsetPluginReceiver()
-        registerReceiver(headsetPlugReceiver,IntentFilter().apply {
+        registerReceiver(headsetPlugReceiver, IntentFilter().apply {
             addAction(Intent.ACTION_HEADSET_PLUG)
+            addAction(CallService.ACTION_ON_AD_LOAD_FAIL)
+            addAction(CallService.ACTION_ON_AD_SHOW)
         })
 
         phone = intent.getStringExtra("phone")
@@ -108,10 +113,10 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         }
         unregisterReceiver(headsetPlugReceiver)
         toneGeneratorHelper?.stopRingingTone()
-        if(disposable?.isDisposed == false){
+        if (disposable?.isDisposed == false) {
             disposable?.dispose()
         }
-        if(!LogUtils.test){
+        if (!LogUtils.test) {
             sensorManager.unregisterListener(this)
         }
     }
@@ -121,7 +126,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         println("onClick number=$number")
         dataBinding.phone2.insert(number)
         dialEffectHelper?.dialNumber(number)
-        if(!LogUtils.test){
+        if (!LogUtils.test) {
             callBinder?.getCurrentCall()?.dialDtmf(number)
         }
     }
@@ -141,23 +146,25 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             number_pad.visibility = View.GONE
             dataBinding.phone.visibility = View.VISIBLE
             dataBinding.scrollView.visibility = View.GONE
-            (dataBinding.duration.layoutParams as ConstraintLayout.LayoutParams).topToBottom = R.id.phone
+            (dataBinding.duration.layoutParams as ConstraintLayout.LayoutParams).topToBottom =
+                R.id.phone
         } else {
             expand = true
             number_pad.visibility = View.VISIBLE
             dataBinding.phone.visibility = View.GONE
             dataBinding.scrollView.visibility = View.VISIBLE
-            (dataBinding.duration.layoutParams as ConstraintLayout.LayoutParams).topToBottom = R.id.scrollView
+            (dataBinding.duration.layoutParams as ConstraintLayout.LayoutParams).topToBottom =
+                R.id.scrollView
         }
     }
 
-    fun hangup(flag:Boolean = true) {
+    fun hangup(flag: Boolean = true) {
         println("hangup flat=$flag")
         callBinder?.hangup()
         val state =
             if (callBinder?.getCurrentCall()?.info?.state == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED) 1 else 2
         val coin_cost = (rate * ceil(count * 1.0f / 60)).toInt()
-        val record = Record(
+        record = Record(
             0,
             0,
             phone!!,
@@ -173,15 +180,13 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             state
         )
         UserManager.get().user!!.points -= coin_cost
-        DBHelper.get().addCallRecord(record)
-        if(flag) {
-            Dispatcher.dispatch(this) {
-                navigate(CallResultActivity::class.java)
-                extra("record", record)
-                defaultAnimate()
-            }.go()
-            finish()
-        }
+        DBHelper.get().addCallRecord(record!!)
+//        if(flag) {
+//
+//        }
+        Dispatcher.dispatch(this) {
+            action(CallService.ACTION_SHOW_AD)
+        }.send()
     }
 
     fun del(v: View) {
@@ -189,15 +194,16 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if(keyCode == KeyEvent.KEYCODE_BACK){
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
 
             return true
         }
         return super.onKeyDown(keyCode, event)
     }
-    val toneGeneratorHelper = if(LogUtils.test) null else ToneGenerateHelper()
+
+    val toneGeneratorHelper = if (LogUtils.test) null else ToneGenerateHelper()
     override fun onCallStateChange(callInfo: CallInfo?) {
-        if(callInfo != null) {
+        if (callInfo != null) {
             runOnUiThread {
                 var callState = ""
                 if (callInfo!!.state.swigValue() < pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED.swigValue()) {
@@ -207,7 +213,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
                         //拨打电话，对方未接时候
                         callState = callInfo.stateText
                         println("$TAG 对方未接")
-                        if(callInfo.state == pjsip_inv_state.PJSIP_INV_STATE_EARLY) {
+                        if (callInfo.state == pjsip_inv_state.PJSIP_INV_STATE_EARLY) {
                             toneGeneratorHelper?.startRingingTone()
                         }
                     }
@@ -257,44 +263,54 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 
     }
 
-    private fun hasWireHeadSet():Boolean{
-        return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+    private fun hasWireHeadSet(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val deviceInfo = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
             for (audioDeviceInfo in deviceInfo) {
-                if(audioDeviceInfo.type == AudioDeviceInfo.TYPE_WIRED_HEADSET ||
+                if (audioDeviceInfo.type == AudioDeviceInfo.TYPE_WIRED_HEADSET ||
                     audioDeviceInfo.type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES ||
-                    audioDeviceInfo.type == AudioDeviceInfo.TYPE_USB_HEADSET ){
+                    audioDeviceInfo.type == AudioDeviceInfo.TYPE_USB_HEADSET
+                ) {
                     return true
                 }
             }
             false
-        }else{
+        } else {
             audioManager.isWiredHeadsetOn()
         }
     }
 
     @SuppressLint("InvalidWakeLockTag")
-    private fun setScreenOnOff(flag:Boolean){
+    private fun setScreenOnOff(flag: Boolean) {
         println("$TAG setScreenOnOff $flag")
-        if(wakeLock == null){
-            wakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK,TAG)
+        if (wakeLock == null) {
+            wakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, TAG)
         }
-        if(flag){
+        if (flag) {
             wakeLock?.acquire()
-        }else{
+        } else {
             wakeLock?.setReferenceCounted(false)
             wakeLock?.release()
             wakeLock = null
         }
     }
 
-    class HeadsetPluginReceiver : BroadcastReceiver(){
+    inner class HeadsetPluginReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if(intent?.action == Intent.ACTION_HEADSET_PLUG){
-                val state = intent.getIntExtra("state",0)
+            if (intent?.action == Intent.ACTION_HEADSET_PLUG) {
+                val state = intent.getIntExtra("state", 0)
                 println("HeadsetPluginReceiver state=$state")
                 val audioManager = context?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
                 audioManager.isSpeakerphoneOn = state == 0
+            } else if (intent?.action == CallService.ACTION_ON_AD_LOAD_FAIL || intent?.action == CallService.ACTION_ON_AD_CLOSE) {
+                if (record != null) {
+                    Dispatcher.dispatch(this@CallActivity) {
+                        navigate(CallResultActivity::class.java)
+                        extra("record", record!!)
+                        defaultAnimate()
+                    }.go()
+                    finish()
+                }
             }
         }
 
@@ -307,7 +323,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
     override fun onSensorChanged(event: SensorEvent?) {
         val b = hasWireHeadSet()
         println("$TAG onSensorChanged $b")
-        if(b){
+        if (b) {
             return
         }
 //        if(callBinder?.getCurrentCall()?.info?.state == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED || LogUtils.test){
@@ -326,7 +342,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             return
         }
         for (i in 0 until (info?.media?.size() ?: 0)) {
-            val media: Media?= callBinder?.getCurrentCall()?.getMedia(i)
+            val media: Media? = callBinder?.getCurrentCall()?.getMedia(i)
             val mediaInfo = info?.media!![i.toInt()]
             if (mediaInfo.type == pjmedia_type.PJMEDIA_TYPE_AUDIO && media != null && mediaInfo.status == pjsua_call_media_status.PJSUA_CALL_MEDIA_ACTIVE
             ) {
@@ -346,8 +362,8 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         }
     }
 
-    inner class ToneGenerateHelper{
-        var toneGenerator:org.pjsip.pjsua2.ToneGenerator? = org.pjsip.pjsua2.ToneGenerator()
+    inner class ToneGenerateHelper {
+        var toneGenerator: org.pjsip.pjsua2.ToneGenerator? = org.pjsip.pjsua2.ToneGenerator()
         var toneDesc = ToneDesc()
         var toneDescVector = ToneDescVector()
 
@@ -358,7 +374,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         val kSPRingbackCount = 1
         val kSPRingbackInterval = 4000
 
-        fun  startRingingTone(){
+        fun startRingingTone() {
             toneDesc.freq1 = kSPRingbackFrequency1.toShort()
             toneDesc.freq2 = kSPRingbackFrequency2.toShort()
             toneDesc.on_msec = kSPRingbackOnDuration.toShort()
@@ -375,7 +391,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             }
         }
 
-        fun stopRingingTone(){
+        fun stopRingingTone() {
             try {
                 if (toneGenerator != null) toneGenerator!!.stop()
                 toneGenerator = null

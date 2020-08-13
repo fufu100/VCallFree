@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import ufree.call.international.phone.wifi.vcallfree.lib.App
 import org.pjsip.pjsua2.*
 import ufree.call.international.phone.wifi.vcallfree.pjsua.*
+import ufree.call.international.phone.wifi.vcallfree.utils.Dispatcher
 import ufree.call.international.phone.wifi.vcallfree.utils.LogUtils
 import ufree.call.international.phone.wifi.vcallfree.utils.UserManager
 
@@ -47,6 +48,9 @@ class CallService:Service(),MyAppObserver{
         const val CALL_MEDIA_STATE = 5
         const val CHANGE_NETWORK = 6
         const val ACTION_SHOW_AD = "action_show_ad"
+        const val ACTION_ON_AD_SHOW = "action_on_ad_show"
+        const val ACTION_ON_AD_CLOSE = "action_on_ad_close"
+        const val ACTION_ON_AD_LOAD_FAIL = "action_on_ad_load_fail"
     }
 
     override fun onCreate() {
@@ -157,37 +161,43 @@ class CallService:Service(),MyAppObserver{
             return currentCall
         }
 
-        fun initInterstitialAd(autoLoadAd:Boolean){
+        fun initInterstitialAd(){
             mInterstitialAd = InterstitialAd(this@CallService).apply {
                 adUnitId = "ca-app-pub-3940256099942544/1033173712"
                 adListener = object : AdListener() {
                     override fun onAdLoaded() {
-                        // Code to be executed when an ad finishes loading.
                         Log.d(TAG, "onAdLoaded--- ")
-                        if (mInterstitialAd.isLoaded) {
+                        if (showAdOnLoad) {
                             mInterstitialAd.show()
                         }
                     }
 
                     override fun onAdFailedToLoad(errorCode: Int) {
-                        // Code to be executed when an ad request fails.
                         Log.d(TAG, "onAdFailedToLoad,errorCode=$errorCode")
+                        Dispatcher.dispatch(this@CallService){
+                            action(ACTION_ON_AD_LOAD_FAIL)
+                        }.send()
                     }
 
                     override fun onAdOpened() {
-                        // Code to be executed when the ad is displayed.
+                        Log.d(TAG, "onAdOpened--- ")
+                        Dispatcher.dispatch(this@CallService){
+                            action(ACTION_ON_AD_SHOW)
+                        }.send()
                     }
 
                     override fun onAdClosed() {
                         super.onAdClosed()
                         Log.d(TAG, "onAdClosed---")
+                        Dispatcher.dispatch(this@CallService){
+                            action(ACTION_ON_AD_CLOSE)
+                        }.send()
                     }
                 }
 
             }
-            if(autoLoadAd){
-                mInterstitialAd.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
-            }
+            mInterstitialAd.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
+
         }
 
         fun setShowAdOnLoad(f:Boolean){
@@ -215,7 +225,9 @@ class CallService:Service(),MyAppObserver{
         ) {
             println("MyBroadcastReceiver ${intent.action}")
             if(intent.action == ACTION_SHOW_AD){
+                Log.d(TAG, "ACTION_SHOW_AD ${mInterstitialAd.isLoaded} ")
                 if(!mInterstitialAd.isLoading){
+                    showAdOnLoad = true
                     mInterstitialAd.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
                 }
             }else {
