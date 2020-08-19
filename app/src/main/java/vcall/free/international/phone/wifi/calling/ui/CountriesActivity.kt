@@ -99,10 +99,27 @@ class CountriesActivity:BaseBackActivity<ActivityCoutriesBinding>(),BaseAdapter.
 
     private fun loadData(keyword: String = "") {
         list.clear()
-        list.addAll(DBHelper.get().getCountriesByISOs(arrayOf("IN","PK","BD","ID","US","CO","MY","AU","BR","GB","DE")).map {
-            it.isHot = true
-            it
-        })
+        if(keyword.isEmpty()) {
+            list.addAll(
+                DBHelper.get().getCountriesByISOs(
+                    arrayOf(
+                        "IN",
+                        "PK",
+                        "BD",
+                        "ID",
+                        "US",
+                        "CO",
+                        "MY",
+                        "AU",
+                        "BR",
+                        "GB",
+                        "DE"
+                    )
+                ).map {
+                    it.isHot = true
+                    it
+                })
+        }
         list.addAll(DBHelper.get().getAllCountries(keyword))
     }
 

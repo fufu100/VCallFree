@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import com.google.android.ads.nativetemplates.TemplateView
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import kotlinx.android.synthetic.main.activity_main.*
 import vcall.free.international.phone.wifi.calling.api.Api
@@ -82,6 +83,8 @@ class MainActivity : BaseActivity() {
                         navigate(SettingActivity::class.java)
                         defaultAnimate()
                     }.go()
+                R.id.rate_us ->
+                    RateDialog(this).show()
                 R.id.feedback ->
                     Dispatcher.dispatch(this) {
                         navigate(FeedbackActivity::class.java)
@@ -136,6 +139,14 @@ class MainActivity : BaseActivity() {
             e.printStackTrace()
         }
 
+        run outside@{
+            arrayOf("1","2","3","4").forEach {
+                println("foreach $it")
+                if(it == "2"){
+                    return@outside
+                }
+            }
+        }
 
 
     }
@@ -205,19 +216,26 @@ class MainActivity : BaseActivity() {
         return false
     }
 
-    private var mExitTime: Long = 0
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if(supportFragmentManager.findFragmentByTag("Dial")  != null){
                 goBack()
             }else {
-                if (System.currentTimeMillis() - mExitTime > 2000) {
-                    toast("再按一次退出程序")
-                    mExitTime = System.currentTimeMillis()
-                } else {
-                    finish()
-                }
+//                if (System.currentTimeMillis() - mExitTime > 2000) {
+//                    toast("再按一次退出程序")
+//                    mExitTime = System.currentTimeMillis()
+//                } else {
+//                    finish()
+//                }
+
+                ExitDialog(this){
+                    if(it == 0){
+                        finish()
+                    }else {
+                        changeTab(it)
+                    }
+                }.show()
             }
             return true
         }

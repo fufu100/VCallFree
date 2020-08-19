@@ -6,7 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import com.google.android.gms.ads.AdListener
@@ -32,6 +35,7 @@ class CallService:Service(),MyAppObserver{
     var receiver:MyBroadcastReceiver? = null
     private val lastRegStatus = ""
     private var showAdOnLoad = true
+    private lateinit var connectivityManager:ConnectivityManager
     private lateinit var mInterstitialAd: InterstitialAd
     val callStateChangeListeners:MutableList<CallStateChange> = mutableListOf()
     override fun onBind(intent: Intent?): IBinder? {
@@ -61,7 +65,10 @@ class CallService:Service(),MyAppObserver{
         )
         intentFilter.addAction(ACTION_SHOW_AD)
         registerReceiver(receiver, intentFilter)
-
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        }
     }
 
     override fun onDestroy() {
@@ -70,6 +77,9 @@ class CallService:Service(),MyAppObserver{
             unregisterReceiver(receiver)
         }
         app?.deinit()
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            connectivityManager.unregisterNetworkCallback(networkCallback)
+        }
     }
 
     inner class CallBinder:Binder(){
@@ -193,6 +203,7 @@ class CallService:Service(),MyAppObserver{
                             action(ACTION_ON_AD_CLOSE)
                         }.send()
                     }
+
                 }
 
             }
@@ -215,6 +226,19 @@ class CallService:Service(),MyAppObserver{
 //            }
         }
         fun isInterstitialAdLoaded() = mInterstitialAd.isLoaded
+    }
+
+    private val networkCallback = object :ConnectivityManager.NetworkCallback(){
+        override fun onAvailable(network: Network?) {
+            Log.d(TAG,"net onAvailable $network")
+//            ActivityUtils.from(this@TranslateService).action(ACTION_SHOW_AD).send()
+        }
+
+        override fun onCapabilitiesChanged(network: Network?, networkCapabilities: NetworkCapabilities?) {
+            super.onCapabilitiesChanged(network, networkCapabilities)
+            Log.d(TAG,"net onCapabilitiesChanged，$network")
+
+        }
     }
 
     inner class MyBroadcastReceiver : BroadcastReceiver() {

@@ -144,7 +144,7 @@ class Dispatcher (private val context: Context?){
         if (options != null) {
             bundle = options!!.toBundle()
         }
-        if(context != null) {
+        if(context != null && context.packageManager.resolveActivity(intent,0) != null) {
             if (context is Activity) {
                 ActivityCompat.startActivityForResult(
                     context,

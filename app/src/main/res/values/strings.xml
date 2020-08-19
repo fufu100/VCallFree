@@ -13,6 +13,7 @@
     <string name="hint_search_contacts">Search for contacts</string>
     <string name="setting">Setting</string>
     <string name="about">About</string>
+    <string name="agreement">Privacy Agreement</string>
     <string name="about_title">About free calls</string>
     <string name="about_content">Our products are designed to help you work efficiently and entertain, keep your content organized, help you get answers, keep in touch with others, and develop. Learn more. Download on the App Store and download on Google Play.</string>
     <string name="setting_play_dial_tone">Play dial tone</string>
@@ -42,4 +43,14 @@
     <string name="tip_invalid_number">Invalid phone number</string>
     <string name="agree">Agree</string>
     <string name="quit">Quit</string>
+    <string name="congratulations">CONGRATULATIONS</string>
+    <string name="reward_video_points">+10~500</string>
+    <string name="close">Close</string>
+    <string name="check_in">Check in</string>
+    <string name="don_t_forget_to_set_phone_number">Don\'t forget to set phone number</string>
+    <string name="don_t_forget_to_check_in">Don\'t forget to check in</string>
+    <string name="don_t_forget_to_get_more_credits">Don\'t forget to get more credits</string>
+    <string name="set_now">Set Now</string>
+    <string name="more_credits">More Credits</string>
+    <string name="exit">Exit</string>
 </resources>

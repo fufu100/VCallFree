@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Build
 import android.provider.Settings
 import android.telephony.TelephonyManager
@@ -104,7 +106,7 @@ fun Context.getStateListDrawable(drawableRes: Int, color: Int): StateListDrawabl
 
 fun Context.getColorFromRes(colorRes: Int): Int {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-        return resources.getColor(colorRes, theme)
+        return resources.getColor(colorRes)
     } else {
         return getColor(colorRes)
     }
@@ -242,4 +244,15 @@ fun Context.hasPermission(permission:String):Boolean{
 fun Activity.closeKeyBoard(){
     val imm: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.hideSoftInputFromWindow(window.decorView.windowToken, 0)
+}
+
+fun Context.isNetworkConnected():Boolean{
+    try {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo:NetworkInfo = connectivityManager.activeNetworkInfo
+        return networkInfo != null && networkInfo.state == NetworkInfo.State.CONNECTED
+    }catch (e:Exception){
+        e.printStackTrace()
+        return false
+    }
 }

@@ -80,6 +80,9 @@
         <activity
             android:name="vcall.free.international.phone.wifi.calling.ui.CallResultActivity"
             android:configChanges="screenLayout|orientation" />
+        <activity
+            android:name="vcall.free.international.phone.wifi.calling.ui.AgreementActivity"
+            android:configChanges="screenLayout|orientation" />
 
         <service android:name="vcall.free.international.phone.wifi.calling.service.CallService" />
 

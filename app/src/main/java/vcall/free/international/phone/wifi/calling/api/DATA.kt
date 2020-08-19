@@ -54,7 +54,7 @@ data class Server(
     val enport:String
 )
 
-data class AD(
+data class AdConfig(
     val title:String,
     val desc:String,
     val icon:String,
@@ -106,7 +106,7 @@ data class User(
     val max_video:Int,
     val video_interval:Int,
     val phone:String,
-    val ads_config:AD
+    val ads_config:AdConfig
 )
 
 data class Price(
@@ -128,4 +128,33 @@ data class AddPointsResp(
     val errormsg:String,
     val sip:String,
     val points:Int
+)
+
+data class AdResp(
+    var ads:List<AdCategory>
+)
+
+data class AdCategory(
+    var adPlaceID:String,
+    var adStatus:Int,
+    var adSources:List<Ad>
+)
+
+data class Ad(
+    var adSourceName:String,
+    var adFormatType:String,
+    var adPlaceID:String,
+    var adStatus:Int
+){
+//    if()
+}
+
+data class IpInfo(
+    var ip:String,
+    var city:String,
+    var region:String,
+    var country:String,
+    var loc:String,
+    var org:String,
+    var timezone:String
 )

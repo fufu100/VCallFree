@@ -63,5 +63,6 @@
         <item name="android:layout_width">0dp</item>
     </style>
     <style name="CustomDialog" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="dialogCornerRadius">6dp</item>
     </style>
 </resources>

@@ -2,6 +2,7 @@ package vcall.free.international.phone.wifi.calling.ui
 
 import android.os.Bundle
 import android.view.View
+import kotlinx.android.synthetic.main.activity_splash.*
 import vcall.free.international.phone.wifi.calling.lib.prefs
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.databinding.ActivitySettingBinding
@@ -36,6 +37,11 @@ class SettingActivity:BaseBackActivity<ActivitySettingBinding>() {
             R.id.about ->
                 Dispatcher.dispatch(this){
                     navigate(AboutActivity::class.java)
+                    defaultAnimate()
+                }.go()
+            R.id.agreement ->
+                Dispatcher.dispatch(this){
+                    navigate(AgreementActivity::class.java)
                     defaultAnimate()
                 }.go()
         }

@@ -24,4 +24,13 @@ interface ApiService {
 
     @GET("vos.php?m=setphone")
     fun bindPhone(@Query("sip") iso:String,@Query("phone") phone:String?):Observable<Response<ResponseBody>>
+
+    @GET("vos.php?m=param")
+    fun getAd():Observable<AdResp>
+
+    @GET("vos.php?m=adclick")
+    fun addClick(@Query("sip") sip:String):Observable<Response<ResponseBody>>
+
+    @GET("http://ipinfo.io/json")
+    fun getIpInfo():Observable<IpInfo>
 }

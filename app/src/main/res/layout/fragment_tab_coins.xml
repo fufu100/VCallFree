@@ -173,6 +173,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/rewardedVideoTv"
                     android:layout_width="108dp"
                     android:layout_height="34dp"
                     android:gravity="center"
@@ -181,7 +182,7 @@
                     android:drawableStart="@drawable/ic_coin3"
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
-                    android:text="+10~500"
+                    android:text="@string/reward_video_points"
                     android:textStyle="bold"
                     android:textColor="@color/text_light"
                     />

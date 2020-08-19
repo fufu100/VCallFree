@@ -104,4 +104,5 @@ dependencies {
     implementation files('libs/open_sdk_r8353806_lite.jar')
     implementation files('libs/tbs_sdk_thirdapp_v4.3.0.3_43903_sharewithdownloadwithfile_withoutGame_obfs_20200402_121309.jar')
     implementation files('libs/libammsdk.jar')
+    implementation project(':nativetemplates')
 }

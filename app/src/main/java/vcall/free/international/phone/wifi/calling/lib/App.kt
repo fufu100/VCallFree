@@ -33,9 +33,9 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
         if(isInBackgrounnd){
 //            toast("应用从后台回来了")
             isInBackgrounnd = false
-            Dispatcher.dispatch(applicationContext){
-                action(CallService.ACTION_SHOW_AD)
-            }.send()
+//            Dispatcher.dispatch(applicationContext){
+//                action(CallService.ACTION_SHOW_AD)
+//            }.send()
         }
 
     }
@@ -88,10 +88,10 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
         prefs = Prefs(applicationContext)
         requestMap["ver"] = applicationContext.getVersionName()
         requestMap["pk"] = applicationContext.packageName
-        requestMap["re"] = applicationContext.readManifestKey("CHANNEL")
+//        requestMap["re"] = applicationContext.readManifestKey("CHANNEL")
+
         requestMap["lang"] = Locale.getDefault().language
-        requestMap["fis"] = applicationContext.firstInstallTime()
-        requestMap["m"] = "json"
+        requestMap["firstInstallTime"] = applicationContext.firstInstallTime()
 
 //        UMConfigure.init(applicationContext, "5d5113e10cafb26763000494", "google-play", UMConfigure.DEVICE_TYPE_PHONE, null)
 //        MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL)

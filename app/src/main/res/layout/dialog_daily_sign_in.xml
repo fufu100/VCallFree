@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable
+            name="dialog"
+            type="vcall.free.international.phone.wifi.calling.ui.CheckInDialog" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:background="@drawable/bg_dialog_game_result">
+
+        <TextView
+            android:id="@+id/congratulations"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="16dp"
+            android:textColor="@color/text_yellow3"
+            android:textSize="24sp"
+            android:text="Daily Check-in" />
+
+        <TextView
+            android:id="@+id/consecutiveCheck"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:textColor="@color/text_yellow3"
+            android:textSize="14sp"
+            android:text="Consecutive 0 Days" />
+
+        <LinearLayout
+            android:id="@+id/daysLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <TextView
+                android:id="@+id/check1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:drawableTop="@drawable/ic_coin2"
+                android:drawablePadding="5dp"
+                android:background="@drawable/check_in_item_bg"
+                android:textColor="@color/check_in_text"
+                android:textSize="12sp"
+                android:text="+20" />
+
+            <TextView
+                android:id="@+id/check2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:drawableTop="@drawable/ic_coin2"
+                android:drawablePadding="5dp"
+                android:background="@drawable/check_in_item_bg"
+                android:textColor="@color/check_in_text"
+                android:textSize="12sp"
+                android:text="+50" />
+
+            <TextView
+                android:id="@+id/check3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:drawableTop="@drawable/ic_coin2"
+                android:drawablePadding="5dp"
+                android:background="@drawable/check_in_item_bg"
+                android:textColor="@color/check_in_text"
+                android:textSize="12sp"
+                android:text="+100" />
+
+            <TextView
+                android:id="@+id/check4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:drawableTop="@drawable/ic_coin2"
+                android:drawablePadding="5dp"
+                android:background="@drawable/check_in_item_bg"
+                android:textColor="@color/check_in_text"
+                android:textSize="12sp"
+                android:text="+200" />
+
+            <TextView
+                android:id="@+id/check5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:drawableTop="@drawable/ic_coin2"
+                android:drawablePadding="5dp"
+                android:background="@drawable/check_in_item_bg"
+                android:textColor="@color/check_in_text"
+                android:textSize="12sp"
+                android:text="+300" />
+
+            <TextView
+                android:id="@+id/check6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:drawableTop="@drawable/ic_coin2"
+                android:drawablePadding="5dp"
+                android:background="@drawable/check_in_item_bg"
+                android:textColor="@color/check_in_text"
+                android:textSize="12sp"
+                android:text="+400" />
+
+            <TextView
+                android:id="@+id/check7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:drawableTop="@drawable/ic_coin2"
+                android:drawablePadding="5dp"
+                android:background="@drawable/check_in_item_bg"
+                android:textColor="@color/check_in_text"
+                android:textSize="12sp"
+                android:text="+500" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/hasCheckedInTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/text_yellow3"
+            android:textSize="14sp"
+            android:visibility="invisible"
+            android:text="You've checked in today" />
+
+
+        <TextView
+            android:id="@+id/checkInTv"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:paddingStart="94dp"
+            android:paddingEnd="90dp"
+            android:gravity="center"
+            android:background="@drawable/bg_get_it"
+            android:textColor="#D8743E"
+            android:textSize="24sp"
+            android:text="@string/close"
+            android:onClick="@{() -> dialog.checkIn()}"/>
+    </LinearLayout>
+</layout>

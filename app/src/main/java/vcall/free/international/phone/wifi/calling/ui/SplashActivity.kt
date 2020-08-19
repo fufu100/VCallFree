@@ -12,20 +12,20 @@ import androidx.viewpager.widget.PagerAdapter
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_splash.*
+import kotlinx.coroutines.*
 import vcall.free.international.phone.wifi.calling.MainActivity
 import vcall.free.international.phone.wifi.calling.R
+import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.lib.BaseActivity
 import vcall.free.international.phone.wifi.calling.lib.prefs
 import vcall.free.international.phone.wifi.calling.service.CallService
-import vcall.free.international.phone.wifi.calling.utils.Dispatcher
-import vcall.free.international.phone.wifi.calling.utils.DrawableUtils
-import vcall.free.international.phone.wifi.calling.utils.dip2px
+import vcall.free.international.phone.wifi.calling.utils.*
 import java.util.concurrent.TimeUnit
 
 /**
  * Created by lyf on 2020/5/19.
  */
-class SplashActivity:BaseActivity() {
+class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
     private var isAdShowing = false
     private lateinit var conn: ServiceConnection
     private var callBinder: CallService.CallBinder? = null
@@ -46,7 +46,7 @@ class SplashActivity:BaseActivity() {
             build()
         }
         if(!prefs.getBooleanValue("is_first",true)) {
-            startCountDownTime(5)
+            startCountDownTime(7)
         }else{
             AgreementDialog(this){
                 if(it){
@@ -64,10 +64,10 @@ class SplashActivity:BaseActivity() {
             override fun onServiceDisconnected(name: ComponentName?) {}
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 callBinder = service as CallService.CallBinder
-                callBinder?.initInterstitialAd()
-                if(prefs.getBooleanValue("is_first",true)){
-                    callBinder?.setShowAdOnLoad(false)
-                }
+//                callBinder?.initInterstitialAd()
+//                if(prefs.getBooleanValue("is_first",true)){
+//                    callBinder?.setShowAdOnLoad(false)
+//                }
             }
         }
         bindService(Intent(this, CallService::class.java), conn, Context.BIND_AUTO_CREATE)
@@ -75,6 +75,18 @@ class SplashActivity:BaseActivity() {
             addAction(CallService.ACTION_ON_AD_CLOSE)
             addAction(CallService.ACTION_ON_AD_SHOW)
         })
+
+        getAdData()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        AdManager.get().interstitialAdListener.add(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        AdManager.get().interstitialAdListener.remove(this)
     }
 
     override fun onDestroy() {
@@ -86,16 +98,9 @@ class SplashActivity:BaseActivity() {
     private val receiver:BroadcastReceiver = object :BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
             if(CallService.ACTION_ON_AD_SHOW == intent?.action){
-                isAdShowing = true
-                compositeDisposable.dispose()
-                jumpBtn.visibility = View.GONE
+                onAdShow()
             }else if(CallService.ACTION_ON_AD_CLOSE == intent?.action){
-                isAdShowing = false
-                Dispatcher.dispatch(this@SplashActivity) {
-                    navigate(MainActivity::class.java)
-                    defaultAnimate()
-                }.go()
-                finish()
+                onAdClose()
             }
         }
 
@@ -110,7 +115,7 @@ class SplashActivity:BaseActivity() {
             .observeOn(AndroidSchedulers.mainThread())//操作UI主要在UI线程
             .subscribe({ it ->
                 jumpBtn.visibility = View.VISIBLE
-                jumpBtn.text = "${it}秒跳过"
+                jumpBtn.text = "${it}秒"
             }, {
                 it.printStackTrace()
             }, {
@@ -127,11 +132,23 @@ class SplashActivity:BaseActivity() {
     }
 
     fun jump(v:View){
-        Dispatcher.dispatch(this) {
-            navigate(MainActivity::class.java)
-            defaultAnimate()
-        }.go()
-        finish()
+        //禁止跳过
+//        Dispatcher.dispatch(this) {
+//            navigate(MainActivity::class.java)
+//            defaultAnimate()
+//        }.go()
+//        finish()
+    }
+
+    private fun getAdData(){
+        compositeDisposable.add(Api.getApiService().getAd().compose(RxUtils.applySchedulers())
+            .subscribe({
+                AdManager.get().adData = it
+                AdManager.get().loadInterstitialAd(AdManager.ad_splash)
+
+            },{
+                it.printStackTrace()
+            }))
     }
 
     inner class ImagePageAdapter:PagerAdapter(){
@@ -165,5 +182,34 @@ class SplashActivity:BaseActivity() {
             container.addView(iv)
             return iv
         }
+    }
+
+    override fun onAdClose() {
+        isAdShowing = false
+        GlobalScope.launch {
+            delay(150)
+            withContext(Dispatchers.Main){
+                Dispatcher.dispatch(this@SplashActivity) {
+                    navigate(MainActivity::class.java)
+                    defaultAnimate()
+                }.go()
+                finish()
+            }
+        }
+
+    }
+
+    override fun onAdShow() {
+        isAdShowing = true
+        compositeDisposable.dispose()
+        jumpBtn.visibility = View.GONE
+    }
+
+    override fun onAdLoaded() {
+        AdManager.get().showSplashInterstitialAd()
+        AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
+        AdManager.get().loadInterstitialAd(AdManager.ad_point)
+        AdManager.get().loadInterstitialAd(AdManager.ad_close)
+        AdManager.get().loadRewardedAd()
     }
 }

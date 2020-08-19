@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+    </data>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@color/colorPrimary"
+            app:navigationIcon="@drawable/ic_dial_back_arrow"
+            app:contentInsetStartWithNavigation="0dp"
+            app:titleMarginStart="0dp"
+            app:title="@string/agreement"
+            app:titleTextColor="@color/text_normal" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+            <TextView
+                android:id="@+id/text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="16dp"
+                android:maxHeight="300dp"
+                android:lineSpacingMultiplier="1.5"
+                android:textColor="@color/text_normal"
+                android:textSize="14sp" />
+            </LinearLayout>
+    </LinearLayout>
+</layout>

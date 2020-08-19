@@ -35,7 +35,7 @@ class RateDialog(context: Context):Dialog(context,R.style.CustomDialog) {
     fun like(v:View){
         Dispatcher.dispatch(context){
             action(Intent.ACTION_VIEW)
-            data(Uri.parse("http://www.google.com"))
+            data(Uri.parse("market://details?id=" + context.packageName))
             defaultAnimate()
         }.go()
         dismiss()
