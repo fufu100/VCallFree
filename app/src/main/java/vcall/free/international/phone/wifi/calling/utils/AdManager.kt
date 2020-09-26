@@ -47,18 +47,28 @@ class AdManager{
 
 
     fun showSplashInterstitialAd(){
+        LogUtils.println("$tag showSplashInterstitialAd-- ${interstitialAdMap[ad_splash]?.isLoaded}")
         if(interstitialAdMap[ad_splash]?.isLoaded == true){
             interstitialAdMap[ad_splash]?.show()
         }
     }
 
     fun showPreclickInterstitialAd(){
+        LogUtils.println("$tag showPreclickInterstitialAd-- ${interstitialAdMap[ad_preclick]?.isLoaded}")
         if(interstitialAdMap[ad_preclick]?.isLoaded == true){
             interstitialAdMap[ad_preclick]?.show()
         }
     }
 
+    fun showCloseInterstitialAd(){
+        LogUtils.println("$tag showPreclickInterstitialAd-- ${interstitialAdMap[ad_close]?.isLoaded}")
+        if(interstitialAdMap[ad_close]?.isLoaded == true){
+            interstitialAdMap[ad_close]?.show()
+        }
+    }
+
     fun showPointInterstitialAd(){
+        LogUtils.println("$tag showPointInterstitialAd-- ${interstitialAdMap[ad_point]?.isLoaded}")
         if(interstitialAdMap[ad_point]?.isLoaded == true){
             interstitialAdMap[ad_point]?.show()
         }
@@ -97,14 +107,15 @@ class AdManager{
         if(adData != null) {
             for (i in adData!!.ads.indices) {
                 if(adData!!.ads[i].adPlaceID == ad_rewarded && position < adData!!.ads[i].adSources.size){
-                    if(rewardedAd == null){
+//                    if(rewardedAd == null){
                         rewardedAd = RewardedAd(App.context,adData!!.ads[i].adSources[position].adPlaceID)
                         rewardedAd?.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build(),rewardedListener)
-                    }else{
-                       if (rewardedAd?.isLoaded == false) {
-                           rewardedAd?.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build(),rewardedListener)
-                        }
-                    }
+//                    }else{
+//                        LogUtils.println("AdManager loadRewardedAd ${rewardedAd?.isLoaded}")
+//                       if (rewardedAd?.isLoaded == false) {
+//                           rewardedAd?.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build(),rewardedListener)
+//                        }
+//                    }
                     break
                 }
             }
@@ -115,22 +126,26 @@ class AdManager{
         val adListener = MyAdListener(category,position)
         if(adData != null){
             for(i in adData!!.ads.indices){
+                LogUtils.println("$tag loadInterstitialAd $category $position $i")
                 if(adData!!.ads[i].adPlaceID == category && position < adData!!.ads[i].adSources.size){
-                    if(interstitialAdMap[category] == null){
+//                    if(interstitialAdMap[category] == null){
+                        LogUtils.println("$tag loadInterstitialAd 加载广告")
                         interstitialAdMap[category] = InterstitialAd(App.context)
                         interstitialAdMap[category]?.adUnitId =  adData!!.ads[i].adSources[position].adPlaceID
                         interstitialAdMap[category]?.adListener = adListener
                         interstitialAdMap[category]?.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
-                    }else{
-                        if(interstitialAdMap[category]?.adUnitId != adData!!.ads[i].adSources[position].adPlaceID){
-                            interstitialAdMap[category] = InterstitialAd(App.context)
-                            interstitialAdMap[category]?.adUnitId =  adData!!.ads[i].adSources[position].adPlaceID
-                            interstitialAdMap[category]?.adListener = adListener
-                            interstitialAdMap[category]?.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
-                        }else if (interstitialAdMap[category]?.isLoaded == false) {
-                            interstitialAdMap[category]?.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
-                        }
-                    }
+//                    }else{
+//                        if(interstitialAdMap[category]?.adUnitId != adData!!.ads[i].adSources[position].adPlaceID){
+//                            LogUtils.println("$tag loadInterstitialAd adPlaceID不相等 重新load")
+//                            interstitialAdMap[category] = InterstitialAd(App.context)
+//                            interstitialAdMap[category]?.adUnitId =  adData!!.ads[i].adSources[position].adPlaceID
+//                            interstitialAdMap[category]?.adListener = adListener
+//                            interstitialAdMap[category]?.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
+//                        }else if (interstitialAdMap[category]?.isLoaded == false) {
+//                            LogUtils.println("$tag loadInterstitialAd 重新load")
+//                            interstitialAdMap[category]?.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
+//                        }
+//                    }
                     break
                 }
             }
@@ -159,28 +174,36 @@ class AdManager{
 
     inner class MyAdListener(var category:String,var position:Int):AdListener(){
         override fun onAdLoaded() {
-            Log.d(tag, "onAdLoaded--")
+            Log.d(tag, "onAdLoaded-- $category")
             interstitialAdListener.forEach {
                 it.onAdLoaded()
             }
         }
 
         override fun onAdOpened() {
-            Log.d(tag, "onAdOpened--")
+            Log.d(tag, "onAdOpened-- $category")
             interstitialAdListener.forEach {
                 it.onAdShow()
             }
         }
 
         override fun onAdClosed() {
-            Log.d(tag, "onAdClosed--")
-            interstitialAdListener.forEach {
-                it.onAdClose()
+            Log.d(tag, "onAdClosed-- $category ${interstitialAdListener.size}")
+            for(i in interstitialAdListener.indices){
+                try {
+                    interstitialAdListener[i].onAdClose()
+                }catch (e:Exception){
+                    e.printStackTrace()
+                }
+
+            }
+            if(category == ad_splash){
+                loadInterstitialAd(ad_splash)
             }
         }
 
         override fun onAdFailedToLoad(p0: LoadAdError?) {
-            Log.d(tag, "onAdFailedToLoad-- $p0")
+            Log.d(tag, "onAdFailedToLoad-- $p0 $category")
             GlobalScope.launch {
                 delay(1000)
                 withContext(Dispatchers.Main){
@@ -188,6 +211,7 @@ class AdManager{
                 }
             }
         }
+
     }
 
     interface VCallAdListener{

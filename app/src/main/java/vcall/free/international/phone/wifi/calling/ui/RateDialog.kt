@@ -1,20 +1,26 @@
 package vcall.free.international.phone.wifi.calling.ui
 
+import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.view.View
+import androidx.core.app.ShareCompat
 import androidx.databinding.DataBindingUtil
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.databinding.DialogRateBinding
 import vcall.free.international.phone.wifi.calling.utils.Dispatcher
+import vcall.free.international.phone.wifi.calling.utils.UserManager
+import vcall.free.international.phone.wifi.calling.utils.getVersionCode
+import vcall.free.international.phone.wifi.calling.utils.getVersionName
 
 
 /**
  * Created by lyf on 2020/5/12.
  */
-class RateDialog(context: Context):Dialog(context,R.style.CustomDialog) {
+class RateDialog(val activity: Activity):Dialog(activity,R.style.CustomDialog) {
     val dataBinding:DialogRateBinding = DataBindingUtil.inflate(layoutInflater, R.layout.dialog_rate,null,false)
 
     init {
@@ -23,12 +29,25 @@ class RateDialog(context: Context):Dialog(context,R.style.CustomDialog) {
     }
 
     fun hate(v:View){
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.type = "message/rfc822" // 设置邮件格式
-        intent.putExtra(Intent.EXTRA_EMAIL, "rxjava@qq.com") // 接收人
-        intent.putExtra(Intent.EXTRA_SUBJECT, "这是邮件的主题部分") // 主题
-        intent.putExtra(Intent.EXTRA_TEXT, "这是要反馈的内容") // 正文
-        context.startActivity(Intent.createChooser(intent, "请选择邮件类应用"))
+        val str = String.format(
+            "Please give us your suggestions and questions. If you help us to improve successfully, you will be rewarded 50000 points.<br>" +
+                    "VersionName:%s<br>VersionCode:%d<br>sip:%s<br>Device Manufacture:%s<br>Device Brand/Model:%s/%s<br>System Version:%d",
+            context.getVersionName(),
+            context.getVersionCode(),
+            UserManager.get().user?.sip ?: "",
+            Build.MANUFACTURER,
+            Build.BRAND,
+            Build.MODEL,
+            Build.VERSION.SDK_INT
+        )
+
+        ShareCompat.IntentBuilder.from(activity).setType("message/rfc822")
+            .addEmailTo("VCallFree_Feedback@hotmail.com")
+            .setSubject("unlike")
+            .setHtmlText(str)
+            .setChooserTitle("Choose email")
+            .startChooser();
+
         dismiss()
     }
 

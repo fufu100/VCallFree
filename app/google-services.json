@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1051064475334",
+    "firebase_url": "https://vcallfree-7b449.firebaseio.com",
+    "project_id": "vcallfree-7b449",
+    "storage_bucket": "vcallfree-7b449.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1051064475334:android:751366538886aa8ba2c1c7",
+        "android_client_info": {
+          "package_name": "vcall.free.international.phone.wifi.calling"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1051064475334-rujdofeobfr7b18ul3sf66068dt2fppv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCkEVGUNxLffWB5wo37me_Za0f8GxpTvo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1051064475334-rujdofeobfr7b18ul3sf66068dt2fppv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

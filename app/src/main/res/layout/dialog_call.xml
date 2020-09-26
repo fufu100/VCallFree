@@ -136,6 +136,14 @@
             android:textStyle="bold"
             android:textColor="@color/blue"/>
 
+        <ProgressBar
+            android:id="@+id/progressBar1"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/coin_rate_tv"
+            app:layout_constraintBottom_toBottomOf= "@id/coin_rate_tv"/>
+
         <TextView
             android:id="@+id/time_remaining"
             android:layout_width="wrap_content"
@@ -147,7 +155,13 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="@color/blue"/>
-        
+        <ProgressBar
+            android:id="@+id/progressBar2"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/time_remaining_tv"
+            app:layout_constraintBottom_toBottomOf= "@id/time_remaining_tv"/>
         <Button
             android:id="@+id/call"
             android:layout_width="match_parent"

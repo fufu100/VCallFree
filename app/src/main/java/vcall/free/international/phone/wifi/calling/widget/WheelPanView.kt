@@ -106,7 +106,7 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
     private val rotateListener: RotateListener? = null
     //记录上次的位置
     private var lastPosition = 0
-    fun startRotate(pos: Int,callback:() -> Unit) {
+    fun startRotate(pos: Int,duration:Long = 0,callback:() -> Unit) {
         val mAngle = 360.0f / count
         //最低圈数是mMinTimes圈
         val newAngle:Float =
@@ -118,7 +118,12 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
         currAngle = newAngle.toFloat()
         lastPosition = pos
         // 动画的持续时间，执行多久？
-        anim.duration = num * mVarTime.toLong()
+        if(duration == 0L){
+            anim.duration = num * mVarTime.toLong()
+        }else{
+            anim.duration = 1000
+        }
+        anim.duration = 1000
         anim.addUpdateListener { animation -> //将动画的过程态回调给调用者
             if (rotateListener != null) rotateListener.rotating(animation)
         }

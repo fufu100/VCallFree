@@ -18,9 +18,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -85,6 +85,7 @@
             android:configChanges="screenLayout|orientation" />
 
         <service android:name="vcall.free.international.phone.wifi.calling.service.CallService" />
+        <service android:name=".service.DaemonService" />
 
         <meta-data
             android:name="CHANNEL"

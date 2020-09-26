@@ -23,6 +23,7 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
     private lateinit var drawerLayout: ViewGroup
     private var drawerHeight: Int = 0
     var isOpen: Boolean = false
+    var needSwipe = true
     private var lastY: Float = 0f
     private var isDragging: Boolean = false
     private var isDownInDrawerLayout: Boolean = false
@@ -55,13 +56,14 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
             widthMeasureSpec,
             MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST)
         )
+        needSwipe = drawerHeight < drawerLayout.measuredHeight
         setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec),MeasureSpec.getSize(heightMeasureSpec))
     }
 
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
 //        println("$TAG $changed $l,$t,$r,$b")
-        if (isOpen) {
+        if(drawerHeight >= drawerLayout.measuredHeight){
             mapView.layout(0, t, r - l, b - drawerHeight)
             drawerLayout.layout(
                 0,
@@ -69,14 +71,24 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
                 r - l,
                 b
             )
-        } else {
-            mapView.layout(0, t, r - l, b - drawerHeight)
-            drawerLayout.layout(
-                0,
-                b - drawerHeight,
-                r -l,
-                b - drawerHeight + drawerLayout.measuredHeight
-            )
+        }else {
+            if (isOpen) {
+                mapView.layout(0, t, r - l, b - drawerHeight)
+                drawerLayout.layout(
+                    0,
+                    b - drawerLayout.measuredHeight,
+                    r - l,
+                    b
+                )
+            } else {
+                mapView.layout(0, t, r - l, b - drawerHeight)
+                drawerLayout.layout(
+                    0,
+                    b - drawerHeight,
+                    r - l,
+                    b - drawerHeight + drawerLayout.measuredHeight
+                )
+            }
         }
 
     }
@@ -106,7 +118,7 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
 
 
         }
-        return isDragging
+        return isDragging and needSwipe
     }
 
     @SuppressLint("ClickableViewAccessibility")

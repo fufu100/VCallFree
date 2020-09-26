@@ -20,6 +20,7 @@ import com.newmotor.x5.db.DBHelper
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_call.*
+import kotlinx.coroutines.*
 import org.pjsip.pjsua2.*
 import org.pjsip.pjsua2.pjmedia_type
 import org.pjsip.pjsua2.pjsua_call_media_status
@@ -39,14 +40,16 @@ import kotlin.math.ceil
  * Created by lyf on 2020/5/10.
  */
 class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallStateChange,
-    SensorEventListener {
+    SensorEventListener,AdManager.VCallAdListener {
     private val TAG = "CallActivity"
     private lateinit var conn: ServiceConnection
     private var callBinder: CallService.CallBinder? = null
     var expand = false//是否显示拨号键盘
     var phone: String? = ""
+    var username:String = ""
     var rate: Int = 0
     var count = 0L
+    var isAdShowing = false;
     var record: Record? = null
     var disposable: Disposable? = null
     lateinit var audioManager: AudioManager
@@ -89,7 +92,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             addAction(CallService.ACTION_ON_AD_LOAD_FAIL)
             addAction(CallService.ACTION_ON_AD_SHOW)
         })
-
+        username = intent.getStringExtra("username")?:""
         phone = intent.getStringExtra("phone")
         rate = intent.getIntExtra("rate", 0)
         dataBinding.phone.text =
@@ -98,18 +101,19 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         if (LogUtils.test) {
             startTimeCount()
         }
-
+        AdManager.get().interstitialAdListener.add(this)
     }
 
     override fun onDestroy() {
+        AdManager.get().interstitialAdListener.remove(this)
         super.onDestroy()
         if (::conn.isInitialized) {
             callBinder?.removeCallStateChangeListener(this)
             unbindService(conn)
         }
-        if (disposable?.isDisposed == false) {
-            disposable?.dispose()
-        }
+//        if (disposable?.isDisposed == false) {
+//            disposable?.dispose()
+//        }
         unregisterReceiver(headsetPlugReceiver)
         toneGeneratorHelper?.stopRingingTone()
         if (disposable?.isDisposed == false) {
@@ -122,7 +126,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 
     fun onClick(v: View) {
         val number = v.tag.toString()
-        println("onClick number=$number")
+        LogUtils.println("onClick number=$number")
         dataBinding.phone2.insert(number)
         dialEffectHelper?.dialNumber(number)
         if (!LogUtils.test) {
@@ -130,10 +134,11 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         }
     }
 
+    //点击静音按钮
     fun mute(v: View) {
         v.isSelected = !v.isSelected
     }
-
+    //点击外放按钮
     fun horn(v: View) {
         v.isSelected = !v.isSelected
         audioManager.isSpeakerphoneOn = v.isSelected
@@ -157,12 +162,29 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         }
     }
 
+    //挂断电话，通话中挂断会回调到下面到onDisconnect方法，如果没有打通电话就手动调用onDisconnect方法
     fun hangup(flag: Boolean = true) {
-        println("hangup flat=$flag")
-        callBinder?.hangup()
-        val state =
-            if (callBinder?.getCurrentCall()?.info?.state == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED) 1 else 2
-        val coin_cost = (rate * ceil(count * 1.0f / 60)).toInt()
+        LogUtils.println("hangup flat=$flag ${callBinder?.getCurrentCall() == null}")
+        if(LogUtils.test){
+            onDisconnect()
+        }else {
+            if(callBinder?.getCurrentCall() == null){
+                onDisconnect()
+            }else {
+                callBinder?.hangup()
+            }
+        }
+
+    }
+
+    private fun onDisconnect(){
+        var state = 2//state=1接通
+        var coin_cost = 0
+
+        if(count > 0) {
+            state = 1
+            coin_cost = (rate * ceil(count * 1.0f / 60)).toInt()
+        }
         record = Record(
             0,
             0,
@@ -170,7 +192,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             UserManager.get().country!!.iso,
             UserManager.get().country!!.code,
             UserManager.get().country!!.prefix,
-            "",
+            username,
             0L,
             System.currentTimeMillis(),
             count,
@@ -180,12 +202,18 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         )
         UserManager.get().user!!.points -= coin_cost
         DBHelper.get().addCallRecord(record!!)
-//        if(flag) {
-//
-//        }
-        Dispatcher.dispatch(this) {
-            action(CallService.ACTION_SHOW_AD)
-        }.send()
+        if(AdManager.get().interstitialAdMap[AdManager.ad_close]?.isLoaded == true){
+            AdManager.get().showCloseInterstitialAd()
+            isAdShowing = true
+        }else{
+            AdManager.get().loadInterstitialAd(AdManager.ad_close)
+            Dispatcher.dispatch(this) {
+                navigate(CallResultActivity::class.java)
+                extra("record", record!!)
+                defaultAnimate()
+            }.go()
+            finish()
+        }
     }
 
     fun del(v: View) {
@@ -194,7 +222,6 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-
             return true
         }
         return super.onKeyDown(keyCode, event)
@@ -202,6 +229,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 
     val toneGeneratorHelper = if (LogUtils.test) null else ToneGenerateHelper()
     override fun onCallStateChange(callInfo: CallInfo?) {
+        LogUtils.println("$tag onCallStateChange ${callInfo?.stateText},${callInfo?.state}")
         if (callInfo != null) {
             runOnUiThread {
                 var callState = ""
@@ -211,7 +239,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
                     } else {
                         //拨打电话，对方未接时候
                         callState = callInfo.stateText
-                        println("$TAG 对方未接")
+                        LogUtils.println("$TAG 对方未接")
                         if (callInfo.state == pjsip_inv_state.PJSIP_INV_STATE_EARLY) {
                             toneGeneratorHelper?.startRingingTone()
                         }
@@ -230,7 +258,13 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
                         Log.d(TAG, "连接失败")
 //                buttonHangup.setText("OK") //来电未接
                         callState = "Call disconnected: " + callInfo.lastReason
-                        finish()
+                        GlobalScope.launch {
+                            delay(1000)
+                            withContext(Dispatchers.Main){
+//                                hangup(true)
+                                onDisconnect()
+                            }
+                        }
                     }
                 }
                 dataBinding.timeRemaining.text = callState
@@ -252,10 +286,17 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
                     it / 60,
                     it % 60
                 )
-                println("startTimeCount ${UserManager.get().user}")
+                LogUtils.println("startTimeCount ${UserManager.get().user}")
                 val totalMinRemaining = UserManager.get().user!!.points / rate - it / 60
                 dataBinding.timeRemaining.text =
                     String.format(Locale.getDefault(), "%d min Remaining", totalMinRemaining)
+                if(totalMinRemaining <=1){
+                    hangup(true)
+                    toast("Total remain time less than 1 min,auto hang up")
+                    if (disposable?.isDisposed == false) {
+                        disposable?.dispose()
+                    }
+                }
             }, {
                 it.printStackTrace()
             })
@@ -281,7 +322,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 
     @SuppressLint("InvalidWakeLockTag")
     private fun setScreenOnOff(flag: Boolean) {
-        println("$TAG setScreenOnOff $flag")
+        LogUtils.println("$TAG setScreenOnOff $flag")
         if (wakeLock == null) {
             wakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, TAG)
         }
@@ -296,9 +337,10 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 
     inner class HeadsetPluginReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+            LogUtils.println("HeadsetPluginReceiver onReceive ${intent?.action}")
             if (intent?.action == Intent.ACTION_HEADSET_PLUG) {
                 val state = intent.getIntExtra("state", 0)
-                println("HeadsetPluginReceiver state=$state")
+                LogUtils.println("HeadsetPluginReceiver state=$state")
                 val audioManager = context?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
                 audioManager.isSpeakerphoneOn = state == 0
             } else if (intent?.action == CallService.ACTION_ON_AD_LOAD_FAIL || intent?.action == CallService.ACTION_ON_AD_CLOSE) {
@@ -321,13 +363,13 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 
     override fun onSensorChanged(event: SensorEvent?) {
         val b = hasWireHeadSet()
-        println("$TAG onSensorChanged $b")
+        LogUtils.println("$TAG onSensorChanged $b")
         if (b) {
             return
         }
 //        if(callBinder?.getCurrentCall()?.info?.state == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED || LogUtils.test){
         val distance = event?.values?.get(0) ?: 0f
-        println("$TAG distance $distance $maxmiumDistance")
+        LogUtils.println("$TAG distance $distance $maxmiumDistance")
         setScreenOnOff(distance >= maxmiumDistance)
 //        }
     }
@@ -398,6 +440,26 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
                 ex.printStackTrace()
             }
         }
+    }
+
+    override fun onAdClose() {
+        LogUtils.println("$tag,onAdClose $isAdShowing")
+        if(isAdShowing) {
+            Dispatcher.dispatch(this) {
+                navigate(CallResultActivity::class.java)
+                extra("record", record!!)
+                defaultAnimate()
+            }.go()
+            finish()
+        }
+    }
+
+    override fun onAdShow() {
+
+    }
+
+    override fun onAdLoaded() {
+
     }
 
 }

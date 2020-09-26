@@ -1,9 +1,12 @@
 package vcall.free.international.phone.wifi.calling
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import org.junit.Test
 
 import org.junit.Assert.*
 import vcall.free.international.phone.wifi.calling.utils.PointStrategy
+import java.lang.Exception
+import java.util.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -30,6 +33,20 @@ class ExampleUnitTest {
         result.forEach {
             print(it)
             print(" ")
+        }
+    }
+
+    @Test
+    fun testParsePhone(){
+        try {
+            val phoneNumberUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
+            val phoneNumber = phoneNumberUtil.parseAndKeepRawInput("+11866734018", null)
+            val iso = phoneNumberUtil.getRegionCodeForNumber(phoneNumber)
+            val phone = phoneNumberUtil.getNationalSignificantNumber(phoneNumber)
+            val phoneNationalFormat = phoneNumberUtil.format(phoneNumber,PhoneNumberUtil.PhoneNumberFormat.NATIONAL)
+            println("testParsePhone $phone $iso ${Locale.getDefault().country} $phoneNationalFormat")
+        }catch (e: Exception){
+            e.printStackTrace()
         }
     }
 }

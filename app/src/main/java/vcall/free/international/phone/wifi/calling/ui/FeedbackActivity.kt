@@ -1,9 +1,11 @@
 package vcall.free.international.phone.wifi.calling.ui
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import androidx.core.app.ShareCompat
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.databinding.ActivityFeedbackBinding
 import vcall.free.international.phone.wifi.calling.lib.BaseBackActivity
@@ -47,12 +49,12 @@ class FeedbackActivity:BaseBackActivity<ActivityFeedbackBinding>() {
             return
         }
         if(content.isNotEmpty()) {
-            val intent = Intent(Intent.ACTION_SEND)
-            intent.type = "message/rfc822" // 设置邮件格式
-            intent.putExtra(Intent.EXTRA_EMAIL, "rxjava@qq.com") // 接收人
-            intent.putExtra(Intent.EXTRA_SUBJECT, subject) // 主题
-            intent.putExtra(Intent.EXTRA_TEXT, "$content${UserManager.get().user?.sip}") // 正文
-            startActivity(Intent.createChooser(intent, "请选择邮件类应用"))
+            ShareCompat.IntentBuilder.from(this).setType("message/rfc822")
+                .addEmailTo("VCallFree_Feedback@hotmail.com")
+                .setSubject(subject)
+                .setHtmlText("$content <br>sip:${UserManager.get().user?.sip}")
+                .setChooserTitle("Choose email")
+                .startChooser();
         }else{
             toast(R.string.please_enter_your_suggestion)
         }

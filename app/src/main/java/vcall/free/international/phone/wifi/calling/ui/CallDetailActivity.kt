@@ -6,6 +6,7 @@ import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.api.Record
 import vcall.free.international.phone.wifi.calling.databinding.ActivityCallDetailBinding
 import vcall.free.international.phone.wifi.calling.lib.BaseBackActivity
+import vcall.free.international.phone.wifi.calling.utils.LogUtils
 import java.util.*
 
 /**
@@ -18,7 +19,7 @@ class CallDetailActivity:BaseBackActivity<ActivityCallDetailBinding>() {
         super.initView(savedInstanceState)
         record = intent.getParcelableExtra("record")
         dataBinding.phone = "+" + record?.code + record?.phone
-        println("CallDetailActivity $record")
+        LogUtils.println("CallDetailActivity $record")
         dataBinding.country = DBHelper.get().getCountry(record!!.iso)
         val date = Date(record!!.addTime)
         dataBinding.date = String.format(Locale.getDefault(),"%tA, %tB %td,%tl:%tM %tp",date,date,date,date,date,date)

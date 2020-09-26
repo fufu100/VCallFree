@@ -30,6 +30,14 @@ fun Context.getVersionName():String{
         return ""
     }
 }
+fun Context.getVersionCode():Int{
+    try {
+        return this.packageManager.getPackageInfo(packageName,0).versionCode
+    }catch (e:Exception){
+        e.printStackTrace()
+        return 0
+    }
+}
 
 fun Context.readManifestKey(key:String):String?{
     val appinfo = this.packageManager.getApplicationInfo(
@@ -126,6 +134,12 @@ fun Context.toast(message:Int){
 }
 
 fun Activity.snackBar(message: String){
+    if(!isFinishing) {
+        Snackbar.make(window.decorView.findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show()
+    }
+}
+
+fun Activity.snackBar(message: Int){
     if(!isFinishing) {
         Snackbar.make(window.decorView.findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show()
     }

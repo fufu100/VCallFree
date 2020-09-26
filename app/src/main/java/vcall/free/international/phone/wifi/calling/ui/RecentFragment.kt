@@ -69,7 +69,7 @@ class RecentFragment:BaseFragment() ,BaseAdapter.OnItemClick<Record>{
                 defaultAnimate()
             }.go()
         }else{
-            (activity as MainActivity).dial(t.phone,t.iso)
+            (activity as MainActivity).dial(t.phone,t.iso,t.username?:"")
         }
     }
 

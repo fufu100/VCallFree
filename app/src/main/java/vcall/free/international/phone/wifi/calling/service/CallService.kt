@@ -20,6 +20,8 @@ import kotlinx.coroutines.launch
 import vcall.free.international.phone.wifi.calling.lib.App
 import org.pjsip.pjsua2.*
 import vcall.free.international.phone.wifi.calling.pjsua.*
+import vcall.free.international.phone.wifi.calling.ui.SplashActivity
+import vcall.free.international.phone.wifi.calling.utils.AdManager
 import vcall.free.international.phone.wifi.calling.utils.Dispatcher
 import vcall.free.international.phone.wifi.calling.utils.LogUtils
 import vcall.free.international.phone.wifi.calling.utils.UserManager
@@ -35,8 +37,9 @@ class CallService:Service(),MyAppObserver{
     var receiver:MyBroadcastReceiver? = null
     private val lastRegStatus = ""
     private var showAdOnLoad = true
+    private var regStatus = false
     private lateinit var connectivityManager:ConnectivityManager
-    private lateinit var mInterstitialAd: InterstitialAd
+//    private lateinit var mInterstitialAd: InterstitialAd
     val callStateChangeListeners:MutableList<CallStateChange> = mutableListOf()
     override fun onBind(intent: Intent?): IBinder? {
         return CallBinder()
@@ -93,6 +96,7 @@ class CallService:Service(),MyAppObserver{
                         Thread.sleep(5000)
                     } catch (e: InterruptedException) {
                     }
+                    regStatus = false
                     app?.init(this@CallService, App.appCacheDirectory)
                     UserManager.get().user?.also {
                         accCfg = AccountConfig()
@@ -107,7 +111,7 @@ class CallService:Service(),MyAppObserver{
                         accCfg?.videoConfig?.autoShowIncoming = true
                         accout = app?.addAcc(accCfg)
 
-                        println("$TAG initAccount 成功 ${accCfg?.idUri},${accCfg?.regConfig}")
+                        LogUtils.println("$TAG initAccount 成功 ${accCfg?.idUri},${accCfg?.regConfig}")
                     }
                 }
 
@@ -122,10 +126,10 @@ class CallService:Service(),MyAppObserver{
         }
 
         fun makeCall(phone: String):Boolean{
-            if(!LogUtils.test) {
+            if(!LogUtils.test && accout != null) {
                 val buddyURI =
                     "sip:$phone@${UserManager.get().user?.servers!![0].host}:${UserManager.get().user?.servers!![0].port}"
-                println("$TAG buddyURI=$buddyURI")
+                LogUtils.println("$TAG buddyURI=$buddyURI")
                 addBuddy(buddyURI)
                 val call = MyCall(accout, -1)
                 val prm = CallOpParam(true)
@@ -137,7 +141,9 @@ class CallService:Service(),MyAppObserver{
                     return false
                 }
                 currentCall = call
-                println("$TAG makeCall currentCall: ${currentCall?.info?.remoteUri}")
+                LogUtils.println("$TAG makeCall currentCall: ${currentCall?.info?.remoteUri}")
+            }else{
+                LogUtils.println("$TAG,makeCall失败 ${accout == null}")
             }
             return true
         }
@@ -149,7 +155,7 @@ class CallService:Service(),MyAppObserver{
                 try {
                     currentCall?.hangup(prm)
                 }catch (e:Exception){
-                    println("$TAG,挂断电话失败")
+                    LogUtils.println("$TAG,挂断电话失败")
                     e.printStackTrace()
                 }
             }
@@ -171,61 +177,69 @@ class CallService:Service(),MyAppObserver{
             return currentCall
         }
 
-        fun initInterstitialAd(){
-            mInterstitialAd = InterstitialAd(this@CallService).apply {
-                adUnitId = "ca-app-pub-3940256099942544/1033173712"
-                adListener = object : AdListener() {
-                    override fun onAdLoaded() {
-                        Log.d(TAG, "onAdLoaded--- ")
-                        if (showAdOnLoad) {
-                            mInterstitialAd.show()
-                        }
-                    }
-
-                    override fun onAdFailedToLoad(errorCode: Int) {
-                        Log.d(TAG, "onAdFailedToLoad,errorCode=$errorCode")
-                        Dispatcher.dispatch(this@CallService){
-                            action(ACTION_ON_AD_LOAD_FAIL)
-                        }.send()
-                    }
-
-                    override fun onAdOpened() {
-                        Log.d(TAG, "onAdOpened--- ")
-                        Dispatcher.dispatch(this@CallService){
-                            action(ACTION_ON_AD_SHOW)
-                        }.send()
-                    }
-
-                    override fun onAdClosed() {
-                        super.onAdClosed()
-                        Log.d(TAG, "onAdClosed---")
-                        Dispatcher.dispatch(this@CallService){
-                            action(ACTION_ON_AD_CLOSE)
-                        }.send()
-                    }
-
-                }
-
-            }
-            mInterstitialAd.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
-
-        }
+//        fun initInterstitialAd(){
+//            mInterstitialAd = InterstitialAd(this@CallService).apply {
+//                adUnitId = "ca-app-pub-3940256099942544/1033173712"
+//                adListener = object : AdListener() {
+//                    override fun onAdLoaded() {
+//                        Log.d(TAG, "onAdLoaded--- ")
+//                        if (showAdOnLoad) {
+//                            mInterstitialAd.show()
+//                        }
+//                    }
+//
+//                    override fun onAdFailedToLoad(errorCode: Int) {
+//                        Log.d(TAG, "onAdFailedToLoad,errorCode=$errorCode")
+//                        Dispatcher.dispatch(this@CallService){
+//                            action(ACTION_ON_AD_LOAD_FAIL)
+//                        }.send()
+//                    }
+//
+//                    override fun onAdOpened() {
+//                        Log.d(TAG, "onAdOpened--- ")
+//                        Dispatcher.dispatch(this@CallService){
+//                            action(ACTION_ON_AD_SHOW)
+//                        }.send()
+//                    }
+//
+//                    override fun onAdClosed() {
+//                        super.onAdClosed()
+//                        Log.d(TAG, "onAdClosed---")
+//                        Dispatcher.dispatch(this@CallService){
+//                            action(ACTION_ON_AD_CLOSE)
+//                        }.send()
+//                    }
+//
+//                }
+//
+//            }
+//            mInterstitialAd.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
+//
+//        }
 
         fun setShowAdOnLoad(f:Boolean){
             showAdOnLoad = f
         }
 
-        fun showFullScreenAd(){
-            if(mInterstitialAd.isLoaded){
-                mInterstitialAd.show()
-            }
-        }
+//        fun showFullScreenAd(){
+//            if(mInterstitialAd.isLoaded){
+//                mInterstitialAd.show()
+//            }
+//        }
         fun hideFullScreenAd(){
 //            if(mInterstitialAd.isLoaded){
 //                mInterstitialAd.
 //            }
         }
-        fun isInterstitialAdLoaded() = mInterstitialAd.isLoaded
+
+        fun getRegStatus():Boolean{
+            return regStatus
+        }
+
+        fun reRegistration(){
+            accout?.setRegistration(true)
+        }
+//        fun isInterstitialAdLoaded() = mInterstitialAd.isLoaded
     }
 
     private val networkCallback = object :ConnectivityManager.NetworkCallback(){
@@ -247,13 +261,24 @@ class CallService:Service(),MyAppObserver{
             context: Context,
             intent: Intent
         ) {
-            println("MyBroadcastReceiver ${intent.action}")
+            LogUtils.println("MyBroadcastReceiver ${intent.action}")
             if(intent.action == ACTION_SHOW_AD){
-                Log.d(TAG, "ACTION_SHOW_AD ${mInterstitialAd.isLoaded} ")
-                if(!mInterstitialAd.isLoading){
-                    showAdOnLoad = true
-                    mInterstitialAd.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
-                }
+                LogUtils.d(TAG, "ACTION_SHOW_AD  ")
+//                if(AdManager.get().interstitialAdMap[AdManager.ad_splash]?.isLoaded == true){
+//                    AdManager.get().showSplashInterstitialAd()
+                    Dispatcher.dispatch(this@CallService){
+                        navigate(SplashActivity::class.java)
+                        flag(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        extra("only_show_ad",true)
+                    }.go()
+//                }else{
+//                    LogUtils.println("广告没有加载好")
+//                    AdManager.get().loadInterstitialAd(AdManager.ad_splash)
+//                }
+//                if(!mInterstitialAd.isLoading){
+//                    showAdOnLoad = true
+//                    mInterstitialAd.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
+//                }
             }else {
                 if (isNetworkChange(context)) {
                     notifyChangeNetwork()
@@ -288,7 +313,10 @@ class CallService:Service(),MyAppObserver{
         var msg_str = ""
         msg_str += if (expiration == 0) "Unregistration" else "Registration"
         msg_str += if (code!!.swigValue() / 100 === 2) " successful" else " failed: $reason"
-        println("$TAG notifyRegState $msg_str")
+        LogUtils.println("$TAG notifyRegState $msg_str $expiration $reason")
+        if(code!!.swigValue() / 100 == 2){
+            regStatus = true
+        }
     }
 
     override fun notifyCallState(call: MyCall?) {

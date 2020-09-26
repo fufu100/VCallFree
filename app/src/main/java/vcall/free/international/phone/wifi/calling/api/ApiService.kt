@@ -9,7 +9,7 @@ interface ApiService {
 
     @GET("vos.php?m=signup&pk=vcall.free.international.phone.wifi.calling")
     @Streaming
-    fun signup(@Query("uuid") uuid:String):Observable<User>
+    fun signup(@QueryMap map:MutableMap<String,String>):Observable<User>
 
 
     @GET("vos.php?m=rates")

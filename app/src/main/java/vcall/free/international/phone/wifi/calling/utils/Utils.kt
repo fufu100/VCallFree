@@ -7,6 +7,7 @@ import android.content.ContentUris
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.provider.ContactsContract
+import android.util.Base64
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
@@ -19,8 +20,13 @@ import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.api.Contact
 import vcall.free.international.phone.wifi.calling.widget.CircleTransform
 import java.io.File
+import java.net.URLDecoder
+import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 @BindingAdapter("url")
 fun loadImage(imageView: ImageView, url: String?) {
@@ -150,6 +156,32 @@ fun getStateListColor2(color: IntArray): ColorStateList {
 
 fun formatTime(duration:Long):String{
     return SimpleDateFormat("MM-dd HH:mm",Locale.getDefault()).format(duration)
+}
+
+fun desEncrypt(data:String):String{
+    try {
+        val cipher = Cipher.getInstance("DES/CBC/PKCS5Padding")
+        val paramSpec = IvParameterSpec("87493871".toByteArray())
+        val secretKeySpec = SecretKeySpec("86101100".toByteArray(),"DES")
+        cipher.init(Cipher.ENCRYPT_MODE,secretKeySpec,paramSpec)
+        return URLEncoder.encode(Base64.encodeToString(cipher.doFinal(data.toByteArray()),Base64.DEFAULT))
+    }catch (e:Exception){
+        e.printStackTrace()
+        return ""
+    }
+}
+
+fun desDecrypt(data:String):String{
+    try {
+        val cipher = Cipher.getInstance("DES/CBC/PKCS5Padding")
+        val paramSpec = IvParameterSpec("87493871".toByteArray())
+        val secretKeySpec = SecretKeySpec("86101100".toByteArray(),"DES")
+        cipher.init(Cipher.DECRYPT_MODE,secretKeySpec,paramSpec)
+        return String(cipher.doFinal(Base64.decode(URLDecoder.decode(data),Base64.DEFAULT)))
+    }catch (e:Exception){
+        e.printStackTrace()
+        return ""
+    }
 }
 
 

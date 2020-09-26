@@ -57,7 +57,7 @@
                 android:textColor="@color/text_normal"/>
         </LinearLayout>
 
-        <TextView
+        <EditText
             android:id="@+id/phoneTv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -71,6 +71,7 @@
             android:textColor="@color/text_normal"
             android:textSize="30sp"
             android:background="@null"
+            android:inputType="phone"
             tools:text="12134"
             android:cursorVisible="true" />
         
@@ -94,7 +95,7 @@
             android:textColor="@color/text_search"
             android:textColorHint="@color/text_search"
             android:textSize="15sp"
-            android:text="Fill in the verification code"
+            android:hint="Fill in the verification code"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:background="@null"
@@ -127,14 +128,15 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="@drawable/bg_setting_item"
+            android:background="@drawable/bg_blue_round"
             app:layout_constraintTop_toBottomOf="@id/line2"
             android:layout_marginStart="14dp"
             android:layout_marginEnd="14dp"
             android:layout_marginTop="32dp"
+            android:textAllCaps="false"
             android:text="Bind Phone"
             android:textSize="20sp"
-            android:textColor="@color/text_search"
+            android:textColor="#ECF1FF"
             android:onClick="@{() -> activity.bindPhone()}"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

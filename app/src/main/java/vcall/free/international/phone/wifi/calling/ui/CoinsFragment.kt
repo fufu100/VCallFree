@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.rewarded.RewardItem
@@ -15,18 +16,24 @@ import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdCallback
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.newmotor.x5.db.DBHelper
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_tab_coins.*
 import kotlinx.coroutines.*
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.databinding.FragmentTabCoinsBinding
+import vcall.free.international.phone.wifi.calling.lib.App
 import vcall.free.international.phone.wifi.calling.lib.BaseDataBindingFragment
 import vcall.free.international.phone.wifi.calling.lib.prefs
 import vcall.free.international.phone.wifi.calling.utils.*
 import vcall.free.international.phone.wifi.calling.widget.CoinLayout
+import vcall.free.international.phone.wifi.calling.widget.Loading
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Created by lyf on 2020/4/28.
@@ -35,13 +42,14 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
     var playCount = 0
     var strategy:PointStrategy? = null
     var job:Job? = null
-    var adState = 0
+    var adState = -1
     var pointsToAdd = 0
+    lateinit var loading:Loading
     override fun getLayoutResId(): Int = R.layout.fragment_tab_coins
     override fun initView(v: View) {
         dataBinding.fragment = this
         dataBinding.coinLayout.checker = this
-
+        loading = Loading(activity!!)
 
         dataBinding.totalPlayCount.text = UserManager.get().user?.max_wheel.toString()
         playCount = DBHelper.get().getPlayCount()
@@ -54,7 +62,34 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
     override fun onResume() {
         super.onResume()
-        dataBinding.totalCoins= UserManager.get().user?.points.toString()
+        if(dataBinding.totalCoins != UserManager.get().user?.points.toString()){
+            dataBinding.totalCoins= UserManager.get().user?.points.toString()
+            val animatorSet = AnimatorSet()
+            animatorSet.playTogether(
+                ObjectAnimator.ofFloat(dataBinding.coinIv, "scaleX", 1f, 1.2f, 0.9f, 1.0f),
+                ObjectAnimator.ofFloat(dataBinding.coinIv, "scaleX", 1f, 1.2f, 0.9f, 1.0f),
+                ObjectAnimator.ofFloat(dataBinding.coinIv, "scaleY", 1f, 1.2f, 0.9f, 1.0f),
+                ObjectAnimator.ofFloat(dataBinding.coinIv, "scaleY", 1f, 1.2f, 0.9f, 1.0f)
+            )
+            animatorSet.duration = 800
+            animatorSet.startDelay = 1000
+            animatorSet.start()
+        }
+
+        LogUtils.println("$fragmentTag onResume ${UserManager.get().user?.phone} ${UserManager.get().user?.phone?.isNotEmpty()}")
+        if(UserManager.get().user?.phone?.isNotEmpty() == true){
+            dataBinding.setPhoneNumberLayout.visibility = View.GONE
+            GlobalScope.launch {
+                delay(200)
+                withContext(Dispatchers.Main){
+                    if(!dataBinding.coinLayout.needSwipe){
+                        dataBinding.drawerIv.visibility = View.INVISIBLE
+                    }
+                }
+            }
+
+        }
+
         if(context?.isNetworkConnected() == false){
             dataBinding.goIv.isClickable = false
             dataBinding.goIv.setImageResource(R.drawable.ic_go2)
@@ -78,6 +113,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                 }
 
                 override fun onRewardedAdClosed() {
+                    AdManager.get().loadRewardedAd()
                     if(earned){
                         pointsToAdd = PointStrategy.videoPoints[getVideotPoints()]
                         GameResultDialog(context!!,{
@@ -86,7 +122,10 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                                 AdManager.get().showPointInterstitialAd()
                             }else{
                                 AdManager.get().loadInterstitialAd(AdManager.ad_point)
+                                //如果广告没有加载仍然增加积分
+                                addPoint(pointsToAdd,"reward")
                             }
+
                         }).apply {
                             setResult("+$pointsToAdd")
                         }.show()
@@ -96,6 +135,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             })
         }else{
             Log.d(fragmentTag, "showRewardedAd-- not load ")
+            AdManager.get().loadRewardedAd()
             GlobalScope.launch(Dispatchers.Main) {
                 dataBinding.rewardedVideoTv.text = "Retry"
                 withContext(Dispatchers.IO){
@@ -115,35 +155,84 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
     fun signIn(v:View){
         CheckInDialog(context!!){
-            addPoint(it,"checkin")
+//            AdManager.get().showPointInterstitialAd()
+//            addPoint(it,"checkin")
+            pointsToAdd = it
+            GameResultDialog(context!!,{
+                if(AdManager.get().interstitialAdMap[AdManager.ad_point]?.isLoaded == true) {
+                    adState = 7
+                    AdManager.get().showPointInterstitialAd()
+                }else{
+                    AdManager.get().loadInterstitialAd(AdManager.ad_point)
+                    //如果广告没有加载仍然增加积分
+                    addPoint(pointsToAdd,"checkin")
+                }
+            }).apply {
+                setResult("+$pointsToAdd")
+            }.show()
+
         }.show()
     }
 
-    fun start(v: View){
-        if(!dataBinding.coinLayout.isOpen) {
-           adState = 0
-            pointsToAdd = 0
-            //如果加载好了preclick广告则先展示广告，如果没加载到就转到thanks
-            if(AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isLoaded == true) {
-                AdManager.get().showPreclickInterstitialAd()
+    @SuppressLint("CheckResult")
+    fun start(v: View?){
+        if(!dataBinding.coinLayout.isOpen && UserManager.get().user != null) {
+            if(!dataBinding.goIv.isClickable){
+                return
+            }
+            val b:Calendar = Calendar.getInstance()
+            val c:Calendar = Calendar.getInstance()
+            c.timeInMillis = UserManager.get().user!!.time
+            LogUtils.println("start ${UserManager.get().user!!.time} ${c.timeInMillis} ${b.timeInMillis}")
+            if(c.get(Calendar.DAY_OF_MONTH) == b.get(Calendar.DAY_OF_MONTH) ) {
+                LogUtils.println("没有过期 ${c.get(Calendar.DAY_OF_MONTH)}")
+                adState = 0
+                pointsToAdd = 0
+                //如果加载好了preclick广告则先展示广告，如果没加载到就转到thanks
+                LogUtils.println("$fragmentTag start--${AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isLoaded}")
+                if (AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isLoaded == true) {
+                    AdManager.get().showPreclickInterstitialAd()
+                } else {
+                    AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
+                    wheelStartRotate()
+                }
             }else{
-                wheelStartRotate()
+                LogUtils.println("过期了，重新获取")
+                val map = mutableMapOf<String,String>()
+                map.putAll(App.requestMap)
+                map.put("uuid",context!!.getDeviceId())
+                Api.getApiService().signup(map)
+                    .compose(RxUtils.applySchedulers())
+                    .subscribe({
+                        if (it.errcode == 0) {
+                            it.time = System.currentTimeMillis()
+                            UserManager.get().user = it
+                            start(v)
+                        }
+                    }, {
+                        it.printStackTrace()
+                    })
+
             }
         }
     }
 
-    private fun wheelStartRotate(){
+    private fun wheelStartRotate(duration:Long = 0){
         var endPos = getPoints()
         if(adState == 0){
-            println("$fragmentTag adState=0")
+            LogUtils.println("$fragmentTag adState=0")
             endPos = 0
-            AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
+//            AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
         }
-        if(AdManager.get().interstitialAdMap[AdManager.ad_point]?.isLoaded == false){
-            println("$fragmentTag 积分广告还没加载")
+        if(AdManager.get().interstitialAdMap[AdManager.ad_point] == null || AdManager.get().interstitialAdMap[AdManager.ad_point]?.isLoaded == false){
+            LogUtils.println("$fragmentTag 积分广告还没加载")
             endPos = 0
             AdManager.get().loadInterstitialAd(AdManager.ad_point)
         }
+        if(endPos == 0){
+            adState = -1
+        }
+        println("CoinFragment wheelStartRotate endPos=$endPos ,${AdManager.get().interstitialAdMap[AdManager.ad_point]} ${AdManager.get().interstitialAdMap[AdManager.ad_point]?.isLoaded}")
         val animatorSet = AnimatorSet()
         animatorSet.playTogether(
             ObjectAnimator.ofFloat(dataBinding.goIv, "scaleX", 1f, 1.2f, 0.9f, 1.0f),
@@ -153,11 +242,12 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         )
         animatorSet.duration = 300
         animatorSet.start()
-        dataBinding.panView.startRotate(PointStrategy.points.size - endPos + 1) {
+        dataBinding.panView.startRotate(PointStrategy.points.size - endPos + 1,duration) {
             if (endPos != 0) {
                 showObtainCoinsAlert(endPos)
             }else{
-                goIv.isClickable = true
+//                goIv.isClickable = true
+                startTimeCount()
             }
         }
         goIv.isClickable = false
@@ -171,7 +261,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             AdManager.get().rewardedAd?.show(activity,rewardedAdCallback)
         }).apply {
             setResult("+${PointStrategy.points[pos]}")
-            pointsToAdd = max(500,PointStrategy.points[pos] * 2)//如果转到500就不翻倍了
+            pointsToAdd = min(500,PointStrategy.points[pos] * 2)//如果转到500就不翻倍了
             if(AdManager.get().rewardedAd?.isLoaded == true){
                 showMore()
             }else{
@@ -187,6 +277,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             DBHelper.get().addPlayCount(playCount)
             dataBinding.playCountTv.text = playCount.toString()
         }
+        loading.show()
         Api.getApiService().addPoints(
             mutableMapOf(
                 "uuid" to context!!.getDeviceId(),
@@ -195,11 +286,26 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                 "points" to points
             )
         )
+            .doOnNext {
+                if(it.errcode == 0) {
+                    DBHelper.get().setTodayCredits(DBHelper.get().getTodayCredits() + points)
+                }
+            }
             .compose(RxUtils.applySchedulers())
             .subscribe({
+                loading.dismiss()
                 if (it.errcode == 0) {
                     UserManager.get().user?.points = it.points
                     dataBinding.totalCoins = UserManager.get().user!!.points.toString()
+                    val animatorSet = AnimatorSet()
+                    animatorSet.playTogether(
+                        ObjectAnimator.ofFloat(dataBinding.coinIv, "scaleX", 1f, 1.2f, 0.9f, 1.0f),
+                        ObjectAnimator.ofFloat(dataBinding.coinIv, "scaleX", 1f, 1.2f, 0.9f, 1.0f),
+                        ObjectAnimator.ofFloat(dataBinding.coinIv, "scaleY", 1f, 1.2f, 0.9f, 1.0f),
+                        ObjectAnimator.ofFloat(dataBinding.coinIv, "scaleY", 1f, 1.2f, 0.9f, 1.0f)
+                    )
+                    animatorSet.duration = 800
+                    animatorSet.start()
                     if(type == "wheel") {
                         startTimeCount()
                     }else if(type == "checkin"){
@@ -208,17 +314,25 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                         val format = SimpleDateFormat("yyyyMMdd", Locale.ENGLISH)
                         prefs.save("last_check_day",format.format(Date()))
                     }
-                    adState = 0
+                    adState = -1
+                    Dispatcher.dispatch(context){
+                        action("refresh_notification")
+                    }.send()
                 } else {
                     if(type == "wheel") {
                         goIv.isClickable = true
                         context?.toast(it.errormsg)
+                    }else if(type == "checkin"){
+                        context?.toast(it.errormsg)
                     }
                 }
+
             }, {
+                loading.dismiss()
                 if(type == "wheel") {
                     goIv.isClickable = true
                 }
+                context?.toast(R.string.net_error)
                 it.printStackTrace()
             })
     }
@@ -231,7 +345,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                 withContext(Dispatchers.Main){
                     dataBinding.goTv.text = i.toString()
                 }
-                println("i=$i")
+                LogUtils.println("i=$i")
                 delay(1000)
             }
             withContext(Dispatchers.Main) {
@@ -248,6 +362,18 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         if(isDataBindingInitialized()){
             dataBinding.totalCoins= UserManager.get().user?.points.toString()
             dataBinding.totalPlayCount.text = UserManager.get().user?.max_wheel.toString()
+            if(UserManager.get().user?.phone?.isNotEmpty() == true){
+                dataBinding.setPhoneNumberLayout.visibility = View.GONE
+                GlobalScope.launch {
+                    delay(200)
+                    withContext(Dispatchers.Main){
+                        if(!dataBinding.coinLayout.needSwipe){
+                            dataBinding.drawerIv.visibility = View.INVISIBLE
+                        }
+                    }
+                }
+
+            }
         }
 
     }
@@ -291,12 +417,19 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
     override fun onAdClose() {
         adState++
+        LogUtils.println("$fragmentTag onAdClose adState=$adState")
         if(adState == 2){
-            wheelStartRotate()
+            wheelStartRotate(1000L)
+            AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
         }else if(adState == 4){
+            AdManager.get().loadInterstitialAd(AdManager.ad_point)
             addPoint(pointsToAdd,"wheel")
-        }else if(adState == 5){
+        }else if(adState == 7){
+            AdManager.get().loadInterstitialAd(AdManager.ad_point)
             addPoint(pointsToAdd,"reward")
+        }else if(adState == 9){
+            AdManager.get().loadInterstitialAd(AdManager.ad_point)
+            addPoint(pointsToAdd,"checkin")
         }
     }
 
@@ -316,10 +449,13 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         }
 
         override fun onRewardedAdClosed() {
+            //转盘的激励视频如果没有看完视频则不增加转盘积分
+            AdManager.get().loadRewardedAd()
             if(earned){
                 addPoint(pointsToAdd,"wheel")
             }else{
                 adState = 0
+                startTimeCount()
                 Log.d(fragmentTag, "onRewardedAdClosed:earn is false ")
             }
 

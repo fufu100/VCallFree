@@ -11,6 +11,7 @@ import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.api.Country
 import vcall.free.international.phone.wifi.calling.databinding.DialogCallBinding
+import vcall.free.international.phone.wifi.calling.utils.LogUtils
 import vcall.free.international.phone.wifi.calling.utils.RxUtils
 import vcall.free.international.phone.wifi.calling.utils.UserManager
 import vcall.free.international.phone.wifi.calling.utils.toast
@@ -24,7 +25,7 @@ class CallDialog(context: Context,val makeCall:(callRate:Int) -> Unit):Dialog(co
     set(value) {
         field = value
         dataBinding.phone = value
-        println("dialog phone=$value")
+        LogUtils.println("dialog phone=$value")
     }
     var country: Country? = null
     set(value) {
@@ -58,6 +59,8 @@ class CallDialog(context: Context,val makeCall:(callRate:Int) -> Unit):Dialog(co
                     rate = it.points
                     dataBinding.callRate.text = it.points.toString()
                     dataBinding.timeRemaining.text = ((UserManager.get().user?.points ?: 0) / it.points).toString()
+                    dataBinding.progressBar1.visibility = View.GONE
+                    dataBinding.progressBar2.visibility = View.GONE
                 }else{
                     context.toast(it.errmsg)
                     dismiss()
@@ -68,7 +71,7 @@ class CallDialog(context: Context,val makeCall:(callRate:Int) -> Unit):Dialog(co
     }
 
     fun call(v:View){
-        println("call-$rate")
+        LogUtils.println("call-$rate")
         if(rate != 0) {
             makeCall(rate)
             dismiss()

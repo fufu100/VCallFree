@@ -105,8 +105,9 @@ data class User(
     val invite_country_points:InviteCountryPoints,
     val max_video:Int,
     val video_interval:Int,
-    val phone:String,
-    val ads_config:AdConfig
+    var phone:String,
+    val ads_config:AdConfig,
+    var time:Long
 )
 
 data class Price(

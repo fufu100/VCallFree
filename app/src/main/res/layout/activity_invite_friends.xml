@@ -122,7 +122,7 @@
                 android:drawablePadding="5dp"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
-                android:text="+1000~6000"
+                android:text="+1000~10000"
                 android:textColor="@color/text_yellow2" />
         </LinearLayout>
 

@@ -102,6 +102,11 @@ class Dispatcher (private val context: Context?){
         return this
     }
 
+    fun category(category:String):Dispatcher{
+        intent.addCategory(category)
+        return this
+    }
+
     fun requestCode(code: Int): Dispatcher {
         this.requestCode = code
         return this

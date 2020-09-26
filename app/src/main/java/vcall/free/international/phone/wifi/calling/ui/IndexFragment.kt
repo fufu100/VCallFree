@@ -35,6 +35,14 @@ class IndexFragment:BaseDataBindingFragment<FragmentIndexBinding>() ,RadioGroup.
         (fragments[2] as CoinsFragment).refreshUser()
     }
 
+    fun changeTab(tab:Int){
+        dataBinding.viewPager.currentItem = tab;
+    }
+
+    fun autoPlay(){
+        (fragments[2] as CoinsFragment).start(null)
+    }
+
     override fun onCheckedChanged(group: RadioGroup?, checkedId: Int) {
         when(checkedId){
             R.id.radio_contacts ->

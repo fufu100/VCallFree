@@ -59,7 +59,7 @@
             android:background="@drawable/bg_get_it"
             android:textColor="#D8743E"
             android:textSize="24sp"
-            android:text="GET IT"
+            android:text="Get It"
             android:onClick="@{() -> dialog.get()}"/>
 
         <TextView
@@ -79,7 +79,7 @@
             android:background="@drawable/bg_get_it"
             android:textColor="#D8743E"
             android:textSize="24sp"
-            android:text="MORE POINT"
+            android:text="More Points"
             android:onClick="@{() -> dialog.more()}"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

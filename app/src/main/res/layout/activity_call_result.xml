@@ -13,6 +13,9 @@
         <variable
             name="phone"
             type="String" />
+        <variable
+            name="activity"
+            type="vcall.free.international.phone.wifi.calling.ui.CallResultActivity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -164,7 +167,7 @@
         <View
             android:id="@+id/bg"
             android:layout_width="match_parent"
-            android:layout_height="141dp"
+            android:layout_height="201dp"
             app:layout_constraintTop_toBottomOf="@id/flag"
             android:layout_marginStart="14dp"
             android:layout_marginEnd="14dp"
@@ -187,16 +190,86 @@
             android:textSize="16sp"
             android:text="@string/tip_rate" />
 
-        <RatingBar
-            android:layout_width="wrap_content"
-            android:layout_height="35dp"
-            android:layout_marginTop="18dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+        <ImageView
+            android:id="@+id/hatedIv"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             app:layout_constraintTop_toBottomOf="@id/tip"
-            style="@style/Widget.AppCompat.RatingBar"
-            android:max="5"
-            android:rating="5"
-            android:progressDrawable="@drawable/rating_bar"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/like"
+            android:layout_marginTop="24dp"
+            android:src="@drawable/ic_hate"
+            android:drawablePadding="8dp"
+            android:onClick="@{() -> activity.hate()}"/>
+        <ImageView
+            android:id="@+id/likeIv"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            app:layout_constraintTop_toBottomOf="@id/tip"
+            app:layout_constraintStart_toEndOf="@id/hated"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="24dp"
+            android:src="@drawable/ic_like"
+            android:onClick="@{() -> activity.like()}"/>
+
+        <TextView
+            android:id="@+id/hated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/hatedIv"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/like"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_marginTop="15dp"
+            android:gravity="center_horizontal"
+            android:text="@string/hated"
+            android:textColor="@color/text_normal"
+            android:textSize="16sp"
+            android:onClick="@{() -> activity.hate()}"/>
+        <TextView
+            android:id="@+id/like"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/likeIv"
+            app:layout_constraintStart_toEndOf="@id/hated"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_marginTop="15dp"
+            android:text="@string/like"
+            android:textColor="@color/text_normal"
+            android:textSize="16sp"
+            android:onClick="@{() -> activity.like()}"/>
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="like,hated,likeIv,hatedIv,bg,tip"/>
+
+
+        <com.google.android.ads.nativetemplates.TemplateView
+            android:id="@+id/templateView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintTop_toBottomOf="@id/flag"
+            android:layout_marginTop="28dp"
+            android:visibility="gone"
+            app:gnt_template_type="@layout/gnt_medium_template_view" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@id/templateView"
+            app:layout_constraintEnd_toEndOf="@id/templateView"
+            app:layout_constraintTop_toTopOf="@id/templateView"
+            app:layout_constraintBottom_toBottomOf="@id/templateView"
+            android:layout_gravity="center"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

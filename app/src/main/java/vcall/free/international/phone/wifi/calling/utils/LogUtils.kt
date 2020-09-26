@@ -43,4 +43,10 @@ object LogUtils {
             exception?.printStackTrace()
         }
     }
+
+    fun println(str:String){
+        if(LOG_ON){
+            Log.d("VCallFree",str)
+        }
+    }
 }

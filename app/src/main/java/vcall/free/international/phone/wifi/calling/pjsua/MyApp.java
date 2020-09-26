@@ -306,8 +306,10 @@ public class MyApp {
         /* Force delete Endpoint here, to avoid deletion from a non-
          * registered thread (by GC?).
          */
-        ep.delete();
-        ep = null;
+        if(ep != null) {
+            ep.delete();
+            ep = null;
+        }
     }
 }
 

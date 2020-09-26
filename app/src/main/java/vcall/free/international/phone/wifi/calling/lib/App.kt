@@ -33,9 +33,11 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
         if(isInBackgrounnd){
 //            toast("应用从后台回来了")
             isInBackgrounnd = false
-//            Dispatcher.dispatch(applicationContext){
-//                action(CallService.ACTION_SHOW_AD)
-//            }.send()
+            if(!activity!!::class.java.canonicalName!!.endsWith("CallActivity")) {
+                Dispatcher.dispatch(applicationContext) {
+                    action(CallService.ACTION_SHOW_AD)
+                }.send()
+            }
         }
 
     }
@@ -65,11 +67,11 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
     }
 
     override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
-        println("App onActivityCreated")
+        println("App onActivityCreated ${activity!!::class.java.canonicalName}")
     }
 
     companion object{
-        val requestMap = mutableMapOf<String,String?>()
+        val requestMap = mutableMapOf<String,String>()
         var appCacheDirectory:String = ""
         @SuppressLint("StaticFieldLeak")
         var context: Context? = null

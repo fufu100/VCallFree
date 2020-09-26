@@ -79,10 +79,8 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
         println("getContact ${context != null}")
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && ActivityCompat.checkSelfPermission(context!!,
                 Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_DENIED){
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (lackPermission()) {
-                    requestPermissions( PERMISSIONS, 0)
-                }
+            if (lackPermission()) {
+                requestPermissions( PERMISSIONS, 0)
             }
             return
         }
@@ -97,9 +95,9 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
             values = arrayOf("%$keyword%","%$keyword%")
         }
         println("搜索条件： $where")
-        values?.forEach {
-            println("values:$it")
-        }
+//        values?.forEach {
+//            println("values:$it")
+//        }
         if(contractsObserver == null){
             contractsObserver = ContractsObserver(Handler(Looper.getMainLooper()))
         }
@@ -111,7 +109,8 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
                 ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
                 ContactsContract.CommonDataKinds.Phone.NUMBER,
                 ContactsContract.CommonDataKinds.Phone.PHOTO_ID,
-                ContactsContract.CommonDataKinds.Phone._ID
+                ContactsContract.CommonDataKinds.Phone._ID,
+                ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER
             ),
             where, values, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " COLLATE LOCALIZED"
         )
@@ -122,6 +121,7 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
             val username = phoneCursor.getString(1)
             val photoId = phoneCursor.getLong(3)
             list.add(Contact(phoneId,contactId, username, phone, photoId))
+//            println("$fragmentTag ${phoneCursor.getString(5)}")
         }
         phoneCursor?.close()
     }
@@ -152,18 +152,20 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
 
     override fun onItemClick(id: Int, position: Int, t: Contact) {
         if(id == -1){
-            var iso = ""
+            var iso:String? = ""
             var phone = t.phone
             println("onItemClick ${Locale.getDefault().country}")
             try {
                 val phoneNumberUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
-                val phoneNumber = phoneNumberUtil.parse(t.phone, Locale.getDefault().country)
+                val phoneNumber = phoneNumberUtil.parseAndKeepRawInput(t.phone, "CN")
+                println("onItemClick ${phoneNumber == null} ${Locale.getDefault().country}")
+
                 iso = phoneNumberUtil.getRegionCodeForNumber(phoneNumber)
                 phone = phoneNumberUtil.getNationalSignificantNumber(phoneNumber)
             }catch (e:Exception){
                 e.printStackTrace()
             }
-            (activity as MainActivity).dial(phone,iso)
+            (activity as MainActivity).dial(phone,iso?:"",t.username)
         }else if(id == R.id.invite){
             Dispatcher.dispatch(context){
                 action(Intent.ACTION_SENDTO)

@@ -19,11 +19,16 @@ import com.google.android.ads.nativetemplates.TemplateView
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import kotlinx.android.synthetic.main.activity_main.*
 import vcall.free.international.phone.wifi.calling.api.Api
+import vcall.free.international.phone.wifi.calling.lib.App
 import vcall.free.international.phone.wifi.calling.lib.BaseActivity
+import vcall.free.international.phone.wifi.calling.lib.prefs
 import vcall.free.international.phone.wifi.calling.service.CallService
+import vcall.free.international.phone.wifi.calling.service.DaemonService
 import vcall.free.international.phone.wifi.calling.ui.*
 import vcall.free.international.phone.wifi.calling.utils.*
+import vcall.free.international.phone.wifi.calling.widget.Loading
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class MainActivity : BaseActivity() {
     private val PERMISSION_REQUEST_CODE = 0
@@ -37,6 +42,8 @@ class MainActivity : BaseActivity() {
     private lateinit var conn: ServiceConnection
     private var callBinder: CallService.CallBinder? = null
     override fun getLayoutRes(): Int = R.layout.activity_main
+    private lateinit var exitDialog: ExitDialog
+    private lateinit var loading:Loading
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setSupportActionBar(toolbar)
@@ -93,22 +100,22 @@ class MainActivity : BaseActivity() {
             }
             true
         }
-        println("MainActivity firstInstallTime=${getFirstInstallTime()} ")
-        println("MainActivity simCountryIso=${getSimCountryIso()} ")
-        println("MainActivity simSerialNum=${getSimSerialNumber()} ")
-        println("MainActivity androidID=${getAndroidID()} ")
-        println("MainActivity imei=${getIMEI()} ")
-        println("MainActivity build Id=${Build.ID} ")
-        println("MainActivity build user=${Build.USER} ")
-        println("MainActivity getSerial=${getSerial()} ")
-        println("MainActivity getDeviceId=${getDeviceId()} ")
+        LogUtils.println("MainActivity firstInstallTime=${getFirstInstallTime()} ")
+        LogUtils.println("MainActivity simCountryIso=${getSimCountryIso()} ")
+        LogUtils.println("MainActivity simSerialNum=${getSimSerialNumber()} ")
+        LogUtils.println("MainActivity androidID=${getAndroidID()} ")
+        LogUtils.println("MainActivity imei=${getIMEI()} ")
+        LogUtils.println("MainActivity build Id=${Build.ID} ")
+        LogUtils.println("MainActivity build user=${Build.USER} ")
+        LogUtils.println("MainActivity getSerial=${getSerial()} ")
+        LogUtils.println("MainActivity getDeviceId=${getDeviceId()} ")
 
         val uuid = UUID(0L, 1L)
-        println("uuid=$uuid")
+        LogUtils.println("uuid=$uuid")
         val uuid2 = UUID(0L, 1L)
-        println("uuid2=$uuid2")
-        println("uuid2=${Build.SERIAL}")
-//        DBHelper.get()
+        LogUtils.println("uuid2=$uuid2")
+        LogUtils.println("uuid2=${Build.SERIAL}")
+        loading = Loading(this)
 
         conn = object : ServiceConnection {
             override fun onServiceDisconnected(name: ComponentName?) {
@@ -130,7 +137,7 @@ class MainActivity : BaseActivity() {
 //        phoneNumber2.rawInput = "+12134883500"
             val iso = phoneNumberUtil.getRegionCodeForNumber(phoneNumber2)
             val nationalNumber = phoneNumberUtil.getNationalSignificantNumber(phoneNumber2)
-            println(
+            LogUtils.println(
                 "MainActivity phone:${phoneNumber.countryCode},${phoneNumberUtil.isPossibleNumber(
                     phoneNumber2
                 )} ,iso=$iso,nationalNumber=$nationalNumber"
@@ -139,37 +146,75 @@ class MainActivity : BaseActivity() {
             e.printStackTrace()
         }
 
-        run outside@{
-            arrayOf("1","2","3","4").forEach {
-                println("foreach $it")
-                if(it == "2"){
-                    return@outside
+        if (!NotificationUtils.get().areNotificationsEnable()) {
+            NotificationUtils.get().remindOpenNotification(this)
+        }else{
+            if(Build.VERSION.SDK_INT >= 26) {
+                LogUtils.println("$tag onCreate startForegroundService--")
+                val intent = Intent(applicationContext, DaemonService::class.java)
+                startForegroundService(intent)
+            }else{
+                val intent = Intent(applicationContext, DaemonService::class.java)
+                startService(intent)
+            }
+        }
+        exitDialog = ExitDialog(this){
+            if(it == 0){
+                if(UserManager.get().user == null){
+                    Dispatcher.dispatch(this){
+                        action(Intent.ACTION_MAIN)
+                        flag(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        category(Intent.CATEGORY_HOME)
+                    }.go()
+                }else {
+                    finish()
+                }
+            }else {
+
+                if(it == 3){
+                    changeTab(2)
+                    val fragment = supportFragmentManager.findFragmentByTag("Index")
+                    if(fragment != null){
+                        (fragment as IndexFragment).autoPlay()
+                    }
+                }else{
+                    changeTab(it)
                 }
             }
         }
 
-
     }
 
     public fun changeTab(tab: Int) {
-        println("Main changeTab $tab")
-//        (radioGroup.getChildAt(tab) as RadioButton).isChecked = true
+        val fragment = supportFragmentManager.findFragmentByTag("Index")
+        if(fragment != null){
+            (fragment as IndexFragment).changeTab(tab)
+        }
     }
 
     private fun test() {
-        compositeDisposable.add(Api.getApiService().signup(getDeviceId())
+        loading.show()
+        val map = mutableMapOf<String,String>()
+        map.putAll(App.requestMap)
+        map.put("uuid",getDeviceId())
+        compositeDisposable.add(Api.getApiService().signup(map)
             .compose(RxUtils.applySchedulers())
             .subscribe({
+                loading.dismiss()
                 if (it.errcode == 0) {
+                    it.time = System.currentTimeMillis()
                     UserManager.get().user = it
-//                    (fragments[2] as CoinsFragment).refreshUser()
                     (supportFragmentManager.findFragmentByTag("Index") as IndexFragment).refreshUser()
                     navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text =
                         it.points.toString()
                     callBinder?.initAccount()
+                    Dispatcher.dispatch(this){
+                        action("refresh_notification")
+                    }.send()
                 }
             }, {
                 it.printStackTrace()
+                loading.dismiss()
             })
         )
     }
@@ -229,20 +274,18 @@ class MainActivity : BaseActivity() {
 //                    finish()
 //                }
 
-                ExitDialog(this){
-                    if(it == 0){
-                        finish()
-                    }else {
-                        changeTab(it)
-                    }
-                }.show()
+                exitDialog.show()
             }
             return true
         }
         return super.onKeyDown(keyCode, event)
     }
 
-    fun dial(phone: String? = "", isoStr: String? = "US") {
+    fun dial(phone: String? = "", isoStr: String = "",username:String = "") {
+        var _isoStr:String = isoStr
+        if(isoStr.isEmpty()){
+            _isoStr = prefs.getStringValue("iso","US")
+        }
         val ft = supportFragmentManager.beginTransaction()
         ft.setCustomAnimations(
             R.anim.bootom_slide_enter,
@@ -253,7 +296,14 @@ class MainActivity : BaseActivity() {
         ft.add(
             R.id.frameLayout,
             DialFragment().apply {
-                arguments = Bundle().apply { putString("phone", phone);putString("iso", isoStr); }
+                arguments = Bundle().apply {
+                    putString("phone", phone)
+                    putString("iso", _isoStr)
+                    putString("username", username)
+                    if(phone?.isEmpty() == true){
+                        putBoolean("can_input",true)
+                    }
+                }
             },
             "Dial"
         )

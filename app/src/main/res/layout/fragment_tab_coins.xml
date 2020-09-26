@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <variable
@@ -58,22 +59,31 @@
                 android:layout_marginTop="12dp"
                 android:text="GO"/>
 
-            <TextView
-                android:id="@+id/total_coins_tv"
+                <TextView
+                    android:id="@+id/total_coins_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:background="@drawable/bg_total_coins_tv"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/panView"
+                    android:layout_marginStart="32dp"
+                    android:paddingEnd="10dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="37dp"
+                    tools:text="1"
+                    android:text="@{totalCoins}"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:textColor="#FAF2D7"/>
+
+            <ImageView
+                android:id="@+id/coinIv"
                 android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:paddingRight="10dp"
-                android:background="@drawable/bg_total_coins_tv"
-                android:gravity="center_vertical"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/panView"
-                android:drawableStart="@drawable/coin"
-                android:drawablePadding="6dp"
-                android:layout_marginStart="32dp"
-                android:text="@{totalCoins}"
-                android:textStyle="bold"
-                android:textSize="13sp"
-                android:textColor="#FAF2D7"/>
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@id/total_coins_tv"
+                app:layout_constraintTop_toTopOf="@id/total_coins_tv"
+                android:src="@drawable/coin"/>
+
 
             <LinearLayout
                 android:id="@+id/play_count"
@@ -159,7 +169,7 @@
                 android:paddingTop="15dp"
                 android:paddingEnd="24dp"
                 android:paddingBottom="15dp"
-                android:onClick="@{fragment.showRewardedAd}">
+                android:onClick="@{fragment::showRewardedAd}">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -203,7 +213,7 @@
                     android:drawableStart="@drawable/ic_invite_friends"
                     android:drawablePadding="15dp"
                     android:gravity="center_vertical"
-                    android:text="Invite Friends"
+                    android:text="Invite friends"
                     android:textColor="@color/text_normal"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -251,19 +261,21 @@
                     android:drawableStart="@drawable/ic_coin3"
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
-                    android:text="+20~500"
+                    android:text="+20~1000"
                     android:textStyle="bold"
                     android:textColor="@color/text_light"
                     android:onClick="@{fragment::signIn}"/>
             </FrameLayout>
 
             <FrameLayout
+                android:id="@+id/setPhoneNumberLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingStart="14dp"
                 android:paddingTop="15dp"
                 android:paddingEnd="24dp"
                 android:paddingBottom="15dp"
+                android:visibility="visible"
                 android:onClick="@{fragment::setPhoneNumber}">
 
                 <TextView
@@ -272,7 +284,7 @@
                     android:drawableStart="@drawable/ic_set_phone_number"
                     android:drawablePadding="15dp"
                     android:gravity="center_vertical"
-                    android:text="Set Phone number"
+                    android:text="Set phone number"
                     android:textColor="@color/text_normal"
                     android:textSize="15sp"
                     android:textStyle="bold" />

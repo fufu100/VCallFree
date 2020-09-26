@@ -49,7 +49,7 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginStart="10dp"
-            android:text="@{obj.phone}"
+            android:text="@{obj.username != null &amp;&amp; obj.username.length() > 0 ? obj.username  : obj.phone}"
             tools:text="xxx"/>
 
         <TextView
