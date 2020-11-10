@@ -13,12 +13,15 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
+import com.google.i18n.phonenumbers.PhoneNumberToTimeZonesMapper
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.newmotor.x5.db.DBHelper
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.api.Record
 import vcall.free.international.phone.wifi.calling.databinding.ActivityCallResultBinding
 import vcall.free.international.phone.wifi.calling.lib.BaseBackActivity
 import vcall.free.international.phone.wifi.calling.utils.*
+import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -38,7 +41,13 @@ class CallResultActivity:BaseBackActivity<ActivityCallResultBinding>() {
         }
         dataBinding.country = DBHelper.get().getCountry(record.iso)
         val date = Date(record.addTime)
-        dataBinding.date = String.format(Locale.getDefault(),"%tA, %tB %td, %tl:%tM %tp",date,date,date,date,date,date)
+        val phoneNumberUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
+        val phoneNumber = phoneNumberUtil.parseAndKeepRawInput("+${dataBinding.country?.code}${dataBinding.phone}", null)
+        val timeZone = PhoneNumberToTimeZonesMapper.getInstance().getTimeZonesForNumber(phoneNumber).toString()
+        val tz = TimeZone.getTimeZone(timeZone.substring(1,timeZone.length - 1))
+        val format = SimpleDateFormat("E,dd/MM hh:mm a")
+        format.timeZone = tz
+        dataBinding.date = format.format(date)
         dataBinding.coinCost.text = record!!.coinCost.toString()
         dataBinding.duration.text = String.format(Locale.getDefault(),"%d:%02d min",record.duration / 60,record.duration % 60)
 
@@ -46,9 +55,13 @@ class CallResultActivity:BaseBackActivity<ActivityCallResultBinding>() {
         if(record.duration > 30){
             dataBinding.group.visibility = View.VISIBLE
         }else{
-            dataBinding.templateView.visibility = View.VISIBLE
-            dataBinding.progressBar.visibility = View.VISIBLE
-            loadAd()
+            if(AdManager.get().adData?.ads?.count {
+                    it.adPlaceID == "voip_ysgd"
+                } == 1) {
+                dataBinding.templateView.visibility = View.VISIBLE
+                dataBinding.progressBar.visibility = View.VISIBLE
+                loadAd()
+            }
         }
     }
 

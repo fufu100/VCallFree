@@ -51,7 +51,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         dataBinding.coinLayout.checker = this
         loading = Loading(activity!!)
 
-        dataBinding.totalPlayCount.text = UserManager.get().user?.max_wheel.toString()
+        dataBinding.totalPlayCount.text = (UserManager.get().user?.max_wheel?:1000).toString()
         playCount = DBHelper.get().getPlayCount()
         dataBinding.playCountTv.text = playCount.toString()
         AdManager.get().interstitialAdListener.add(this)
@@ -63,7 +63,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
     override fun onResume() {
         super.onResume()
         if(dataBinding.totalCoins != UserManager.get().user?.points.toString()){
-            dataBinding.totalCoins= UserManager.get().user?.points.toString()
+            dataBinding.totalCoins= (UserManager.get().user?.points?:1000).toString()
             val animatorSet = AnimatorSet()
             animatorSet.playTogether(
                 ObjectAnimator.ofFloat(dataBinding.coinIv, "scaleX", 1f, 1.2f, 0.9f, 1.0f),
@@ -224,9 +224,12 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             endPos = 0
 //            AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
         }
-        if(AdManager.get().interstitialAdMap[AdManager.ad_point] == null || AdManager.get().interstitialAdMap[AdManager.ad_point]?.isLoaded == false){
+        if(AdManager.get().interstitialAdMap[AdManager.ad_point]?.isLoaded == false && AdManager.get().rewardedAd?.isLoaded == false){
             LogUtils.println("$fragmentTag 积分广告还没加载")
             endPos = 0
+            AdManager.get().loadInterstitialAd(AdManager.ad_point)
+        }else if(AdManager.get().interstitialAdMap[AdManager.ad_point]?.isLoaded == false && AdManager.get().rewardedAd?.isLoaded == true){
+            endPos = 4//积分广告没加载 激励视频加载了，给50积分
             AdManager.get().loadInterstitialAd(AdManager.ad_point)
         }
         if(endPos == 0){
@@ -255,17 +258,24 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
     private fun showObtainCoinsAlert(pos:Int){
         GameResultDialog(context!!,{
-            pointsToAdd = PointStrategy.points[pos]
-            AdManager.get().showPointInterstitialAd()
+            if(AdManager.get().interstitialAdMap[AdManager.ad_point]?.isLoaded == false && AdManager.get().rewardedAd?.isLoaded == true){
+                pointsToAdd = PointStrategy.points[pos]
+                AdManager.get().rewardedAd?.show(activity,rewardedAdCallback)
+            }else {
+                pointsToAdd = PointStrategy.points[pos]
+                AdManager.get().showPointInterstitialAd()
+            }
         },{
             AdManager.get().rewardedAd?.show(activity,rewardedAdCallback)
         }).apply {
             setResult("+${PointStrategy.points[pos]}")
             pointsToAdd = min(500,PointStrategy.points[pos] * 2)//如果转到500就不翻倍了
-            if(AdManager.get().rewardedAd?.isLoaded == true){
+            if(AdManager.get().rewardedAd?.isLoaded == true && AdManager.get().interstitialAdMap[AdManager.ad_point]?.isLoaded == true){
                 showMore()
             }else{
-                AdManager.get().loadRewardedAd()
+                if(AdManager.get().rewardedAd?.isLoaded == false) {
+                    AdManager.get().loadRewardedAd()
+                }
             }
         }.show()
     }
@@ -283,7 +293,8 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                 "uuid" to context!!.getDeviceId(),
                 "type" to type,
                 "ts" to System.currentTimeMillis(),
-                "points" to points
+                "points" to points,
+                "country" to Locale.getDefault().country
             )
         )
             .doOnNext {
@@ -360,7 +371,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
     fun refreshUser(){
         if(isDataBindingInitialized()){
-            dataBinding.totalCoins= UserManager.get().user?.points.toString()
+            dataBinding.totalCoins= (UserManager.get().user?.points?:1000).toString()
             dataBinding.totalPlayCount.text = UserManager.get().user?.max_wheel.toString()
             if(UserManager.get().user?.phone?.isNotEmpty() == true){
                 dataBinding.setPhoneNumberLayout.visibility = View.GONE

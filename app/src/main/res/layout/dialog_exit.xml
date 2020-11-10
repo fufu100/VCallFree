@@ -37,6 +37,7 @@
             android:id="@+id/progressBar"
             android:layout_width="45dp"
             android:layout_height="45dp"
+            android:visibility="gone"
             android:layout_gravity="center"/>
 
         </FrameLayout>

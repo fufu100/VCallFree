@@ -43,7 +43,6 @@
     <string name="tip_auth_fail">Failed to get auth code,please check your network</string>
     <string name="tip_select_subject">Please choose a type</string>
     <string name="tip_open_notification">You haven\'t grant SHOW NOTIFICATION permission,grant now?</string>
-    <string name="jump">跳过</string>
     <string name="tip_invalid_number">Invalid phone number</string>
     <string name="agree">Agree</string>
     <string name="quit">Quit</string>

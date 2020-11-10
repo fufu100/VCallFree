@@ -7,6 +7,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.ColorFilter
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Build
 import android.os.IBinder
 import android.provider.ContactsContract
@@ -115,7 +119,7 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>() {
                 return
             }
         }
-        if(callBinder?.getRegStatus() == false){
+        if(callBinder?.getRegStatus() != 1){
             context?.toast("Registration failed,please try later")
             if(UserManager.get().user != null){
                 callBinder?.reRegistration()
@@ -124,6 +128,7 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>() {
         }
         if(UserManager.get().user == null){
             LogUtils.println("用户注册失败")
+
             return
         }
         try {

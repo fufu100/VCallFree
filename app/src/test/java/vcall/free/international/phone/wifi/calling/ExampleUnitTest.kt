@@ -1,11 +1,13 @@
 package vcall.free.international.phone.wifi.calling
 
+import com.google.i18n.phonenumbers.PhoneNumberToTimeZonesMapper
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import org.junit.Test
 
 import org.junit.Assert.*
 import vcall.free.international.phone.wifi.calling.utils.PointStrategy
 import java.lang.Exception
+import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -16,6 +18,10 @@ import java.util.*
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
+        val date = Date()
+        val c = Calendar.getInstance(Locale.US)
+        val format = SimpleDateFormat("E,MM dd hh:mm a z",Locale.CHINA)
+        println(format.format(Date(c.timeInMillis)))
         assertEquals(4, 2 + 2)
     }
 
@@ -40,11 +46,17 @@ class ExampleUnitTest {
     fun testParsePhone(){
         try {
             val phoneNumberUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
-            val phoneNumber = phoneNumberUtil.parseAndKeepRawInput("+11866734018", null)
+            val phoneNumber = phoneNumberUtil.parseAndKeepRawInput("+12134883500", null)
             val iso = phoneNumberUtil.getRegionCodeForNumber(phoneNumber)
             val phone = phoneNumberUtil.getNationalSignificantNumber(phoneNumber)
             val phoneNationalFormat = phoneNumberUtil.format(phoneNumber,PhoneNumberUtil.PhoneNumberFormat.NATIONAL)
-            println("testParsePhone $phone $iso ${Locale.getDefault().country} $phoneNationalFormat")
+            val timeZone = PhoneNumberToTimeZonesMapper.getInstance().getTimeZonesForNumber(phoneNumber).toString()
+            val tz = TimeZone.getTimeZone(timeZone.substring(1,timeZone.length - 1))
+            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z")
+            sdf.timeZone = tz
+            val date = Date(System.currentTimeMillis())
+
+            println("testParsePhone $phone $iso ${Locale.getDefault().country} $phoneNationalFormat ${timeZone} ${sdf.format(date)}")
         }catch (e: Exception){
             e.printStackTrace()
         }

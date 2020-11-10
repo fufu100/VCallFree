@@ -10,7 +10,7 @@ import vcall.free.international.phone.wifi.calling.BuildConfig
 import java.util.concurrent.TimeUnit
 
 object Api {
-    private const val baseUrl = "http://vcallfree.com"
+    private const val baseUrl = "https://vcallfree.com"
     private var mRetrofit:Retrofit? = null
 
     fun getApiService():ApiService{

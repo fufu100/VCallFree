@@ -6,6 +6,7 @@ import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import com.anythink.core.api.ATSDK
 import com.newmotor.x5.db.DBHelper
 import com.umeng.analytics.MobclickAgent
 import com.umeng.commonsdk.UMConfigure
@@ -20,6 +21,7 @@ import java.io.InputStreamReader
 import java.util.*
 //5ec6a4d1978eea0864b20201
 val prefs: Prefs by lazy { App.prefs!! }
+val encryptedPrefs :EncryptPrefs by lazy { App.encryptPrefs!! }
 class App : Application(),Application.ActivityLifecycleCallbacks{
     var start = 0
     var stop = 0
@@ -76,6 +78,7 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
         @SuppressLint("StaticFieldLeak")
         var context: Context? = null
         var prefs: Prefs? = null
+        var encryptPrefs:EncryptPrefs? = null
     }
     override fun onCreate() {
         super.onCreate()
@@ -88,10 +91,10 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
         println("app OnCreate $appCacheDirectory, ${applicationContext.getExternalFilesDir(null)}")
         context = applicationContext
         prefs = Prefs(applicationContext)
+        encryptPrefs = EncryptPrefs()
         requestMap["ver"] = applicationContext.getVersionName()
         requestMap["pk"] = applicationContext.packageName
-//        requestMap["re"] = applicationContext.readManifestKey("CHANNEL")
-
+        requestMap["country"] = Locale.getDefault().country
         requestMap["lang"] = Locale.getDefault().language
         requestMap["firstInstallTime"] = applicationContext.firstInstallTime()
 
@@ -111,7 +114,10 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
             UMConfigure.DEVICE_TYPE_PHONE,
             null
         )
-        MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL)
+        MobclickAgent.setPageCollectionMode(MobclickAgent.PageMode.LEGACY_AUTO)
+//        MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL)
+        ATSDK.init(applicationContext,"a5f80854919503","bade2107cedab15a24fc76882455de56")
+        ATSDK.setNetworkLogDebug(true)
         initData()
     }
 

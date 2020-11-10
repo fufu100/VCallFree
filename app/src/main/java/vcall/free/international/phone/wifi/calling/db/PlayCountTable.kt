@@ -8,6 +8,7 @@ object PlayCountTable {
     val ID = "_id"
     val COUNT = "count"
     val CREDITS = "credits"
+    val AD_CLICK_COUNT = "ad_click_count"
     val DATE = "date"
 
     fun newCreateTableString(): String {
@@ -16,6 +17,7 @@ object PlayCountTable {
             .append(ID).append(" integer primary key autoincrement,")
             .append(COUNT).append(" integer,")
             .append(CREDITS).append(" integer,")
+            .append(AD_CLICK_COUNT).append(" integer,")
             .append(DATE).append(" varchar")
             .append(")")
         return sb.toString()

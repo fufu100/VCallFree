@@ -6,6 +6,7 @@ buildscript {
         google()
         jcenter()
         maven { url 'https://dl.bintray.com/umsdk/release' }
+        maven { url 'https://dl.bintray.com/anythink/maven'}
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.0.1'
@@ -22,6 +23,7 @@ allprojects {
         jcenter()
         mavenCentral()
         maven { url 'https://dl.bintray.com/umsdk/release' }
+        maven { url 'https://dl.bintray.com/anythink/maven'}
     }
 }
 

@@ -1,7 +1,11 @@
 package vcall.free.international.phone.wifi.calling.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import com.android.installreferrer.api.InstallReferrerClient
+import com.android.installreferrer.api.InstallReferrerStateListener
+import com.android.installreferrer.api.ReferrerDetails
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
@@ -10,6 +14,7 @@ import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.newmotor.x5.db.DBHelper
 import kotlinx.coroutines.*
 import vcall.free.international.phone.wifi.calling.api.AdResp
+import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.lib.App
 import vcall.free.international.phone.wifi.calling.lib.prefs
 
@@ -41,9 +46,47 @@ class AdManager{
     var adData:AdResp? = null
     var interstitialAdMap:MutableMap<String,InterstitialAd> = mutableMapOf()
     var rewardedAd:RewardedAd? = null
+    var referrer:String = ""
 
     var interstitialAdListener:MutableList<VCallAdListener> = mutableListOf()
     var rewardedAdListener:MutableList<VCallAdListener> = mutableListOf()
+    private var referrerClient: InstallReferrerClient =
+        InstallReferrerClient.newBuilder(App.context).build()
+
+    init {
+        referrerClient.startConnection(object : InstallReferrerStateListener {
+
+            override fun onInstallReferrerSetupFinished(responseCode: Int) {
+                when (responseCode) {
+                    InstallReferrerClient.InstallReferrerResponse.OK -> {
+                        // Connection established.
+                        try {
+                            val response: ReferrerDetails = referrerClient.installReferrer
+                            referrer = response.installReferrer
+                            println("InstallReferrerStateListener Connection established $referrer")
+                        }catch (e:Exception){
+                            e.printStackTrace()
+                        }
+
+                    }
+                    InstallReferrerClient.InstallReferrerResponse.FEATURE_NOT_SUPPORTED -> {
+                        // API not available on the current Play Store app.
+                        println("InstallReferrerStateListener API not available on the current Play Store app")
+                    }
+                    InstallReferrerClient.InstallReferrerResponse.SERVICE_UNAVAILABLE -> {
+                        // Connection couldn't be established.
+                        println("InstallReferrerStateListener Connection couldn't be established")
+                    }
+                }
+            }
+
+            override fun onInstallReferrerServiceDisconnected() {
+                // Try to restart the connection on the next request to
+                // Google Play by calling the startConnection() method.
+                println("InstallReferrerStateListener onInstallReferrerServiceDisconnected")
+            }
+        })
+    }
 
 
     fun showSplashInterstitialAd(){
@@ -103,6 +146,11 @@ class AdManager{
     }
 
     fun loadRewardedAd(position: Int = 0){
+        val count = DBHelper.get().getAdClickCount()
+        println("$tag loadRewardedAd count=$count")
+        if(count >= 10){
+            return
+        }
         val rewardedListener = MyRewardedListener(position)
         if(adData != null) {
             for (i in adData!!.ads.indices) {
@@ -123,6 +171,11 @@ class AdManager{
     }
 
     fun loadInterstitialAd(category: String,position: Int = 0){
+        val count = DBHelper.get().getAdClickCount()
+        LogUtils.println("loadInterstitialAd count=$count")
+        if(count >= 10){
+            return
+        }
         val adListener = MyAdListener(category,position)
         if(adData != null){
             for(i in adData!!.ads.indices){
@@ -200,6 +253,25 @@ class AdManager{
             if(category == ad_splash){
                 loadInterstitialAd(ad_splash)
             }
+        }
+
+        @SuppressLint("CheckResult")
+        override fun onAdClicked() {
+            val map = mutableMapOf<String,String>()
+            map["ver"] = App.context?.getVersionName()?:""
+            map["sip"] = UserManager.get().user?.sip?:""
+            map["type"] = category
+            map["update_time"] = System.currentTimeMillis().toString()
+            map["ts"] = System.currentTimeMillis().toString()
+            Api.getApiService().addClick(map)
+                .compose(RxUtils.applySchedulers())
+                .subscribe({
+                    if(it.isSuccessful){
+                        DBHelper.get().addAdClickCount()
+                    }
+                },{
+                    it.printStackTrace()
+                })
         }
 
         override fun onAdFailedToLoad(p0: LoadAdError?) {

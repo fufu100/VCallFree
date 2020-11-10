@@ -6,6 +6,8 @@ import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import androidx.databinding.DataBindingUtil
+import com.google.i18n.phonenumbers.PhoneNumberToTimeZonesMapper
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import io.reactivex.disposables.Disposable
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.api.Api
@@ -15,6 +17,7 @@ import vcall.free.international.phone.wifi.calling.utils.LogUtils
 import vcall.free.international.phone.wifi.calling.utils.RxUtils
 import vcall.free.international.phone.wifi.calling.utils.UserManager
 import vcall.free.international.phone.wifi.calling.utils.toast
+import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -47,11 +50,18 @@ class CallDialog(context: Context,val makeCall:(callRate:Int) -> Unit):Dialog(co
             this?.attributes?.width = WindowManager.LayoutParams.MATCH_PARENT
         }
 
-        val date = Date()
-        dataBinding.date = String.format(Locale.getDefault(),"%tA, %tB %td,%tl:%tM %tp",date,date,date,date,date,date)
+
     }
 
     fun getCallRate(){
+        val date = Date()
+        val phoneNumberUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
+        val phoneNumber = phoneNumberUtil.parseAndKeepRawInput("+${country?.code}${dataBinding.phone}", null)
+        val timeZone = PhoneNumberToTimeZonesMapper.getInstance().getTimeZonesForNumber(phoneNumber).toString()
+        val tz = TimeZone.getTimeZone(timeZone.substring(1,timeZone.length - 1))
+        val format = SimpleDateFormat("E,dd/MM hh:mm a",Locale.getDefault())
+        format.timeZone = tz
+        dataBinding.date = format.format(date)
         disposable = Api.getApiService().getPrice(country!!.iso,country?.code + phone)
             .compose(RxUtils.applySchedulers())
             .subscribe({

@@ -26,7 +26,7 @@ abstract class BaseActivity :AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        println("onResume  $tag")
+        println("onResume  $tag ${supportFragmentManager.fragments.size}")
         if (supportFragmentManager.fragments.size == 0) {
             MobclickAgent.onPageStart(tag)
         }
@@ -35,7 +35,7 @@ abstract class BaseActivity :AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        println("onPause $tag")
+        println("onPause $tag ${supportFragmentManager.fragments.size}")
         if (supportFragmentManager.fragments.size == 0) {
             MobclickAgent.onPageEnd(tag)
         }

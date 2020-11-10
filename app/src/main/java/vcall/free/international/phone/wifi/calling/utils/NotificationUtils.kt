@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.NotificationManagerCompat
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.lib.App
 import java.lang.reflect.Field
@@ -36,13 +37,14 @@ class NotificationUtils {
             return notificationManager.areNotificationsEnabled()
         }else{
             try {
-                val appOpsManager = App.context!!.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-                val uid = App.context!!.applicationInfo.uid
-                val appOpsClass = Class.forName(AppOpsManager::class.java.name)
-                val checkOpNoThrowMethod = appOpsClass.getMethod("checkOpNoThrow",Integer.TYPE,Integer.TYPE,String.javaClass)
-                val opPostNotificationValue: Field = appOpsClass.getDeclaredField("OP_POST_NOTIFICATION")
-                val value = opPostNotificationValue.get(Int::class.java) as Int
-                return (checkOpNoThrowMethod.invoke(appOpsManager,value,uid,App.context!!.packageName) as Int) == AppOpsManager.MODE_ALLOWED
+//                val appOpsManager = App.context!!.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+//                val uid = App.context!!.applicationInfo.uid
+//                val appOpsClass = Class.forName(AppOpsManager::class.java.name)
+//                val checkOpNoThrowMethod = appOpsClass.getMethod("checkOpNoThrow",Integer.TYPE,Integer.TYPE,String.javaClass)
+//                val opPostNotificationValue: Field = appOpsClass.getDeclaredField("OP_POST_NOTIFICATION")
+//                val value = opPostNotificationValue.get(Int::class.java) as Int
+//                return (checkOpNoThrowMethod.invoke(appOpsManager,value,uid,App.context!!.packageName) as Int) == AppOpsManager.MODE_ALLOWED
+                return NotificationManagerCompat.from(App.context!!).areNotificationsEnabled()
             }catch (e:Exception){
                 e.printStackTrace()
             }

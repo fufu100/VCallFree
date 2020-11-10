@@ -105,11 +105,33 @@
 -keep class org.pjsip.** {*;}
 
 -keep class com.uc.** {*;}
+-keep class com.zui.** {*;}
+-keep class com.miui.** {*;}
+-keep class com.heytap.** {*;}
+-keep class a.** {*;}
+-keep class com.vivo.** {*;}
 
 -keepclassmembers class * {
    public <init> (org.json.JSONObject);
 }
--keepclassmembers enum * {
-    public static **[] values();
-    public static ** valueOf(java.lang.String);
+
+-keep public class vcall.free.international.phone.wifi.calling.R$*{
+   public static final int *;
+}
+
+-keep public class com.anythink.network.**
+-keepclassmembers class com.anythink.network.** {
+   public *;
+}
+
+-dontwarn com.anythink.hb.**
+-keep class com.anythink.hb.**{ *;}
+
+-dontwarn com.anythink.china.api.**
+-keep class com.anythink.china.api.**{ *;}
+
+# new in v5.6.6
+-keep class com.anythink.myoffer.ui.**{ *;}
+-keepclassmembers public class com.anythink.myoffer.ui.** {
+   public *;
 }

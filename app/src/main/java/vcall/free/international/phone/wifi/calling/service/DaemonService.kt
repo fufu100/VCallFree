@@ -66,7 +66,7 @@ class DaemonService: Service() {
 
     private fun getContent():String{
         println("getContent : ${UserManager.get().user}")
-        return String.format("Today's credits:%d,Wheel count:%d/%d",DBHelper.get().getTodayCredits(),DBHelper.get().getPlayCount(),UserManager.get().user?.max_wheel)
+        return String.format("Today's credits:%d,Wheel count:%d/%d",DBHelper.get().getTodayCredits(),DBHelper.get().getPlayCount(),UserManager.get().user?.max_wheel ?: 0)
     }
 
     override fun onDestroy() {

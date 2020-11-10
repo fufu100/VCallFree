@@ -37,7 +37,7 @@ class CallService:Service(),MyAppObserver{
     var receiver:MyBroadcastReceiver? = null
     private val lastRegStatus = ""
     private var showAdOnLoad = true
-    private var regStatus = false
+    private var regStatus = -1
     private lateinit var connectivityManager:ConnectivityManager
 //    private lateinit var mInterstitialAd: InterstitialAd
     val callStateChangeListeners:MutableList<CallStateChange> = mutableListOf()
@@ -96,7 +96,7 @@ class CallService:Service(),MyAppObserver{
                         Thread.sleep(5000)
                     } catch (e: InterruptedException) {
                     }
-                    regStatus = false
+                    regStatus = 0
                     app?.init(this@CallService, App.appCacheDirectory)
                     UserManager.get().user?.also {
                         accCfg = AccountConfig()
@@ -157,6 +157,7 @@ class CallService:Service(),MyAppObserver{
                 }catch (e:Exception){
                     LogUtils.println("$TAG,挂断电话失败")
                     e.printStackTrace()
+                    currentCall?.delete()
                 }
             }
         }
@@ -232,12 +233,22 @@ class CallService:Service(),MyAppObserver{
 //            }
         }
 
-        fun getRegStatus():Boolean{
+        fun getRegStatus():Int{
             return regStatus
         }
 
         fun reRegistration(){
-            accout?.setRegistration(true)
+            println("$TAG reRegistration regStatus=$regStatus")
+            if(regStatus == 1 || regStatus == 2){
+                try {
+                    accout?.setRegistration(true)
+                }catch (e:Exception){
+                    Log.e(TAG, "reRegistration fail--- ")
+                    e.printStackTrace()
+                }
+
+                regStatus = 0
+            }
         }
 //        fun isInterstitialAdLoaded() = mInterstitialAd.isLoaded
     }
@@ -315,7 +326,9 @@ class CallService:Service(),MyAppObserver{
         msg_str += if (code!!.swigValue() / 100 === 2) " successful" else " failed: $reason"
         LogUtils.println("$TAG notifyRegState $msg_str $expiration $reason")
         if(code!!.swigValue() / 100 == 2){
-            regStatus = true
+            regStatus = 1
+        }else{
+            regStatus = 2
         }
     }
 

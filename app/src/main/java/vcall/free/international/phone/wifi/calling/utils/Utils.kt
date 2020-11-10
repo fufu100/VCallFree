@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.api.Contact
+import vcall.free.international.phone.wifi.calling.lib.encryptedPrefs
 import vcall.free.international.phone.wifi.calling.widget.CircleTransform
 import java.io.File
 import java.net.URLDecoder
@@ -174,8 +175,8 @@ fun desEncrypt(data:String):String{
 fun desDecrypt(data:String):String{
     try {
         val cipher = Cipher.getInstance("DES/CBC/PKCS5Padding")
-        val paramSpec = IvParameterSpec("87493871".toByteArray())
-        val secretKeySpec = SecretKeySpec("86101100".toByteArray(),"DES")
+        val paramSpec = IvParameterSpec(encryptedPrefs.getKey("iv").toByteArray())
+        val secretKeySpec = SecretKeySpec(encryptedPrefs.getKey("key").toByteArray(),"DES")
         cipher.init(Cipher.DECRYPT_MODE,secretKeySpec,paramSpec)
         return String(cipher.doFinal(Base64.decode(URLDecoder.decode(data),Base64.DEFAULT)))
     }catch (e:Exception){
@@ -183,6 +184,8 @@ fun desDecrypt(data:String):String{
         return ""
     }
 }
+
+
 
 
 

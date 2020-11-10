@@ -29,7 +29,15 @@ class ExitDialog(context: Context,val callback:(flag:Int) -> Unit):Dialog(contex
     init {
         setContentView(dataBinding.root)
         dataBinding.dialog = this
-        loadAd()
+        if(AdManager.get().adData?.ads?.count {
+                it.adPlaceID == "voip_ystc"
+            } == 1) {
+            dataBinding.templateView.visibility = View.VISIBLE
+            dataBinding.progressBar.visibility = View.VISIBLE
+            loadAd()
+        }else{
+            dataBinding.templateView.visibility = View.GONE
+        }
 
 
         setOnDismissListener {
@@ -59,6 +67,7 @@ class ExitDialog(context: Context,val callback:(flag:Int) -> Unit):Dialog(contex
 
     private fun loadAd(){
         val adID = getNativeAdID()
+        println("ExitDialog loadAd adID=$adID")
         if(adID.isNotEmpty()) {
             val adLoader = AdLoader.Builder(context, adID)
                 .forUnifiedNativeAd { unifiedNativeAd ->
@@ -72,8 +81,11 @@ class ExitDialog(context: Context,val callback:(flag:Int) -> Unit):Dialog(contex
                     dataBinding.templateView.setNativeAd(unifiedNativeAd)
                 }
                 .withAdListener(object : AdListener() {
-                    override fun onAdFailedToLoad(p0: LoadAdError?) {
-                        LogUtils.println("原生广告加载失败 $p0")
+                    override fun onAdFailedToLoad(p0: LoadAdError) {
+                        LogUtils.println("原生广告加载失败 ${p0.message} ${p0.toString()}")
+
+                        dataBinding.templateView.visibility = View.GONE
+                        dataBinding.progressBar.visibility = View.GONE
                     }
 
                     override fun onAdLoaded() {

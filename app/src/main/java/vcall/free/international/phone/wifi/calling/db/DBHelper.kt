@@ -30,15 +30,18 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         db?.execSQL(CountryTable.newDeleteTableString())
         db?.execSQL(CountryTable.newCreateTableString())
 
-        db?.execSQL(PlayCountTable.newDeleteTableString())
-        db?.execSQL(PlayCountTable.newCreateTableString())
+//        db?.execSQL(PlayCountTable.newDeleteTableString())
+//        db?.execSQL(PlayCountTable.newCreateTableString())
+        if(newVersion == 7){
+            db?.execSQL("alter table ${PlayCountTable.TB_NAME} add column ${PlayCountTable.AD_CLICK_COUNT} integer")
+        }
 
         println("DBHelper onUpgrade $oldVersion $newVersion")
     }
 
     companion object {
         private val DATABASE_NAME = "vcallfree_database.db"  //数据库名
-        private val DATABASE_VERSION = 6    //数据库版本
+        private val DATABASE_VERSION = 7    //数据库版本
         var instance: DBHelper? = null
             get() {
                 if (field == null) {
@@ -239,6 +242,26 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         val cv = ContentValues()
         val format = SimpleDateFormat("yyyyMMdd",Locale.ENGLISH)
         cv.put(PlayCountTable.CREDITS,credits)
+        cv.put(PlayCountTable.DATE,format.format(Date()))
+        updateOrInsert(PlayCountTable.TB_NAME,cv,PlayCountTable.DATE)
+    }
+
+    fun getAdClickCount():Int{
+        val format = SimpleDateFormat("yyyyMMdd",Locale.ENGLISH)
+        val date = format.format(Date())
+        println("getTodayCredits date=$date")
+        val cursor = queryAndAll(PlayCountTable.TB_NAME,PlayCountTable.DATE,date)
+        if(cursor?.moveToNext() == true){
+            return cursor.getInt(cursor.getColumnIndex(PlayCountTable.AD_CLICK_COUNT))
+        }
+        return 0
+    }
+
+    fun addAdClickCount(){
+        val count = getAdClickCount()
+        val cv = ContentValues()
+        val format = SimpleDateFormat("yyyyMMdd",Locale.ENGLISH)
+        cv.put(PlayCountTable.AD_CLICK_COUNT,count + 1)
         cv.put(PlayCountTable.DATE,format.format(Date()))
         updateOrInsert(PlayCountTable.TB_NAME,cv,PlayCountTable.DATE)
     }
