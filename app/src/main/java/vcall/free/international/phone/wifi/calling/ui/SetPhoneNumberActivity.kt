@@ -153,7 +153,7 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>(),
                                     UserManager.get().user?.phone = dataBinding.phoneTv.text.toString()
                                     GameResultDialog(this,{
                                         UserManager.get().user!!.points += 1000
-                                        if(AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == true){
+                                        if(AdManager.get().interstitialAdMap[AdManager.ad_point]?.isLoaded == true){
                                             AdManager.get().loadInterstitialAd(AdManager.ad_point)
                                         }else{
                                             AdManager.get().loadInterstitialAd(AdManager.ad_point)
@@ -235,8 +235,8 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>(),
 
     }
 
-    override fun onAdLoadFail() {
-
-    }
+//    override fun onAdLoadFail() {
+//
+//    }
 
 }

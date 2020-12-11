@@ -116,8 +116,8 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
         )
         MobclickAgent.setPageCollectionMode(MobclickAgent.PageMode.LEGACY_AUTO)
 //        MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL)
-        ATSDK.init(applicationContext,"a5f80854919503","bade2107cedab15a24fc76882455de56")
-        ATSDK.setNetworkLogDebug(true)
+//        ATSDK.init(applicationContext,"a5f80854919503","bade2107cedab15a24fc76882455de56")
+//        ATSDK.setNetworkLogDebug(true)
         initData()
     }
 

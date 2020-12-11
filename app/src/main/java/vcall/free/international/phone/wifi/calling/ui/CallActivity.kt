@@ -71,8 +71,8 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         audioManager.isSpeakerphoneOn = false
         if (!LogUtils.test) {
             sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-            val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
-            maxmiumDistance = sensor.maximumRange
+            val sensor:Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
+            maxmiumDistance = sensor?.maximumRange?:10f
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
         }
         conn = object : ServiceConnection {
@@ -202,8 +202,8 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         )
         UserManager.get().user!!.points -= coin_cost
         DBHelper.get().addCallRecord(record!!)
-        if(AdManager.get().interstitialAdMap[AdManager.ad_close]?.isAdReady == true){
-            AdManager.get().showCloseInterstitialAd(this)
+        if(AdManager.get().interstitialAdMap[AdManager.ad_close]?.isLoaded == true){
+            AdManager.get().showCloseInterstitialAd()
             isAdShowing = true
         }else{
             AdManager.get().loadInterstitialAd(AdManager.ad_close)
@@ -464,8 +464,8 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 
     }
 
-    override fun onAdLoadFail() {
-
-    }
+//    override fun onAdLoadFail() {
+//
+//    }
 
 }

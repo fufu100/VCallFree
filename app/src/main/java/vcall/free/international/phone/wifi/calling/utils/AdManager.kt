@@ -1,17 +1,11 @@
 package vcall.free.international.phone.wifi.calling.utils
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.util.Log
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
 import com.android.installreferrer.api.ReferrerDetails
-import com.anythink.core.api.ATAdInfo
-import com.anythink.interstitial.api.ATInterstitial
-import com.anythink.interstitial.api.ATInterstitialListener
-import com.anythink.rewardvideo.api.ATRewardVideoAd
-import com.anythink.rewardvideo.api.ATRewardVideoListener
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
@@ -27,16 +21,15 @@ import vcall.free.international.phone.wifi.calling.lib.prefs
 /**
  * Created by lyf on 2020/8/14.
  */
-class AdManager {
+class AdManager{
     companion object {
-        val tag = "anythink AdManager"
-        val ad_splash = "topon_startpage"
-        val ad_preclick = "toponon_perclick"
-        val ad_point = "topon_jifen"
-        val ad_close = "toponon_close"
-        val ad_rewarded = "topon_rewardvideo"
-        val ad_quite = "topon_ystc"
-        val ad_call_result = "topon_ysclose"
+        val tag = "AdManager"
+        val ad_splash = "voip_startpage"
+        val ad_preclick = "voip_preclick"
+        val ad_point = "voip_jifen"
+        val ad_close = "voip_close"
+        val ad_rewarded = "voip_rewardvideo"
+        val ad_origin = "voip_ystc"
         private var instance: AdManager? = null
             get() {
                 if (field == null) {
@@ -45,20 +38,18 @@ class AdManager {
 
                 return field
             }
-
         @JvmStatic
-        fun get(): AdManager {
+        fun get(): AdManager{
             return instance!!
         }
     }
+    var adData:AdResp? = null
+    var interstitialAdMap:MutableMap<String,InterstitialAd> = mutableMapOf()
+    var rewardedAd:RewardedAd? = null
+    var referrer:String = ""
 
-    var adData: AdResp? = null
-    var interstitialAdMap: MutableMap<String, ATInterstitial> = mutableMapOf()
-    var rewardedAd: ATRewardVideoAd? = null
-    var referrer: String = ""
-
-    var interstitialAdListener: MutableList<VCallAdListener> = mutableListOf()
-    var rewardedAdListener: MutableList<VCallAdListener> = mutableListOf()
+    var interstitialAdListener:MutableList<VCallAdListener> = mutableListOf()
+    var rewardedAdListener:MutableList<VCallAdListener> = mutableListOf()
     private var referrerClient: InstallReferrerClient =
         InstallReferrerClient.newBuilder(App.context).build()
 
@@ -73,7 +64,7 @@ class AdManager {
                             val response: ReferrerDetails = referrerClient.installReferrer
                             referrer = response.installReferrer
                             println("InstallReferrerStateListener Connection established $referrer")
-                        } catch (e: Exception) {
+                        }catch (e:Exception){
                             e.printStackTrace()
                         }
 
@@ -98,209 +89,206 @@ class AdManager {
     }
 
 
-    fun showSplashInterstitialAd(activity: Activity?) {
-        LogUtils.println("$tag showSplashInterstitialAd-- ${interstitialAdMap[ad_splash]?.isAdReady}")
-        if (interstitialAdMap[ad_splash]?.isAdReady == true) {
-            interstitialAdMap[ad_splash]?.show(activity)
+    fun showSplashInterstitialAd(){
+        LogUtils.println("$tag showSplashInterstitialAd-- ${interstitialAdMap[ad_splash]?.isLoaded}")
+        if(interstitialAdMap[ad_splash]?.isLoaded == true){
+            interstitialAdMap[ad_splash]?.show()
         }
     }
 
-    fun showPreclickInterstitialAd(activity: Activity?) {
-        LogUtils.println("$tag showPreclickInterstitialAd-- ${interstitialAdMap[ad_preclick]?.isAdReady}")
-        if (interstitialAdMap[ad_preclick]?.isAdReady == true) {
-            interstitialAdMap[ad_preclick]?.show(activity)
+    fun showPreclickInterstitialAd(){
+        LogUtils.println("$tag showPreclickInterstitialAd-- ${interstitialAdMap[ad_preclick]?.isLoaded}")
+        if(interstitialAdMap[ad_preclick]?.isLoaded == true){
+            interstitialAdMap[ad_preclick]?.show()
         }
     }
 
-    fun showCloseInterstitialAd(activity: Activity?) {
-        LogUtils.println("$tag showPreclickInterstitialAd-- ${interstitialAdMap[ad_close]?.isAdReady}")
-        if (interstitialAdMap[ad_close]?.isAdReady == true) {
-            interstitialAdMap[ad_close]?.show(activity)
+    fun showCloseInterstitialAd(){
+        LogUtils.println("$tag showPreclickInterstitialAd-- ${interstitialAdMap[ad_close]?.isLoaded}")
+        if(interstitialAdMap[ad_close]?.isLoaded == true){
+            interstitialAdMap[ad_close]?.show()
         }
     }
 
-    fun showPointInterstitialAd(activity: Activity?) {
-        LogUtils.println("$tag showPointInterstitialAd-- ${interstitialAdMap[ad_point]?.isAdReady}")
-        if (interstitialAdMap[ad_point]?.isAdReady == true) {
-            interstitialAdMap[ad_point]?.show(activity)
+    fun showPointInterstitialAd(){
+        LogUtils.println("$tag showPointInterstitialAd-- ${interstitialAdMap[ad_point]?.isLoaded}")
+        if(interstitialAdMap[ad_point]?.isLoaded == true){
+            interstitialAdMap[ad_point]?.show()
         }
     }
 
-    fun loadRewardedAd(position: Int = 0) {
+    var rewardedAdCallback = object :RewardedAdCallback(){
+        override fun onUserEarnedReward(p0: RewardItem) {
+            Log.d(tag, "onUserEarnedReward $p0")
+        }
+
+        override fun onRewardedAdClosed() {
+            Log.d(tag, "onRewardedAdClosed- ")
+            rewardedAdListener.forEach {
+                it.onAdClose()
+            }
+        }
+
+        override fun onRewardedAdOpened() {
+            Log.d(tag, "onRewardedAdOpened- ")
+            rewardedAdListener.forEach {
+                it.onAdShow()
+            }
+        }
+
+        override fun onRewardedAdFailedToShow(p0: AdError?) {
+            Log.d(tag, "onRewardedAdFailedToShow: $p0")
+            rewardedAdListener.forEach {
+                it.onAdClose()
+            }
+        }
+
+    }
+
+    fun loadRewardedAd(position: Int = 0){
         val count = DBHelper.get().getAdClickCount()
         println("$tag loadRewardedAd count=$count")
-        if (count >= 10) {
+        if(count >= 10){
             return
         }
         val rewardedListener = MyRewardedListener(position)
-        if (adData != null) {
+        if(adData != null) {
             for (i in adData!!.ads.indices) {
-                if (adData!!.ads[i].adPlaceID == ad_rewarded && position < adData!!.ads[i].adSources.size) {
-                    rewardedAd =
-                        ATRewardVideoAd(App.context, adData!!.ads[i].adSources[position].adPlaceID)
-//                    rewardedAd?.setAdListener(rewardedListener)
-                    rewardedAd?.load()
+                if(adData!!.ads[i].adPlaceID == ad_rewarded && position < adData!!.ads[i].adSources.size){
+//                    if(rewardedAd == null){
+                    rewardedAd = RewardedAd(App.context,adData!!.ads[i].adSources[position].adPlaceID)
+                    rewardedAd?.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build(),rewardedListener)
+//                    }else{
+//                        LogUtils.println("AdManager loadRewardedAd ${rewardedAd?.isLoaded}")
+//                       if (rewardedAd?.isLoaded == false) {
+//                           rewardedAd?.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build(),rewardedListener)
+//                        }
+//                    }
                     break
                 }
             }
         }
     }
 
-    fun loadInterstitialAd(category: String, position: Int = 0) {
+    fun loadInterstitialAd(category: String,position: Int = 0){
         val count = DBHelper.get().getAdClickCount()
         LogUtils.println("loadInterstitialAd count=$count")
-        if (count >= 10) {
+        if(count >= 10){
             return
         }
-        val adListener = MyAdListener(category, position)
-        if (adData != null) {
-            for (i in adData!!.ads.indices) {
+        val adListener = MyAdListener(category,position)
+        if(adData != null){
+            for(i in adData!!.ads.indices){
                 LogUtils.println("$tag loadInterstitialAd $category $position $i")
-                if (adData!!.ads[i].adPlaceID == category  ) {
-                    if(position < adData!!.ads[i].adSources.size) {
-                        LogUtils.println("$tag loadInterstitialAd 加载广告")
-                        interstitialAdMap[category] =
-                            ATInterstitial(
-                                App.context,
-                                adData!!.ads[i].adSources[position].adPlaceID
-                            )
-                        interstitialAdMap[category]?.setAdListener(adListener)
-                        interstitialAdMap[category]?.load()
-                    }else{
-                        interstitialAdListener.forEach {
-                            it.onAdLoadFail()
-                        }
-                    }
+                if(adData!!.ads[i].adPlaceID == category && position < adData!!.ads[i].adSources.size){
+//                    if(interstitialAdMap[category] == null){
+                    LogUtils.println("$tag loadInterstitialAd 加载广告")
+                    interstitialAdMap[category] = InterstitialAd(App.context)
+                    interstitialAdMap[category]?.adUnitId =  adData!!.ads[i].adSources[position].adPlaceID
+                    interstitialAdMap[category]?.adListener = adListener
+                    interstitialAdMap[category]?.loadAd(AdRequest.Builder().build())
+//                    }else{
+//                        if(interstitialAdMap[category]?.adUnitId != adData!!.ads[i].adSources[position].adPlaceID){
+//                            LogUtils.println("$tag loadInterstitialAd adPlaceID不相等 重新load")
+//                            interstitialAdMap[category] = InterstitialAd(App.context)
+//                            interstitialAdMap[category]?.adUnitId =  adData!!.ads[i].adSources[position].adPlaceID
+//                            interstitialAdMap[category]?.adListener = adListener
+//                            interstitialAdMap[category]?.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
+//                        }else if (interstitialAdMap[category]?.isLoaded == false) {
+//                            LogUtils.println("$tag loadInterstitialAd 重新load")
+//                            interstitialAdMap[category]?.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
+//                        }
+//                    }
                     break
                 }
             }
         }
     }
 
-    inner class MyRewardedListener(var position: Int = 0) : ATRewardVideoListener {
-        override fun onRewardedVideoAdClosed(p0: ATAdInfo?) {
-
-        }
-
-        override fun onReward(p0: ATAdInfo?) {
-
-        }
-
-        override fun onRewardedVideoAdPlayFailed(
-            p0: com.anythink.core.api.AdError?,
-            p1: ATAdInfo?
-        ) {
-
-        }
-
-        override fun onRewardedVideoAdLoaded() {
+    inner class MyRewardedListener(var position: Int = 0):RewardedAdLoadCallback(){
+        override fun onRewardedAdLoaded() {
             Log.d(tag, "onRewardedAdLoaded: ")
             rewardedAdListener.forEach {
                 it.onAdLoaded()
             }
         }
 
-        override fun onRewardedVideoAdPlayStart(p0: ATAdInfo?) {
-
-        }
-
-        override fun onRewardedVideoAdFailed(p0: com.anythink.core.api.AdError?) {
+        override fun onRewardedAdFailedToLoad(p0: LoadAdError?) {
             Log.d(tag, "onRewardedAdFailedToLoad: $p0")
             rewardedAd = null
             GlobalScope.launch {
                 delay(1000)
-                withContext(Dispatchers.Main) {
+                withContext(Dispatchers.Main){
                     loadRewardedAd(position + 1)
                 }
             }
         }
-
-        override fun onRewardedVideoAdPlayEnd(p0: ATAdInfo?) {
-
-        }
-
-        override fun onRewardedVideoAdPlayClicked(p0: ATAdInfo?) {
-
-        }
     }
 
-    inner class MyAdListener(var category: String, var position: Int) : ATInterstitialListener {
-        override fun onInterstitialAdLoadFail(p0: com.anythink.core.api.AdError?) {
-            Log.d(tag, "onAdFailedToLoad-- $p0 $category")
-            GlobalScope.launch {
-                delay(1000)
-                withContext(Dispatchers.Main) {
-                    loadInterstitialAd(category, position + 1)
-                }
-            }
-        }
-
-        override fun onInterstitialAdLoaded() {
-            Log.d(tag, "onAdLoaded-- $category ${interstitialAdListener.size}")
+    inner class MyAdListener(var category:String,var position:Int):AdListener(){
+        override fun onAdLoaded() {
+            Log.d(tag, "onAdLoaded-- $category")
             interstitialAdListener.forEach {
                 it.onAdLoaded()
             }
         }
 
-        override fun onInterstitialAdVideoEnd(p0: ATAdInfo?) {
-            TODO("Not yet implemented")
-        }
-
-        override fun onInterstitialAdShow(p0: ATAdInfo?) {
+        override fun onAdOpened() {
             Log.d(tag, "onAdOpened-- $category")
             interstitialAdListener.forEach {
                 it.onAdShow()
             }
         }
 
-        override fun onInterstitialAdVideoError(p0: com.anythink.core.api.AdError?) {
-            TODO("Not yet implemented")
+        override fun onAdClosed() {
+            Log.d(tag, "onAdClosed-- $category ${interstitialAdListener.size}")
+            for(i in interstitialAdListener.indices){
+                try {
+                    interstitialAdListener[i].onAdClose()
+                }catch (e:Exception){
+                    e.printStackTrace()
+                }
+
+            }
+            if(category == ad_splash){
+                loadInterstitialAd(ad_splash)
+            }
         }
 
         @SuppressLint("CheckResult")
-        override fun onInterstitialAdClicked(p0: ATAdInfo?) {
-            val map = mutableMapOf<String, String>()
-            map["ver"] = App.context?.getVersionName() ?: ""
-            map["sip"] = UserManager.get().user?.sip ?: ""
+        override fun onAdClicked() {
+            val map = mutableMapOf<String,String>()
+            map["ver"] = App.context?.getVersionName()?:""
+            map["sip"] = UserManager.get().user?.sip?:""
             map["type"] = category
             map["update_time"] = System.currentTimeMillis().toString()
             map["ts"] = System.currentTimeMillis().toString()
             Api.getApiService().addClick(map)
                 .compose(RxUtils.applySchedulers())
                 .subscribe({
-                    if (it.isSuccessful) {
+                    if(it.isSuccessful){
                         DBHelper.get().addAdClickCount()
                     }
-                }, {
+                },{
                     it.printStackTrace()
                 })
         }
 
-        override fun onInterstitialAdVideoStart(p0: ATAdInfo?) {
-            TODO("Not yet implemented")
-        }
-
-        override fun onInterstitialAdClose(p0: ATAdInfo?) {
-            Log.d(tag, "onAdClosed-- $category ${interstitialAdListener.size}")
-            for (i in interstitialAdListener.indices) {
-                try {
-                    interstitialAdListener[i].onAdClose()
-                } catch (e: Exception) {
-                    e.printStackTrace()
+        override fun onAdFailedToLoad(p0: LoadAdError?) {
+            Log.d(tag, "onAdFailedToLoad-- $p0 $category")
+            GlobalScope.launch {
+                delay(1000)
+                withContext(Dispatchers.Main){
+                    loadInterstitialAd(category,position + 1)
                 }
-
-            }
-            if (category == ad_splash) {
-                loadInterstitialAd(ad_splash)
             }
         }
 
     }
 
-    interface VCallAdListener {
+    interface VCallAdListener{
         fun onAdClose()
         fun onAdShow()
         fun onAdLoaded()
-        fun onAdLoadFail()
     }
 }

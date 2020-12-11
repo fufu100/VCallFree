@@ -77,7 +77,8 @@ class CallResultActivity:BaseBackActivity<ActivityCallResultBinding>() {
             if(AdManager.get().adData?.ads?.count {
                     it.adPlaceID == "voip_ysgd"
                 } == 1) {
-                dataBinding.adContainer.visibility = View.VISIBLE
+                dataBinding.templateView.visibility = View.VISIBLE
+                dataBinding.progressBar.visibility = View.VISIBLE
                 loadAd()
             }
         }
@@ -115,105 +116,37 @@ class CallResultActivity:BaseBackActivity<ActivityCallResultBinding>() {
     private fun loadAd(){
         val adID = getNativeAdID()
         if(adID.isNotEmpty()) {
-            atNatives = ATNative(this,adID,object : ATNativeNetworkListener {
-                override fun onNativeAdLoadFail(p0: AdError?) {
-                    Log.e(tag, "onNativeAdLoadFail: ${p0?.desc}" )
-                    p0?.printStackTrace()
-                    dataBinding.adContainer.visibility = View.VISIBLE
+            val adLoader = AdLoader.Builder(this, adID)
+                .forUnifiedNativeAd { unifiedNativeAd ->
+                    val styles = NativeTemplateStyle.Builder().withMainBackgroundColor(
+                        ColorDrawable(
+                            Color.WHITE
+                        )
+                    ).build()
+                    dataBinding.templateView.setStyles(styles)
+                    dataBinding.templateView.setNativeAd(unifiedNativeAd)
                 }
-
-                override fun onNativeAdLoaded() {
-                    Log.d(tag, "onNativeAdLoaded:--- ")
-                    showAd()
-                }
-
-            })
-            val localMap: MutableMap<String, Any> = mutableMapOf()
-            val adViewWidth = screenWidth() - dip2px(10) * 2
-            val adViewHeight = dip2px(300)
-            localMap[ATAdConst.KEY.AD_WIDTH] = adViewWidth
-            localMap[ATAdConst.KEY.AD_HEIGHT] = adViewHeight
-            atNatives.setLocalExtra(localMap)
-            if(anyThinkNativeAdView == null){
-                anyThinkNativeAdView = ATNativeAdView(this)
-            }
-            atNatives.makeAdRequest()
-
-            if(dataBinding.adContainer.childCount == 1){
-                dataBinding.adContainer.addView(anyThinkNativeAdView,0,
-                    FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,adViewHeight))
-            }
-        }
-    }
-
-    fun showAd(){
-        val nativeAd: NativeAd? = atNatives.getNativeAd()
-        if (nativeAd != null) {
-//            if (mNativeAd != null) {
-//                mNativeAd.destory()
-//            }
-//            nativeAd = nativeAd
-            nativeAd.setNativeEventListener(object : ATNativeEventListener {
-                override fun onAdImpressed(view: ATNativeAdView, entity: ATAdInfo) {
-                    Log.i(tag, "native ad onAdImpressed:\n$entity")
-                }
-
-                @SuppressLint("CheckResult")
-                override fun onAdClicked(view: ATNativeAdView, entity: ATAdInfo) {
-                    Log.i(tag, "native ad onAdClicked:\n$entity")
-                    val map = mutableMapOf<String, String>()
-                    map["ver"] = App.context?.getVersionName() ?: ""
-                    map["sip"] = UserManager.get().user?.sip ?: ""
-                    map["type"] = AdManager.ad_call_result
-                    map["update_time"] = System.currentTimeMillis().toString()
-                    map["ts"] = System.currentTimeMillis().toString()
-                    Api.getApiService().addClick(map)
-                        .compose(RxUtils.applySchedulers())
-                        .subscribe({
-                            if (it.isSuccessful) {
-                                DBHelper.get().addAdClickCount()
-                            }
-                        }, {
-                            it.printStackTrace()
-                        })
-                }
-
-                override fun onAdVideoStart(view: ATNativeAdView) {
-                    Log.i(tag, "native ad onAdVideoStart")
-                }
-
-                override fun onAdVideoEnd(view: ATNativeAdView) {
-                    Log.i(tag, "native ad onAdVideoEnd")
-                }
-
-                override fun onAdVideoProgress(view: ATNativeAdView, progress: Int) {
-                    Log.i(tag, "native ad onAdVideoProgress:$progress")
-                }
-            })
-            nativeAd.setDislikeCallbackListener(object : ATNativeDislikeListener() {
-                override fun onAdCloseButtonClick(view: ATNativeAdView, entity: ATAdInfo) {
-                    Log.i(tag, "native ad onAdCloseButtonClick:")
-                    if (view.parent != null) {
-                        (view.parent as ViewGroup).removeView(view)
+                .withAdListener(object : AdListener() {
+                    override fun onAdFailedToLoad(p0: LoadAdError?) {
+                        println("原生广告加载失败 ${p0?.message} ${p0?.cause} ${p0?.code}")
                     }
-                }
-            })
-            val renderer = NativeDemoRender(this)
-            try {
-                nativeAd.renderAdView(anyThinkNativeAdView, renderer)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            anyThinkNativeAdView!!.visibility = View.VISIBLE
-            nativeAd.prepare(anyThinkNativeAdView, renderer.getClickView(), null)
+
+                    override fun onAdLoaded() {
+                        dataBinding.templateView.visibility = View.VISIBLE
+                        dataBinding.progressBar.visibility = View.GONE
+                    }
+                })
+                .build()
+
+            adLoader.loadAd(AdRequest.Builder().build())
         }
     }
 
-    private fun getNativeAdID():String{
+    fun getNativeAdID():String{
         var adID = ""
         if(AdManager.get().adData != null){
-            for(i in AdManager.get().adData!!.ads.indices){
-                if(AdManager.get().adData!!.ads[i].adPlaceID == AdManager.ad_call_result){
+            for(i in 0 until AdManager.get().adData!!.ads.size){
+                if(AdManager.get().adData!!.ads[i].adPlaceID == "voip_ysgd"){
                     adID = AdManager.get().adData!!.ads[i].adSources[0].adPlaceID
                     break
                 }

@@ -79,7 +79,7 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
         })
 
         if(onlyShowAd){
-            AdManager.get().showSplashInterstitialAd(this)
+            AdManager.get().showSplashInterstitialAd()
         }else {
             getAdData()
         }
@@ -98,7 +98,7 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
 
     override fun onStop() {
         super.onStop()
-        if(AdManager.get().interstitialAdMap[AdManager.ad_splash]?.isAdReady == false){
+        if(AdManager.get().interstitialAdMap[AdManager.ad_splash]?.isLoaded == false){
             println("$tag onStop 加载广告")
             AdManager.get().loadInterstitialAd(AdManager.ad_splash)
         }
@@ -240,7 +240,7 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
         if(!adLoaded) {
             adLoaded = true
             if(!isFirst) {
-                AdManager.get().showSplashInterstitialAd(this)
+                AdManager.get().showSplashInterstitialAd()
             }
             AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
             AdManager.get().loadInterstitialAd(AdManager.ad_point)
@@ -249,12 +249,12 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
         }
     }
 
-    override fun onAdLoadFail() {
-        LogUtils.d(tag,"启动页广告加载失败，进入首页")
-        Dispatcher.dispatch(this) {
-            navigate(MainActivity::class.java)
-            defaultAnimate()
-        }.go()
-        finish()
-    }
+//    override fun onAdLoadFail() {
+//        LogUtils.d(tag,"启动页广告加载失败，进入首页")
+//        Dispatcher.dispatch(this) {
+//            navigate(MainActivity::class.java)
+//            defaultAnimate()
+//        }.go()
+//        finish()
+//    }
 }

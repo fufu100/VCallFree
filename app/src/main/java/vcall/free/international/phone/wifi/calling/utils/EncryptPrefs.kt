@@ -36,12 +36,6 @@ class EncryptPrefs {
             App.context!!, EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM)
 
-    fun save(){
-        val encryptedSharedPreferences  = EncryptedSharedPreferences.create("my_secret_prefs1",
-            advancedKeyAlias,App.context!!,EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM)
-        encryptedSharedPreferences.edit().putString("key","86101100").apply()
-    }
-
     fun getKey(key:String):String{
         return getEncryptedPreferences().getString(key,"")?:""
     }
