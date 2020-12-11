@@ -23,15 +23,16 @@
             android:text="@string/don_t_forget_to_set_phone_number" />
 
         <FrameLayout
+            android:id="@+id/adContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        <com.google.android.ads.nativetemplates.TemplateView
-            android:id="@+id/templateView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"
-            app:gnt_template_type="@layout/gnt_medium_template_view" />
+<!--        <com.google.android.ads.nativetemplates.TemplateView-->
+<!--            android:id="@+id/templateView"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:visibility="invisible"-->
+<!--            app:gnt_template_type="@layout/gnt_medium_template_view" />-->
 
         <ProgressBar
             android:id="@+id/progressBar"

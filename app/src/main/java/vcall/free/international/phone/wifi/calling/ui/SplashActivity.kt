@@ -51,7 +51,7 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
         window?.statusBarColor = Color.TRANSPARENT
         if(!onlyShowAd) {
             if (!isFirst) {
-                startCountDownTime(7)
+//                startCountDownTime(7)
             } else {
                 AgreementDialog(this) {
                     if (it) {
@@ -63,7 +63,7 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
                 }.show()
             }
         }else{
-            startCountDownTime(7)
+//            startCountDownTime(7)
         }
 
         conn = object : ServiceConnection {
@@ -79,7 +79,7 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
         })
 
         if(onlyShowAd){
-            AdManager.get().showSplashInterstitialAd()
+            AdManager.get().showSplashInterstitialAd(this)
         }else {
             getAdData()
         }
@@ -98,7 +98,10 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
 
     override fun onStop() {
         super.onStop()
-
+        if(AdManager.get().interstitialAdMap[AdManager.ad_splash]?.isAdReady == false){
+            println("$tag onStop 加载广告")
+            AdManager.get().loadInterstitialAd(AdManager.ad_splash)
+        }
     }
 
     override fun onDestroy() {
@@ -208,7 +211,6 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
 
     override fun onAdClose() {
         isAdShowing = false
-        AdManager.get().loadInterstitialAd(AdManager.ad_splash)
         if(onlyShowAd){
             finish()
         }else {
@@ -238,12 +240,21 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
         if(!adLoaded) {
             adLoaded = true
             if(!isFirst) {
-                AdManager.get().showSplashInterstitialAd()
+                AdManager.get().showSplashInterstitialAd(this)
             }
             AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
             AdManager.get().loadInterstitialAd(AdManager.ad_point)
             AdManager.get().loadInterstitialAd(AdManager.ad_close)
             AdManager.get().loadRewardedAd()
         }
+    }
+
+    override fun onAdLoadFail() {
+        LogUtils.d(tag,"启动页广告加载失败，进入首页")
+        Dispatcher.dispatch(this) {
+            navigate(MainActivity::class.java)
+            defaultAnimate()
+        }.go()
+        finish()
     }
 }

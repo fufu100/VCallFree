@@ -202,8 +202,8 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         )
         UserManager.get().user!!.points -= coin_cost
         DBHelper.get().addCallRecord(record!!)
-        if(AdManager.get().interstitialAdMap[AdManager.ad_close]?.isLoaded == true){
-            AdManager.get().showCloseInterstitialAd()
+        if(AdManager.get().interstitialAdMap[AdManager.ad_close]?.isAdReady == true){
+            AdManager.get().showCloseInterstitialAd(this)
             isAdShowing = true
         }else{
             AdManager.get().loadInterstitialAd(AdManager.ad_close)
@@ -404,9 +404,9 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
     }
 
     inner class ToneGenerateHelper {
-        var toneGenerator: org.pjsip.pjsua2.ToneGenerator? = org.pjsip.pjsua2.ToneGenerator()
-        var toneDesc = ToneDesc()
-        var toneDescVector = ToneDescVector()
+        var toneGenerator: org.pjsip.pjsua2.ToneGenerator? = null
+        lateinit var toneDesc:ToneDesc
+        lateinit var toneDescVector:ToneDescVector
 
         val kSPRingbackFrequency1 = 400
         val kSPRingbackFrequency2 = 480
@@ -416,14 +416,16 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         val kSPRingbackInterval = 4000
 
         fun startRingingTone() {
-            toneDesc.freq1 = kSPRingbackFrequency1.toShort()
-            toneDesc.freq2 = kSPRingbackFrequency2.toShort()
-            toneDesc.on_msec = kSPRingbackOnDuration.toShort()
-            toneDesc.off_msec = kSPRingbackOffDuration.toShort()
-
-            toneDescVector.add(toneDesc)
-
             try {
+                toneDescVector = ToneDescVector()
+                toneDesc = ToneDesc()
+                toneDesc.freq1 = kSPRingbackFrequency1.toShort()
+                toneDesc.freq2 = kSPRingbackFrequency2.toShort()
+                toneDesc.on_msec = kSPRingbackOnDuration.toShort()
+                toneDesc.off_msec = kSPRingbackOffDuration.toShort()
+                toneDescVector.add(toneDesc)
+
+                toneGenerator = org.pjsip.pjsua2.ToneGenerator()
                 toneGenerator!!.createToneGenerator()
                 toneGenerator!!.play(toneDescVector, true)
                 toneGenerator!!.startTransmit(MyApp.ep.audDevManager().playbackDevMedia)
@@ -459,6 +461,10 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
     }
 
     override fun onAdLoaded() {
+
+    }
+
+    override fun onAdLoadFail() {
 
     }
 

@@ -9,6 +9,7 @@ object PlayCountTable {
     val COUNT = "count"
     val CREDITS = "credits"
     val AD_CLICK_COUNT = "ad_click_count"
+    val CLICK_COUNT_LIMIT_TIME = "click_count_limit_time"
     val DATE = "date"
 
     fun newCreateTableString(): String {
@@ -18,6 +19,7 @@ object PlayCountTable {
             .append(COUNT).append(" integer,")
             .append(CREDITS).append(" integer,")
             .append(AD_CLICK_COUNT).append(" integer,")
+            .append(CLICK_COUNT_LIMIT_TIME).append(" integer,")
             .append(DATE).append(" varchar")
             .append(")")
         return sb.toString()

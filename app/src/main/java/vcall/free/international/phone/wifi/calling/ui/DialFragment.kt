@@ -32,7 +32,7 @@ import vcall.free.international.phone.wifi.calling.utils.*
 /**
  * Created by lyf on 2020/5/22.
  */
-class DialFragment:BaseDataBindingFragment<FragmentDialBinding>() {
+class DialFragment:BaseDataBindingFragment<FragmentDialBinding>(),CallService.RegStateChange {
     private lateinit var conn: ServiceConnection
     private var callBinder: CallService.CallBinder? = null
     private var dialEffect: DialEffectHelper? = null
@@ -51,6 +51,11 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>() {
             override fun onServiceDisconnected(name: ComponentName?) {}
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 callBinder = service as CallService.CallBinder
+                callBinder?.setRegStateChangeListener(this@DialFragment)
+                println("$tag onServiceConnected ${callBinder==null} ${callBinder?.getRegStatus()}")
+                if(callBinder?.getRegStatus() != 1){
+                    dataBinding.call.setImageResource(R.drawable.ic_call2)
+                }
             }
         }
         context?.bindService(Intent(context, CallService::class.java), conn, Context.BIND_AUTO_CREATE)
@@ -79,10 +84,13 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>() {
                 requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO),1)
             }
         }
+        println("$tag onResume ${callBinder==null} ${callBinder?.getRegStatus()}")
+
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        callBinder?.setRegStateChangeListener(null)
         context?.unbindService(conn)
     }
 
@@ -128,7 +136,6 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>() {
         }
         if(UserManager.get().user == null){
             LogUtils.println("用户注册失败")
-
             return
         }
         try {
@@ -227,6 +234,14 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>() {
         LogUtils.println("DialFragment onRequestPermissionsResult $requestCode $permissions $grantResults")
         if(grantResults[0] == PackageManager.PERMISSION_GRANTED && requestCode == 2){
             call(null)
+        }
+    }
+
+    override fun onRegStateChange(state: Int) {
+        if(state == 1) {
+            dataBinding.call.setImageResource(R.drawable.ic_call)
+        }else{
+            dataBinding.call.setImageResource(R.drawable.ic_call2)
         }
     }
 }

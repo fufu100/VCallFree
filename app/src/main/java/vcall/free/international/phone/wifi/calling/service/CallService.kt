@@ -41,6 +41,7 @@ class CallService:Service(),MyAppObserver{
     private lateinit var connectivityManager:ConnectivityManager
 //    private lateinit var mInterstitialAd: InterstitialAd
     val callStateChangeListeners:MutableList<CallStateChange> = mutableListOf()
+    var regStateChangeListener:RegStateChange? = null
     override fun onBind(intent: Intent?): IBinder? {
         return CallBinder()
     }
@@ -233,6 +234,10 @@ class CallService:Service(),MyAppObserver{
 //            }
         }
 
+        fun setRegStateChangeListener(listener: RegStateChange?){
+            regStateChangeListener = listener
+        }
+
         fun getRegStatus():Int{
             return regStatus
         }
@@ -330,6 +335,7 @@ class CallService:Service(),MyAppObserver{
         }else{
             regStatus = 2
         }
+        regStateChangeListener?.onRegStateChange(regStatus)
     }
 
     override fun notifyCallState(call: MyCall?) {
@@ -368,5 +374,9 @@ class CallService:Service(),MyAppObserver{
 
     interface CallStateChange{
         fun onCallStateChange(callInfo: CallInfo?)
+    }
+
+    interface RegStateChange{
+        fun onRegStateChange(state:Int)
     }
 }

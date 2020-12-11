@@ -250,8 +250,8 @@
             app:constraint_referenced_ids="like,hated,likeIv,hatedIv,bg,tip"/>
 
 
-        <com.google.android.ads.nativetemplates.TemplateView
-            android:id="@+id/templateView"
+        <FrameLayout
+            android:id="@+id/adContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -259,17 +259,16 @@
             app:layout_constraintTop_toBottomOf="@id/flag"
             android:layout_marginTop="28dp"
             android:visibility="gone"
-            app:gnt_template_type="@layout/gnt_medium_template_view" />
+            app:gnt_template_type="@layout/gnt_medium_template_view" >
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:visibility="gone"
+                android:layout_gravity="center"/>
+        </FrameLayout>
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="@id/templateView"
-            app:layout_constraintEnd_toEndOf="@id/templateView"
-            app:layout_constraintTop_toTopOf="@id/templateView"
-            app:layout_constraintBottom_toBottomOf="@id/templateView"
-            android:layout_gravity="center"/>
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

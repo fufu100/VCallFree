@@ -35,6 +35,7 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import com.newmotor.x5.db.DBHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.lib.App
@@ -205,7 +206,7 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
         appUpdateInfoTask.addOnSuccessListener {appUpdateInfo ->
             println("appUpdateInfo.updateAvailability()=${appUpdateInfo.updateAvailability()}")
-            toast("addOnSuccessListener ${appUpdateInfo.updateAvailability()}")
+//            toast("addOnSuccessListener ${appUpdateInfo.updateAvailability()}")
             if(appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)){
                 appUpdateManager.registerListener(this)
                 appUpdateManager.startUpdateFlowForResult(appUpdateInfo,AppUpdateType.FLEXIBLE,this,2)
@@ -215,10 +216,12 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
         }
         appUpdateInfoTask.addOnFailureListener {
             it.printStackTrace()
-            toast(it.message?:"addOnFailureListener")
+//            toast(it.message?:"addOnFailureListener")
         }
 
-        ATSDK.integrationChecking(applicationContext)
+        if(LogUtils.LOG_ON) {
+            ATSDK.integrationChecking(applicationContext)
+        }
     }
 
 
@@ -259,7 +262,7 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
 
     override fun onResume() {
         super.onResume()
-        testATAd()
+//        testATAd()
     }
 
     override fun onDestroy() {

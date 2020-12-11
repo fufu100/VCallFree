@@ -29,7 +29,7 @@
         android:textColor="@color/text_normal"
         android:textSize="24sp"/>
 
-    <vcall.free.international.phone.wifi.calling.widget.CircleProgressBar
+    <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="50dp"
         android:layout_height="50dp"
