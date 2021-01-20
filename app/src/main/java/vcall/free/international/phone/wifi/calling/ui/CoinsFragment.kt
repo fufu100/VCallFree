@@ -340,7 +340,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
             }, {
                 loading.dismiss()
-                if(type == "wheel") {
+                if(type == "wheel" && goIv != null) {
                     goIv.isClickable = true
                 }
                 context?.toast(R.string.net_error)

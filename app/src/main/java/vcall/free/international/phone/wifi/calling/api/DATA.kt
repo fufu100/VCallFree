@@ -24,7 +24,7 @@ data class Record(
     val iso:String,
     val code:String,
     val prefix:String,
-    val username: String?,
+    val username: String,
     val userPhoto:Long?,
     val addTime:Long,
     val duration:Long,
