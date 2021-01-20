@@ -232,7 +232,7 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>(),CallService.Re
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         LogUtils.println("DialFragment onRequestPermissionsResult $requestCode $permissions $grantResults")
-        if(grantResults[0] == PackageManager.PERMISSION_GRANTED && requestCode == 2){
+        if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED && requestCode == 2){
             call(null)
         }
     }

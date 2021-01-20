@@ -119,21 +119,6 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
             }
             true
         }
-        LogUtils.println("MainActivity firstInstallTime=${getFirstInstallTime()} ")
-        LogUtils.println("MainActivity simCountryIso=${getSimCountryIso()} ")
-        LogUtils.println("MainActivity simSerialNum=${getSimSerialNumber()} ")
-        LogUtils.println("MainActivity androidID=${getAndroidID()} ")
-        LogUtils.println("MainActivity imei=${getIMEI()} ")
-        LogUtils.println("MainActivity build Id=${Build.ID} ")
-        LogUtils.println("MainActivity build user=${Build.USER} ")
-        LogUtils.println("MainActivity getSerial=${getSerial()} ")
-        LogUtils.println("MainActivity getDeviceId=${getDeviceId()} ")
-
-        val uuid = UUID(0L, 1L)
-        LogUtils.println("uuid=$uuid")
-        val uuid2 = UUID(0L, 1L)
-        LogUtils.println("uuid2=$uuid2")
-        LogUtils.println("uuid2=${Build.SERIAL}")
         loading = Loading(this)
 
         conn = object : ServiceConnection {
@@ -146,7 +131,7 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
             }
         }
         bindService(Intent(this, CallService::class.java), conn, Context.BIND_AUTO_CREATE)
-        test()
+        signup()
 
         val phoneNumberUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
 //        phoneNumberUtil.getRegionCodeForNumber(Phonenumber.PhoneNumber())
@@ -232,7 +217,7 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
         }
     }
 
-    private fun test() {
+    private fun signup() {
         loading.show()
         val map = mutableMapOf<String,String>()
         App.requestMap["from"] = AdManager.get().referrer
@@ -258,11 +243,6 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
                 loading.dismiss()
             })
         )
-    }
-
-    override fun onResume() {
-        super.onResume()
-//        testATAd()
     }
 
     override fun onDestroy() {

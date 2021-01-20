@@ -71,8 +71,9 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         audioManager.isSpeakerphoneOn = false
         if (!LogUtils.test) {
             sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-            val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
-            maxmiumDistance = sensor.maximumRange
+            val sensor:Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
+            maxmiumDistance = sensor?.maximumRange?:10f
+            println("$tag maxmiumDistance=$maxmiumDistance")
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
         }
         conn = object : ServiceConnection {
@@ -189,9 +190,9 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             0,
             0,
             phone!!,
-            UserManager.get().country!!.iso,
-            UserManager.get().country!!.code,
-            UserManager.get().country!!.prefix,
+            UserManager.get().country?.iso?:"",
+            UserManager.get().country?.code?:"",
+            UserManager.get().country?.prefix?:"",
             username,
             0L,
             System.currentTimeMillis(),
