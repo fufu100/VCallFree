@@ -207,12 +207,17 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             AdManager.get().showCloseInterstitialAd(this)
             isAdShowing = true
         }else{
-            AdManager.get().loadInterstitialAd(AdManager.ad_close)
-            Dispatcher.dispatch(this) {
-                navigate(CallResultActivity::class.java)
-                extra("record", record!!)
-                defaultAnimate()
-            }.go()
+            try {
+                AdManager.get().loadInterstitialAd(AdManager.ad_close)
+                Dispatcher.dispatch(this) {
+                    navigate(CallResultActivity::class.java)
+                    extra("record", record!!)
+                    defaultAnimate()
+                }.go()
+            }catch (e:Exception){
+                e.printStackTrace()
+            }
+
             finish()
         }
     }

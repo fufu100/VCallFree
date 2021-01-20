@@ -89,7 +89,9 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>(),
                         }
                         delay(1000)
                     }
-                    dataBinding.btn.text = "Send Code"
+                    withContext(Dispatchers.Main){
+                        dataBinding.btn.text = "Send Code"
+                    }
                 }
             }
         }

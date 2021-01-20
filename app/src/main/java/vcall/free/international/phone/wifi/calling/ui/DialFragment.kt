@@ -91,7 +91,9 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>(),CallService.Re
     override fun onDestroy() {
         super.onDestroy()
         callBinder?.setRegStateChangeListener(null)
-        context?.unbindService(conn)
+        if (::conn.isInitialized) {
+            context?.unbindService(conn)
+        }
     }
 
     fun bgClick(v:View){}

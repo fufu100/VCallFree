@@ -118,7 +118,7 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
             val phoneId = phoneCursor.getLong(4)
             val contactId = phoneCursor.getLong(0)
             val phone = phoneCursor.getString(2)
-            val username = phoneCursor.getString(1)
+            val username = phoneCursor.getString(1)?:""
             val photoId = phoneCursor.getLong(3)
             list.add(Contact(phoneId,contactId, username, phone, photoId))
 //            println("$fragmentTag ${phoneCursor.getString(5)}")
