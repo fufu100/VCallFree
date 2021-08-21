@@ -43,7 +43,7 @@ class RateDialog(val activity: Activity):Dialog(activity,R.style.CustomDialog) {
 
         ShareCompat.IntentBuilder.from(activity).setType("message/rfc822")
             .addEmailTo("VCallFree_Feedback@hotmail.com")
-            .setSubject("unlike")
+            .setSubject("VCallFree")
             .setHtmlText(str)
             .setChooserTitle("Choose email")
             .startChooser();

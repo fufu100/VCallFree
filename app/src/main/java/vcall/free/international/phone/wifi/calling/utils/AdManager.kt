@@ -31,9 +31,9 @@ class AdManager {
     companion object {
         val tag = "anythink AdManager"
         val ad_splash = "topon_startpage"
-        val ad_preclick = "toponon_perclick"
+        val ad_preclick = "topon_preclick"
         val ad_point = "topon_jifen"
-        val ad_close = "toponon_close"
+        val ad_close = "topon_close"
         val ad_rewarded = "topon_rewardvideo"
         val ad_quite = "topon_ystc"
         val ad_call_result = "topon_ysclose"
@@ -56,6 +56,8 @@ class AdManager {
     var interstitialAdMap: MutableMap<String, ATInterstitial> = mutableMapOf()
     var rewardedAd: ATRewardVideoAd? = null
     var referrer: String = ""
+    var showLuckyCredits = false
+    var interstitialAdLoadStatus :MutableMap<String,Int> = mutableMapOf()
 
     var interstitialAdListener: MutableList<VCallAdListener> = mutableListOf()
     var rewardedAdListener: MutableList<VCallAdListener> = mutableListOf()
@@ -138,8 +140,9 @@ class AdManager {
                 if (adData!!.ads[i].adPlaceID == ad_rewarded && position < adData!!.ads[i].adSources.size) {
                     rewardedAd =
                         ATRewardVideoAd(App.context, adData!!.ads[i].adSources[position].adPlaceID)
-//                    rewardedAd?.setAdListener(rewardedListener)
+                    rewardedAd?.setAdListener(rewardedListener)
                     rewardedAd?.load()
+                    interstitialAdLoadStatus[ad_rewarded] = 0
                     break
                 }
             }
@@ -148,17 +151,17 @@ class AdManager {
 
     fun loadInterstitialAd(category: String, position: Int = 0) {
         val count = DBHelper.get().getAdClickCount()
-        LogUtils.println("loadInterstitialAd count=$count")
+        LogUtils.println("loadInterstitialAd count=$count $category $position")
         if (count >= 10) {
             return
         }
         val adListener = MyAdListener(category, position)
         if (adData != null) {
             for (i in adData!!.ads.indices) {
-                LogUtils.println("$tag loadInterstitialAd $category $position $i")
+                LogUtils.println("$tag loadInterstitialAd ${adData!!.ads[i].adPlaceID} $category $position $i")
                 if (adData!!.ads[i].adPlaceID == category  ) {
                     if(position < adData!!.ads[i].adSources.size) {
-                        LogUtils.println("$tag loadInterstitialAd 加载广告")
+                        LogUtils.println("$tag loadInterstitialAd 加载广告 $category $position $i")
                         interstitialAdMap[category] =
                             ATInterstitial(
                                 App.context,
@@ -166,6 +169,7 @@ class AdManager {
                             )
                         interstitialAdMap[category]?.setAdListener(adListener)
                         interstitialAdMap[category]?.load()
+                        interstitialAdLoadStatus[category] = 0
                     }else{
                         interstitialAdListener.forEach {
                             it.onAdLoadFail()
@@ -190,11 +194,16 @@ class AdManager {
             p0: com.anythink.core.api.AdError?,
             p1: ATAdInfo?
         ) {
-
+            println("$tag onRewardedVideoAdPlayFailed----")
+            p0?.printStackTrace()
         }
 
         override fun onRewardedVideoAdLoaded() {
-            Log.d(tag, "onRewardedAdLoaded: ")
+            Log.d(tag, "onRewardedAdLoaded adsourceIndex: ${rewardedAd?.checkAdStatus()?.atTopAdInfo?.adsourceIndex}")
+            interstitialAdLoadStatus[ad_rewarded] = 1
+            if(rewardedAd?.checkAdStatus()?.atTopAdInfo?.adsourceIndex == 0 || rewardedAd?.checkAdStatus()?.atTopAdInfo?.adsourceIndex == 1){
+                showLuckyCredits = true
+            }
             rewardedAdListener.forEach {
                 it.onAdLoaded()
             }
@@ -206,9 +215,10 @@ class AdManager {
 
         override fun onRewardedVideoAdFailed(p0: com.anythink.core.api.AdError?) {
             Log.d(tag, "onRewardedAdFailedToLoad: $p0")
+            interstitialAdLoadStatus[ad_rewarded] = 2
             rewardedAd = null
             GlobalScope.launch {
-                delay(1000)
+                delay(10000)
                 withContext(Dispatchers.Main) {
                     loadRewardedAd(position + 1)
                 }
@@ -227,8 +237,9 @@ class AdManager {
     inner class MyAdListener(var category: String, var position: Int) : ATInterstitialListener {
         override fun onInterstitialAdLoadFail(p0: com.anythink.core.api.AdError?) {
             Log.d(tag, "onAdFailedToLoad-- $p0 $category")
+            interstitialAdLoadStatus[category] = 2
             GlobalScope.launch {
-                delay(1000)
+                delay(10000)
                 withContext(Dispatchers.Main) {
                     loadInterstitialAd(category, position + 1)
                 }
@@ -237,9 +248,20 @@ class AdManager {
 
         override fun onInterstitialAdLoaded() {
             Log.d(tag, "onAdLoaded-- $category ${interstitialAdListener.size}")
+            interstitialAdLoadStatus[category] = 1
+//            if(category == ad_point){
+//                if(interstitialAdMap[category]?.checkAdStatus()?.atTopAdInfo?.adsourceIndex == 0 || interstitialAdMap[category]?.checkAdStatus()?.atTopAdInfo?.adsourceIndex == 1){
+//                    showLuckyCredits = true
+//                }
+//            }
             interstitialAdListener.forEach {
                 it.onAdLoaded()
             }
+
+            println("加载的广告位置是 ${interstitialAdMap[category]?.checkAdStatus()?.atTopAdInfo?.adsourceIndex} $category $showLuckyCredits")
+//            if ( == 0) {
+//
+//            }
         }
 
         override fun onInterstitialAdVideoEnd(p0: ATAdInfo?) {
@@ -248,6 +270,11 @@ class AdManager {
 
         override fun onInterstitialAdShow(p0: ATAdInfo?) {
             Log.d(tag, "onAdOpened-- $category")
+            if(category == ad_point && showLuckyCredits){
+                if(p0?.adsourceIndex == 0 || p0?.adsourceIndex == 1) {
+                    showLuckyCredits = false
+                }
+            }
             interstitialAdListener.forEach {
                 it.onAdShow()
             }
@@ -259,10 +286,11 @@ class AdManager {
 
         @SuppressLint("CheckResult")
         override fun onInterstitialAdClicked(p0: ATAdInfo?) {
+            val type = category.replace("topon_","").replace("page","")
             val map = mutableMapOf<String, String>()
             map["ver"] = App.context?.getVersionName() ?: ""
             map["sip"] = UserManager.get().user?.sip ?: ""
-            map["type"] = category
+            map["type"] = type
             map["update_time"] = System.currentTimeMillis().toString()
             map["ts"] = System.currentTimeMillis().toString()
             Api.getApiService().addClick(map)

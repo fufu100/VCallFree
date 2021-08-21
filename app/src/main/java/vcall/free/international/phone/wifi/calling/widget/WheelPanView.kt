@@ -23,7 +23,7 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
     val panColors = intArrayOf(0xFFF5CB57.toInt(),0xFFF2A93C.toInt())
     val panColors2 = intArrayOf(0xFFEEAB41.toInt(),0xFFED9035.toInt())
     val count = 8
-    val texts = arrayOf("thanks","+5","+10","+20","+50","+100","+200","+500")
+    val texts = arrayOf("+5","+10","+20","+50","+100","+200","+5","+500")
 //    val coinDrawable: Drawable? = context.getDrawable(R.drawable.ic_coin2)
     var rect:RectF = RectF()
     val textPath:Path = Path()

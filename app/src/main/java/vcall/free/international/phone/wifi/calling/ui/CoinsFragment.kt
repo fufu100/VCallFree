@@ -1,11 +1,11 @@
 package vcall.free.international.phone.wifi.calling.ui
 
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
+import android.animation.*
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -13,15 +13,10 @@ import androidx.appcompat.app.AlertDialog
 import com.anythink.core.api.ATAdInfo
 import com.anythink.core.api.AdError
 import com.anythink.rewardvideo.api.ATRewardVideoListener
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.rewarded.RewardItem
-import com.google.android.gms.ads.rewarded.RewardedAd
-import com.google.android.gms.ads.rewarded.RewardedAdCallback
-import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.newmotor.x5.db.DBHelper
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_tab_coins.*
 import kotlinx.coroutines.*
+import vcall.free.international.phone.wifi.calling.BuildConfig
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.databinding.FragmentTabCoinsBinding
@@ -33,9 +28,6 @@ import vcall.free.international.phone.wifi.calling.widget.CoinLayout
 import vcall.free.international.phone.wifi.calling.widget.Loading
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
-import kotlin.math.max
 import kotlin.math.min
 
 /**
@@ -48,6 +40,8 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
     var adState = -1
     var pointsToAdd = 0
     lateinit var loading:Loading
+    var animator: ObjectAnimator? = null
+    var currentPlayTime = 0L
     override fun getLayoutResId(): Int = R.layout.fragment_tab_coins
     override fun initView(v: View) {
         dataBinding.fragment = this
@@ -59,7 +53,6 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         dataBinding.playCountTv.text = playCount.toString()
         AdManager.get().interstitialAdListener.add(this)
         AdManager.get().rewardedAdListener.add(this)
-
 
     }
 
@@ -94,9 +87,21 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         }
 
         if(context?.isNetworkConnected() == false){
+            println("$tag 没有网络")
             dataBinding.goIv.isClickable = false
             dataBinding.goIv.setImageResource(R.drawable.ic_go2)
         }
+
+        val format = SimpleDateFormat("yyyyMMdd", Locale.ENGLISH)
+        val lastCheckDay = prefs.getStringValue("last_check_day","")
+        val today = format.format(Date())
+        if(today == lastCheckDay){
+            dataBinding.checkInBtn.setBackgroundResource(R.drawable.bg_gray_round)
+        }else{
+            dataBinding.checkInBtn.setBackgroundResource(R.drawable.bg_blue_round)
+        }
+
+        refreshAdStatusLayout()
     }
 
     override fun onDestroy() {
@@ -180,6 +185,26 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         }.go()
     }
 
+    fun luckyCredits(v: View){
+        if(AdManager.get().showLuckyCredits) {
+            GameResultDialog(context!!, {
+                if (AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == true) {
+                    adState = 10
+                    AdManager.get().showPointInterstitialAd(activity)
+                }
+            }).apply {
+                val r = Random()
+                pointsToAdd = (r.nextInt(5) + 5) * 10
+                setResult("+$pointsToAdd")
+            }.show()
+            currentPlayTime = animator!!.currentPlayTime
+            animator?.cancel()
+            AdManager.get().showLuckyCredits = false
+        }
+
+
+    }
+
     fun signIn(v:View){
         CheckInDialog(context!!){
 //            AdManager.get().showPointInterstitialAd()
@@ -216,12 +241,16 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                 adState = 0
                 pointsToAdd = 0
                 //如果加载好了preclick广告则先展示广告，如果没加载到就转到thanks
-                LogUtils.println("$fragmentTag start--${AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady}")
-                if (AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady == true) {
-                    AdManager.get().showPreclickInterstitialAd(activity)
-                } else {
-                    AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
-                    wheelStartRotate()
+                if(isDeviceInVPN() && prefs.getBooleanValue("show_tip_vpn",true)){
+                    showVPNDialog()
+                }else{
+                    LogUtils.println("$fragmentTag start--${AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady}")
+                    if (AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady == true) {
+                        AdManager.get().showPreclickInterstitialAd(activity)
+                    } else {
+                        AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
+                        wheelStartRotate(1000)
+                    }
                 }
             }else{
                 LogUtils.println("过期了，重新获取")
@@ -244,25 +273,47 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         }
     }
 
+    private fun showVPNDialog(){
+        prefs.save("show_tip_vpn",false)
+        AlertDialog.Builder(context!!).setMessage(R.string.tip_vpn)
+            .setPositiveButton(R.string.confirm){_,_ ->
+                LogUtils.println("$fragmentTag start--${AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady}")
+                if (AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady == true) {
+                    AdManager.get().showPreclickInterstitialAd(activity)
+                } else {
+                    AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
+                    wheelStartRotate(1000)
+                }
+            }
+            .create()
+            .show()
+    }
+
     private fun wheelStartRotate(duration:Long = 0){
         var endPos = getPoints()
         if(adState == 0){
             LogUtils.println("$fragmentTag adState=0")
-            endPos = 0
+//            endPos = 0
 //            AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
         }
-        if(AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == false && AdManager.get().rewardedAd?.isAdReady == false){
+        if((AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady != true) and (AdManager.get().rewardedAd?.isAdReady != true)){
             LogUtils.println("$fragmentTag 积分广告还没加载")
-            endPos = 0
+            if(AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady == true) {
+                endPos = 0
+            }else{
+                endPos = 0
+            }
             AdManager.get().loadInterstitialAd(AdManager.ad_point)
-        }else if(AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == false && AdManager.get().rewardedAd?.isAdReady == true){
-            endPos = 4//积分广告没加载 激励视频加载了，给50积分
+        }else if((AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady != true) and (AdManager.get().rewardedAd?.isAdReady == true)){
+            endPos = 3//积分广告没加载 激励视频加载了，给50积分
             AdManager.get().loadInterstitialAd(AdManager.ad_point)
+        }else if((AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == true) and (AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady != true)){
+            endPos = 0//积分广告加载了，预触发广告没加载，给5积分，2021-2-10新增
         }
         if(endPos == 0){
             adState = -1
         }
-        println("CoinFragment wheelStartRotate endPos=$endPos ,${AdManager.get().interstitialAdMap[AdManager.ad_point]} ${AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady}")
+        println("CoinFragment wheelStartRotate endPos=$endPos ,${AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady} ${AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady} ${AdManager.get().rewardedAd?.isAdReady}")
         val animatorSet = AnimatorSet()
         animatorSet.playTogether(
             ObjectAnimator.ofFloat(dataBinding.goIv, "scaleX", 1f, 1.2f, 0.9f, 1.0f),
@@ -273,40 +324,49 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         animatorSet.duration = 300
         animatorSet.start()
         dataBinding.panView.startRotate(PointStrategy.points.size - endPos + 1,duration) {
-            if (endPos != 0) {
+//            if (endPos != 0) {
                 showObtainCoinsAlert(endPos)
-            }else{
-//                goIv.isClickable = true
-                startTimeCount()
-            }
+//            }else{
+////                goIv.isClickable = true
+//                startTimeCount()
+//            }
         }
         goIv.isClickable = false
     }
 
     private fun showObtainCoinsAlert(pos:Int){
-        GameResultDialog(context!!,{
-            if(AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == false && AdManager.get().rewardedAd?.isAdReady == true){
-                pointsToAdd = PointStrategy.points[pos]
+        if(context != null) {
+            GameResultDialog(context!!, {
+                if ((AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady != true) and (AdManager.get().rewardedAd?.isAdReady == true)) {
+                    pointsToAdd = PointStrategy.points[pos]
+                    AdManager.get().rewardedAd?.setAdListener(rewardedAdCallback)
+                    AdManager.get().rewardedAd?.show(activity)
+                } else if ((AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == true)) {
+                    pointsToAdd = PointStrategy.points[pos]
+                    if (adState != 2) {
+                        adState = 2
+                    }
+                    AdManager.get().showPointInterstitialAd(activity)
+                } else {
+                    pointsToAdd = PointStrategy.points[pos]
+                    addPoint(pointsToAdd, "wheel")
+                }
+            }, {
+                pointsToAdd = PointStrategy.points[pos] * 2
                 AdManager.get().rewardedAd?.setAdListener(rewardedAdCallback)
                 AdManager.get().rewardedAd?.show(activity)
-            }else {
-                pointsToAdd = PointStrategy.points[pos]
-                AdManager.get().showPointInterstitialAd(activity)
-            }
-        },{
-            AdManager.get().rewardedAd?.setAdListener(rewardedAdCallback)
-            AdManager.get().rewardedAd?.show(activity)
-        }).apply {
-            setResult("+${PointStrategy.points[pos]}")
-            pointsToAdd = min(500,PointStrategy.points[pos] * 2)//如果转到500就不翻倍了
-            if(AdManager.get().rewardedAd?.isAdReady == true && AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == true){
-                showMore()
-            }else{
-                if(AdManager.get().rewardedAd?.isAdReady == false) {
-                    AdManager.get().loadRewardedAd()
+            }).apply {
+                setResult("+${PointStrategy.points[pos]}")
+//            pointsToAdd = min(200,PointStrategy.points[pos] * 2)//如果转到500就不翻倍了
+                if (AdManager.get().rewardedAd?.isAdReady == true and (AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == true) and (pos < 6)) {
+                    showMore()
+                } else {
+                    if (AdManager.get().rewardedAd?.isAdReady == false) {
+                        AdManager.get().loadRewardedAd()
+                    }
                 }
-            }
-        }.show()
+            }.show()
+        }
     }
 
     @SuppressLint("CheckResult")
@@ -321,6 +381,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             mutableMapOf(
                 "uuid" to context!!.getDeviceId(),
                 "type" to type,
+                "ver" to context!!.getVersionName(),
                 "ts" to System.currentTimeMillis(),
                 "points" to points,
                 "country" to Locale.getDefault().country
@@ -353,6 +414,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                         prefs.save("check_max_day",consecutive_check+1)
                         val format = SimpleDateFormat("yyyyMMdd", Locale.ENGLISH)
                         prefs.save("last_check_day",format.format(Date()))
+                        dataBinding.checkInBtn.setBackgroundResource(R.drawable.bg_gray_round)
                     }
                     adState = -1
                     Dispatcher.dispatch(context){
@@ -427,11 +489,32 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
     private fun getPoints():Int{
         if(UserManager.get().user != null) {
-            val x = UserManager.get().user!!.wheel_points / UserManager.get().user!!.max_wheel
             if(strategy == null){
                 strategy = PointStrategy()
             }
-            return strategy!!.getRandom(if(x < 50) PointStrategy.pointStrategy1 else PointStrategy.pointStrategy2)
+            if(isDeviceInVPN()){
+                println("当前有VPN，匹配低分策略---")
+                return strategy!!.getRandom(PointStrategy.pointStrategy1)
+            }
+            return if(UserManager.get().user!!.wheel_points < 7500){
+                strategy!!.getRandom(PointStrategy.pointStrategy1)
+            }else if((UserManager.get().user!!.wheel_points >= 7500) and (UserManager.get().user!!.wheel_points < 10000)){
+                strategy!!. getRandom(PointStrategy.pointStrategy2)
+            }else if((UserManager.get().user!!.wheel_points >= 10000) and (UserManager.get().user!!.wheel_points < 15000)){
+                strategy!!.getRandom(PointStrategy.pointStrategy3)
+            }else if((UserManager.get().user!!.wheel_points >= 15000) and (UserManager.get().user!!.wheel_points < 20000)){
+                strategy!!.getRandom(PointStrategy.pointStrategy4)
+            }else if((UserManager.get().user!!.wheel_points >= 20000) and (UserManager.get().user!!.wheel_points < 35000)){
+                strategy!!.getRandom(PointStrategy.pointStrategy5)
+            }else if((UserManager.get().user!!.wheel_points >= 35000) and (UserManager.get().user!!.wheel_points < 50000)){
+                strategy!!.getRandom(PointStrategy.pointStrategy6)
+            }else if((UserManager.get().user!!.wheel_points >= 50000) and (UserManager.get().user!!.wheel_points < 75000)){
+                strategy!!.getRandom(PointStrategy.pointStrategy7)
+            }else if((UserManager.get().user!!.wheel_points >= 75000) and (UserManager.get().user!!.wheel_points < 100000)){
+                strategy!!.getRandom(PointStrategy.pointStrategy8)
+            }else{
+                strategy!!. getRandom(PointStrategy.pointStrategy9)
+            }
         }else{
             return 0
         }
@@ -439,11 +522,28 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
     private fun getVideotPoints():Int{
         if(UserManager.get().user != null) {
-            val x = UserManager.get().user!!.wheel_points / UserManager.get().user!!.max_wheel
             if(strategy == null){
                 strategy = PointStrategy()
             }
-            return strategy!!.getRandom(if(x < 50) PointStrategy.videoStrategy1 else PointStrategy.videoStrategy2)
+            return if(UserManager.get().user!!.reward_points < 7500){
+                strategy!!.getRandom(PointStrategy.pointStrategy1)
+            }else if((UserManager.get().user!!.reward_points >= 7500) and (UserManager.get().user!!.reward_points < 10000)){
+                strategy!!.getRandom(PointStrategy.pointStrategy2)
+            }else if((UserManager.get().user!!.reward_points >= 10000) and (UserManager.get().user!!.reward_points < 15000)){
+                strategy!!.getRandom(PointStrategy.pointStrategy3)
+            }else if((UserManager.get().user!!.reward_points >= 15000) and (UserManager.get().user!!.reward_points < 20000)){
+                strategy!!.getRandom(PointStrategy.pointStrategy4)
+            }else if((UserManager.get().user!!.reward_points >= 20000) and (UserManager.get().user!!.reward_points < 35000)){
+                strategy!!.getRandom(PointStrategy.pointStrategy5)
+            }else if((UserManager.get().user!!.reward_points >= 35000) and (UserManager.get().user!!.reward_points < 50000)){
+                strategy!!.getRandom(PointStrategy.pointStrategy6)
+            }else if((UserManager.get().user!!.reward_points >= 50000) and (UserManager.get().user!!.reward_points < 75000)){
+                strategy!!.getRandom(PointStrategy.pointStrategy7)
+            }else if((UserManager.get().user!!.reward_points >= 75000) and (UserManager.get().user!!.reward_points < 100000)){
+                strategy!!.getRandom(PointStrategy.pointStrategy8)
+            }else{
+                strategy!!.getRandom(PointStrategy.pointStrategy9)
+            }
         }else{
             return 0
         }
@@ -470,19 +570,50 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         }else if(adState == 9){
             AdManager.get().loadInterstitialAd(AdManager.ad_point)
             addPoint(pointsToAdd,"checkin")
+        }else if(adState == 12){
+            AdManager.get().loadInterstitialAd(AdManager.ad_point)
+            addPoint(pointsToAdd,"reward")
         }
+        refreshAdStatusLayout()
     }
 
     override fun onAdShow() {
         adState++
+        if(!AdManager.get().showLuckyCredits){
+            if(animator?.isRunning == true){
+                currentPlayTime = animator!!.currentPlayTime
+                animator?.cancel()
+            }
+        }
     }
 
     override fun onAdLoaded() {
-
+        println("$fragmentTag onAdLoaded ${job?.isActive} ${AdManager.get().showLuckyCredits}")
+        if(job?.isActive != true) {
+            dataBinding.goIv.isClickable = true
+            dataBinding.goIv.setImageResource(R.drawable.ic_go3)
+        }
+        refreshAdStatusLayout()
+        if(AdManager.get().showLuckyCredits){
+            if(animator == null) {
+                animator = tata(dataBinding.luckyCreditsIv, 1f)
+                animator?.repeatCount = ValueAnimator.INFINITE
+            }else{
+                animator?.currentPlayTime = currentPlayTime
+            }
+            animator?.start()
+        }
     }
 
     override fun onAdLoadFail() {
-
+        if(AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady == false and (AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == false) and (AdManager.get().rewardedAd?.isAdReady == false)){
+            dataBinding.goIv.isClickable = false
+            dataBinding.goIv.setImageResource(R.drawable.ic_go2)
+        }else{
+            dataBinding.goIv.isClickable = true
+            dataBinding.goIv.setImageResource(R.drawable.ic_go3)
+        }
+        refreshAdStatusLayout()
     }
 
     private val rewardedAdCallback = object : ATRewardVideoListener {
@@ -538,5 +669,88 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             }
         }
 
+    }
+
+    fun tata(view:View,shakeFactor:Float):ObjectAnimator{
+        val pvhScaleX: PropertyValuesHolder = PropertyValuesHolder.ofKeyframe(
+            View.SCALE_X,
+            Keyframe.ofFloat(0f, 1f),
+            Keyframe.ofFloat(.1f, .9f),
+            Keyframe.ofFloat(.2f, .9f),
+            Keyframe.ofFloat(.3f, 1.1f),
+            Keyframe.ofFloat(.4f, 1.1f),
+            Keyframe.ofFloat(.5f, 1.1f),
+            Keyframe.ofFloat(.6f, 1.1f),
+            Keyframe.ofFloat(.7f, 1.1f),
+            Keyframe.ofFloat(.8f, 1.1f),
+            Keyframe.ofFloat(.9f, 1.1f),
+            Keyframe.ofFloat(1f, 1f)
+        )
+
+        val pvhScaleY: PropertyValuesHolder = PropertyValuesHolder.ofKeyframe(
+            View.SCALE_Y,
+            Keyframe.ofFloat(0f, 1f),
+            Keyframe.ofFloat(.1f, .9f),
+            Keyframe.ofFloat(.2f, .9f),
+            Keyframe.ofFloat(.3f, 1.1f),
+            Keyframe.ofFloat(.4f, 1.1f),
+            Keyframe.ofFloat(.5f, 1.1f),
+            Keyframe.ofFloat(.6f, 1.1f),
+            Keyframe.ofFloat(.7f, 1.1f),
+            Keyframe.ofFloat(.8f, 1.1f),
+            Keyframe.ofFloat(.9f, 1.1f),
+            Keyframe.ofFloat(1f, 1f)
+        )
+
+        val pvhRotate: PropertyValuesHolder = PropertyValuesHolder.ofKeyframe(
+            View.ROTATION,
+            Keyframe.ofFloat(0f, 0f),
+            Keyframe.ofFloat(.1f, -3f * shakeFactor),
+            Keyframe.ofFloat(.2f, -3f * shakeFactor),
+            Keyframe.ofFloat(.3f, 3f * shakeFactor),
+            Keyframe.ofFloat(.4f, -3f * shakeFactor),
+            Keyframe.ofFloat(.5f, 3f * shakeFactor),
+            Keyframe.ofFloat(.6f, -3f * shakeFactor),
+            Keyframe.ofFloat(.7f, 3f * shakeFactor),
+            Keyframe.ofFloat(.8f, -3f * shakeFactor),
+            Keyframe.ofFloat(.9f, 3f * shakeFactor),
+            Keyframe.ofFloat(1f, 0f)
+        )
+
+        return ObjectAnimator.ofPropertyValuesHolder(
+            view,
+            pvhScaleX,
+            pvhScaleY,
+            pvhRotate
+        ).setDuration(1000)
+    }
+
+    private fun refreshAdStatusLayout() {
+        if(BuildConfig.DEBUG) {
+            dataBinding.adStatusLayout.visibility = View.VISIBLE
+            println("refreshAdStatusLayout ${AdManager.get().interstitialAdLoadStatus}")
+            dataBinding.adStatusLayout.removeAllViews()
+            AdManager.get().interstitialAdLoadStatus.forEach {
+                var p = -1
+                if (it.value == 1) {
+                    p =
+                        AdManager.get().interstitialAdMap[it.key]?.checkAdStatus()?.atTopAdInfo?.adsourceIndex
+                            ?: -1
+                    if (it.key == AdManager.ad_rewarded) {
+                        p = AdManager.get().rewardedAd?.checkAdStatus()?.atTopAdInfo?.adsourceIndex
+                            ?: -1
+                    }
+                }
+                dataBinding.adStatusLayout.addView(TextView(context).apply {
+                    text = String.format(
+                        "%s:%s,位置:%d",
+                        it.key,
+                        if (it.value === 0) "加载中" else if (it.value === 1) "加载成功" else "加载失败",
+                        p
+                    )
+                    setTextColor(Color.RED)
+                })
+            }
+        }
     }
 }

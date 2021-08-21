@@ -19,6 +19,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.google.android.material.snackbar.Snackbar
+import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.lib.prefs
 import java.util.*
 
@@ -268,6 +269,33 @@ fun Context.isNetworkConnected():Boolean{
     }catch (e:Exception){
         e.printStackTrace()
         return false
+    }
+}
+
+fun Context.hasSim():Boolean{
+    if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
+        val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        val simState = telephonyManager.simState
+        println("hasSim simState=$simState")
+        return !(simState == TelephonyManager.SIM_STATE_ABSENT || simState == TelephonyManager.SIM_STATE_UNKNOWN)
+    }else{
+        return false
+    }
+}
+
+fun Context.getCountry():String?{
+    if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
+        val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        val simState = telephonyManager.simState
+        println("getCountry simState=$simState")
+        if(simState == TelephonyManager.SIM_STATE_ABSENT || simState == TelephonyManager.SIM_STATE_UNKNOWN){
+            return null
+        }else{
+            println("getCountry simCountryIso=${telephonyManager.simCountryIso} ${telephonyManager.networkCountryIso}")
+            return telephonyManager.simCountryIso.toUpperCase(Locale.ENGLISH)
+        }
+    }else {
+        return null
     }
 }
 

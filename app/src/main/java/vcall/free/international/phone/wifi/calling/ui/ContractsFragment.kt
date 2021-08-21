@@ -148,6 +148,8 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
                 dataBinding.recyclerView.adapter?.notifyDataSetChanged()
             }
         }
+        (activity as MainActivity).signup()
+
     }
 
     override fun onItemClick(id: Int, position: Int, t: Contact) {

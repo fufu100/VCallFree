@@ -96,8 +96,12 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         username = intent.getStringExtra("username")?:""
         phone = intent.getStringExtra("phone")
         rate = intent.getIntExtra("rate", 0)
-        dataBinding.phone.text =
-            String.format(Locale.getDefault(), "+%s %s", UserManager.get().country?.code, phone)
+        if(username.isEmpty()){
+            dataBinding.phone.text =
+                String.format(Locale.getDefault(), "+%s %s", UserManager.get().country?.code,  phone )
+        }else{
+            dataBinding.phone.text = username
+        }
 
         if (LogUtils.test) {
             startTimeCount()
@@ -165,10 +169,12 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 
     //挂断电话，通话中挂断会回调到下面到onDisconnect方法，如果没有打通电话就手动调用onDisconnect方法
     fun hangup(flag: Boolean = true) {
+        dataBinding.hangupIv.isClickable = false
         LogUtils.println("hangup flat=$flag ${callBinder?.getCurrentCall() == null}")
         if(LogUtils.test){
             onDisconnect()
         }else {
+            Log.d(TAG, "hangup 当前电话call: ${callBinder?.getCurrentCall() == null} ")
             if(callBinder?.getCurrentCall() == null){
                 onDisconnect()
             }else {
@@ -186,7 +192,9 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             state = 1
             coin_cost = (rate * ceil(count * 1.0f / 60)).toInt()
         }
+        Log.d(TAG, "onDisConnect: state=$state ")
         record = Record(
+            0,
             0,
             0,
             phone!!,
@@ -265,7 +273,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 //                buttonHangup.setText("OK") //来电未接
                         callState = "Call disconnected: " + callInfo.lastReason
                         GlobalScope.launch {
-                            delay(1000)
+                            delay(200)
                             withContext(Dispatchers.Main){
 //                                hangup(true)
                                 onDisconnect()

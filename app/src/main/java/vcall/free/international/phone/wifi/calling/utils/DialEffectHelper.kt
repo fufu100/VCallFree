@@ -1,21 +1,24 @@
 package vcall.free.international.phone.wifi.calling.utils
 
 import android.content.Context
+import android.media.AudioAttributes
 import android.media.AudioManager
-import android.media.ToneGenerator
+import android.media.SoundPool
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
+import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.lib.prefs
 
 /**
  * Created by lyf on 2020/5/24.
  */
 class DialEffectHelper(val context: Context) {
-    private val DTMF_DURATION_MS = 120
     private val mToneGeneratorLock = Any()
-    private var mToneGenerator: ToneGenerator? = null
+//    private var mToneGenerator: ToneGenerator? = null
+    lateinit var soundPool:SoundPool
+    val toneMap = mutableMapOf<String,Int>()
     private var mDTMFToneEnabled = false
     private var mVibrateEnable = false
     private var vibrator: Vibrator? = null
@@ -40,15 +43,24 @@ class DialEffectHelper(val context: Context) {
                         1
                     ) == 1
                 }
-                synchronized(mToneGeneratorLock) {
-                    if (mDTMFToneEnabled && mToneGenerator == null) {
-                        mToneGenerator = ToneGenerator(AudioManager.STREAM_DTMF, 80)
-                    }
-                }
+                soundPool = SoundPool.Builder().setMaxStreams(1).setAudioAttributes(
+                    AudioAttributes.Builder().setContentType(
+                        AudioAttributes.CONTENT_TYPE_MUSIC).setUsage(AudioAttributes.USAGE_MEDIA).build()).build()
+                toneMap.put("0",soundPool.load(context, R.raw._0,0))
+                toneMap.put("1",soundPool.load(context, R.raw._1,0))
+                toneMap.put("2",soundPool.load(context, R.raw._2,0))
+                toneMap.put("3",soundPool.load(context, R.raw._3,0))
+                toneMap.put("4",soundPool.load(context, R.raw._4,0))
+                toneMap.put("5",soundPool.load(context, R.raw._5,0))
+                toneMap.put("6",soundPool.load(context, R.raw._6,0))
+                toneMap.put("7",soundPool.load(context, R.raw._7,0))
+                toneMap.put("8",soundPool.load(context, R.raw._8,0))
+                toneMap.put("9",soundPool.load(context, R.raw._9,0))
+                toneMap.put("*",soundPool.load(context, R.raw.star,0))
+                toneMap.put("#",soundPool.load(context, R.raw.pound,0))
             } catch (e: Exception) {
                 e.printStackTrace()
                 mDTMFToneEnabled = false
-                mToneGenerator = null
             }
         }
     }
@@ -70,14 +82,9 @@ class DialEffectHelper(val context: Context) {
     }
 
     fun dialNumber(number:String){
+        println("dialNumber $number $mDTMFToneEnabled")
         if(mDTMFToneEnabled){
-            synchronized(mToneGeneratorLock){
-                mToneGenerator?.startTone(when(number){
-                    "*" -> ToneGenerator.TONE_DTMF_S
-                    "#" -> ToneGenerator.TONE_DTMF_P
-                    else -> number.toInt()
-                },DTMF_DURATION_MS)
-            }
+            soundPool.play(toneMap[number]!!,1f,1f,0,0,1f)
         }
         if(canVibrator){
             vibrate(80)

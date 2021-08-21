@@ -4,12 +4,17 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.webkit.WebView
 import com.anythink.core.api.ATSDK
 import com.newmotor.x5.db.DBHelper
 import com.umeng.analytics.MobclickAgent
 import com.umeng.commonsdk.UMConfigure
+import com.umeng.message.IUmengRegisterCallback
+import com.umeng.message.PushAgent
+import com.umeng.message.UTrack
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import vcall.free.international.phone.wifi.calling.api.Country
@@ -35,10 +40,13 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
         if(isInBackgrounnd){
 //            toast("应用从后台回来了")
             isInBackgrounnd = false
-            if(!activity!!::class.java.canonicalName!!.endsWith("CallActivity")) {
+            if(!activity!!::class.java.canonicalName!!.endsWith("CallActivity") && !activity!!::class.java.canonicalName!!.endsWith("SplashActivity") && !activity!!::class.java.canonicalName!!.endsWith("AdActivity") ) {
+                println("应用从后台回来了 展示广告")
                 Dispatcher.dispatch(applicationContext) {
                     action(CallService.ACTION_SHOW_AD)
                 }.send()
+            }else{
+                println("应用从后台回来了 不展示广告")
             }
         }
 
@@ -103,22 +111,52 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
 
         registerActivityLifecycleCallbacks(this)
 
-        CrashHandler.getInstance().apply {
-            init(applicationContext)
-        }
+//        CrashHandler.getInstance().apply {
+//            init(applicationContext)
+//        }
         UMConfigure.setLogEnabled(true)
         UMConfigure.init(
             this,
             "5ec6a4d1978eea0864b20201",
             "umeng",
             UMConfigure.DEVICE_TYPE_PHONE,
-            null
+            "5d2adf7eaf90221648e0e554485336fc"
         )
         MobclickAgent.setPageCollectionMode(MobclickAgent.PageMode.LEGACY_AUTO)
 //        MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL)
         ATSDK.init(applicationContext,"a5f80854919503","bade2107cedab15a24fc76882455de56")
         ATSDK.setNetworkLogDebug(true)
         initData()
+
+        PushAgent.getInstance(this).register(object : IUmengRegisterCallback {
+            override fun onSuccess(p0: String?) {
+                println("umeng regist success $p0")
+            }
+
+            override fun onFailure(p0: String?, p1: String?) {
+                println("umeng regist fail $p0 ,$p1")
+            }
+
+        })
+
+        PushAgent.getInstance(this).setMessageHandler { context, msg ->
+            println("setMessageHandler ${msg.custom}")
+            val isClickOrDismissed = true
+            if (isClickOrDismissed) {
+                //自定义消息的点击统计
+                UTrack.getInstance(applicationContext).trackMsgClick(msg)
+            } else {
+                //自定义消息的忽略统计
+                UTrack.getInstance(applicationContext).trackMsgDismissed(msg)
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val processName = getProcessName()
+            if (packageName != processName) {
+                WebView.setDataDirectorySuffix(processName)
+            }
+        }
     }
 
     private fun initData() {
@@ -144,6 +182,12 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
                         }
                     }
                 } while (line != null)
+            }else{
+                val nepal = DBHelper.get().getCountryByCode("43")
+                if(nepal != null){
+                    nepal.code = "997"
+                    DBHelper.get().updateCountry(nepal)
+                }
             }
             val dest = appCacheDirectory + "flags.zip"
             val flagDirectory = File(appCacheDirectory + "flags")

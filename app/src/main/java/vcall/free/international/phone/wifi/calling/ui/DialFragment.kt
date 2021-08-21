@@ -21,6 +21,9 @@ import androidx.core.content.ContextCompat
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.newmotor.x5.db.DBHelper
 import kotlinx.android.synthetic.main.side_header.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import vcall.free.international.phone.wifi.calling.MainActivity
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.databinding.FragmentDialBinding
@@ -240,10 +243,14 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>(),CallService.Re
     }
 
     override fun onRegStateChange(state: Int) {
-        if(state == 1) {
-            dataBinding.call.setImageResource(R.drawable.ic_call)
-        }else{
-            dataBinding.call.setImageResource(R.drawable.ic_call2)
+        println("$tag onRegStateChange $state")
+        GlobalScope.launch(Dispatchers.Main){
+            if(state == 1) {
+                dataBinding.call.setImageResource(R.drawable.ic_call)
+            }else{
+                dataBinding.call.setImageResource(R.drawable.ic_call2)
+            }
         }
+
     }
 }

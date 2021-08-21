@@ -7,11 +7,17 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.RingtoneManager
+import android.media.SoundPool
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import android.telephony.TelephonyManager
 import android.view.KeyEvent
 import android.view.View
 import android.widget.TextView
@@ -37,6 +43,9 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.newmotor.x5.db.DBHelper
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.lib.App
 import vcall.free.international.phone.wifi.calling.lib.BaseActivity
@@ -67,7 +76,11 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
         super.onCreate(savedInstanceState)
         setSupportActionBar(toolbar)
         toolbar.setNavigationOnClickListener {
-            drawerLayout.openDrawer(GravityCompat.START)
+            if(it.layoutDirection == View.LAYOUT_DIRECTION_RTL){
+                drawerLayout.openDrawer(GravityCompat.END)
+            }else{
+                drawerLayout.openDrawer(GravityCompat.START)
+            }
         }
         supportFragmentManager.beginTransaction()
             .replace(R.id.frameLayout, IndexFragment(), "Index").commit()
@@ -123,15 +136,21 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
 
         conn = object : ServiceConnection {
             override fun onServiceDisconnected(name: ComponentName?) {
-
             }
 
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 callBinder = service as CallService.CallBinder
+                callBinder?.setOnGetIpInfoListener(object : CallService.OnGetIpInfo {
+                    override fun onGetIpInfo(ip: String?) {
+                        println("$tag onGetIpInfo $ip")
+                        signup()
+                    }
+
+                })
             }
         }
         bindService(Intent(this, CallService::class.java), conn, Context.BIND_AUTO_CREATE)
-        signup()
+
 
         val phoneNumberUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
 //        phoneNumberUtil.getRegionCodeForNumber(Phonenumber.PhoneNumber())
@@ -207,6 +226,18 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
         if(LogUtils.LOG_ON) {
             ATSDK.integrationChecking(applicationContext)
         }
+
+        if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
+            signup()
+            val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            println("simCountryIso:${telephonyManager.simCountryIso}")
+//            println("simSerialNumber:${telephonyManager.simSerialNumber}")
+        }else{
+            println("$tag onCreate 没有READ_PHONE_STATE权限！！")
+        }
+
+        val isProxy = isWifiProxy()
+        println("$tag isProxy=$isProxy ${isDeviceInVPN()} ")
     }
 
 
@@ -217,12 +248,24 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
         }
     }
 
-    private fun signup() {
-        loading.show()
+    public fun signup() {
         val map = mutableMapOf<String,String>()
+        var country = this.getCountry()
+        if(country == null){
+            println("尝试通过IP获取国家。。。")
+            if(callBinder?.getIpCountry() != null){
+                country = callBinder?.getIpCountry()
+            }else {
+                callBinder?.getIpInfo()
+                return
+            }
+        }
+        loading.show()
         App.requestMap["from"] = AdManager.get().referrer
         map.putAll(App.requestMap)
         map.put("uuid",getDeviceId())
+        map.put("country",country!!)
+        println("$tag signup $map")
         compositeDisposable.add(Api.getApiService().signup(map)
             .compose(RxUtils.applySchedulers())
             .subscribe({
@@ -246,6 +289,7 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
     }
 
     override fun onDestroy() {
+        sendBroadcast(Intent("stop"))
         super.onDestroy()
         if (::conn.isInitialized) {
             unbindService(conn)

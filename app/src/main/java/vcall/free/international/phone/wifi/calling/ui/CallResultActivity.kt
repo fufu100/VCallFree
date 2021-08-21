@@ -30,6 +30,7 @@ import vcall.free.international.phone.wifi.calling.api.Record
 import vcall.free.international.phone.wifi.calling.databinding.ActivityCallResultBinding
 import vcall.free.international.phone.wifi.calling.lib.App
 import vcall.free.international.phone.wifi.calling.lib.BaseBackActivity
+import vcall.free.international.phone.wifi.calling.lib.prefs
 import vcall.free.international.phone.wifi.calling.nativead.NativeDemoRender
 import vcall.free.international.phone.wifi.calling.utils.*
 import java.text.SimpleDateFormat
@@ -71,7 +72,8 @@ class CallResultActivity:BaseBackActivity<ActivityCallResultBinding>() {
         dataBinding.duration.text = String.format(Locale.getDefault(),"%d:%02d min",record.duration / 60,record.duration % 60)
 
         println("CallResultActivity duration=${record.duration}")
-        if(record.duration > 30){
+        val likeCount = prefs.getIntValue("like_count",0)
+        if(record.duration > 60 && likeCount < 6){
             dataBinding.group.visibility = View.VISIBLE
         }else{
             if(AdManager.get().adData?.ads?.count {
@@ -98,13 +100,15 @@ class CallResultActivity:BaseBackActivity<ActivityCallResultBinding>() {
 
         ShareCompat.IntentBuilder.from(this).setType("message/rfc822")
             .addEmailTo("VCallFree_Feedback@hotmail.com")
-            .setSubject("unlike")
+            .setSubject("VCallFree")
             .setHtmlText(str)
             .setChooserTitle("Choose email")
             .startChooser();
     }
 
     fun like(){
+        val likeCount = prefs.getIntValue("like_count",0)
+        prefs.save("like_count",likeCount + 1)
         Dispatcher.dispatch(this){
             action(Intent.ACTION_VIEW)
             data(Uri.parse("market://details?id=" + packageName))
@@ -164,7 +168,7 @@ class CallResultActivity:BaseBackActivity<ActivityCallResultBinding>() {
                     val map = mutableMapOf<String, String>()
                     map["ver"] = App.context?.getVersionName() ?: ""
                     map["sip"] = UserManager.get().user?.sip ?: ""
-                    map["type"] = AdManager.ad_call_result
+                    map["type"] = "ysclose"
                     map["update_time"] = System.currentTimeMillis().toString()
                     map["ts"] = System.currentTimeMillis().toString()
                     Api.getApiService().addClick(map)

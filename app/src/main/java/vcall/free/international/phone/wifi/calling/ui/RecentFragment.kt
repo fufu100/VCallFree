@@ -1,5 +1,6 @@
 package vcall.free.international.phone.wifi.calling.ui
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.view.View
@@ -33,6 +34,22 @@ class RecentFragment:BaseFragment() ,BaseAdapter.OnItemClick<Record>{
         }.apply {
             mOnItemClickListener = this@RecentFragment
             mShowFooterItem = false
+            onBindView = { dataBinding, position ->
+                run {
+                    dataBinding?.root?.setOnLongClickListener {
+                        AlertDialog.Builder(context).setMessage(R.string.delete_call_record)
+                            .setPositiveButton(R.string.confirm){_,_ ->
+                                DBHelper.get().deleteCallRecord(list[position].id)
+                                list.removeAt(position)
+                                recyclerView.adapter?.notifyDataSetChanged()
+                            }
+                            .setNegativeButton(R.string.cancel,null)
+                            .create()
+                            .show()
+                        true
+                    }
+                }
+            }
         }
         dial.setOnClickListener { dial() }
 

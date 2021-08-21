@@ -1,20 +1,25 @@
 package vcall.free.international.phone.wifi.calling.ui
 
+import android.Manifest
 import android.content.*
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.viewpager.widget.PagerAdapter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_splash.*
+import kotlinx.android.synthetic.main.dialog_call.*
 import kotlinx.coroutines.*
 import vcall.free.international.phone.wifi.calling.MainActivity
 import vcall.free.international.phone.wifi.calling.R
@@ -51,7 +56,7 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
         window?.statusBarColor = Color.TRANSPARENT
         if(!onlyShowAd) {
             if (!isFirst) {
-//                startCountDownTime(7)
+                startCountDownTime(29)
             } else {
                 AgreementDialog(this) {
                     if (it) {
@@ -63,13 +68,19 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
                 }.show()
             }
         }else{
-//            startCountDownTime(7)
+            startCountDownTime(29)
         }
 
         conn = object : ServiceConnection {
             override fun onServiceDisconnected(name: ComponentName?) {}
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 callBinder = service as CallService.CallBinder
+                if(ContextCompat.checkSelfPermission(this@SplashActivity,
+                        Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
+                    if(!this@SplashActivity.hasSim()){
+                        callBinder?.getIpInfo()
+                    }
+                }
             }
         }
         bindService(Intent(this, CallService::class.java), conn, Context.BIND_AUTO_CREATE)
@@ -130,17 +141,17 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
     }
 
     private fun startCountDownTime(time: Long) {
-        GlobalScope.launch {
-            delay(1500)
-            while (progressBar.progress < 100) {
-                delay(65)
-                withContext(Dispatchers.Main) {
-                    progressBar.progress += 1
-                }
-            }
-
-        }
-        compositeDisposable.add(Observable.interval(1500, 1000, TimeUnit.MILLISECONDS)//设置0延迟，每隔一秒发送一条数据
+//        GlobalScope.launch {
+//            delay(1500)
+//            while (progressBar.progress < 100) {
+//                delay(65)
+//                withContext(Dispatchers.Main) {
+//                    progressBar.progress += 1
+//                }
+//            }
+//
+//        }
+        compositeDisposable.add(Observable.interval(1000, 1000, TimeUnit.MILLISECONDS)//设置0延迟，每隔一秒发送一条数据
             .take(time + 1) //设置循环次数
             .map {
                 time - it
@@ -153,7 +164,7 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
                 it.printStackTrace()
             }, {
                 if(!isAdShowing) {
-                    callBinder?.setShowAdOnLoad(false)
+//                    callBinder?.setShowAdOnLoad(false)
                     Dispatcher.dispatch(this) {
                         navigate(MainActivity::class.java)
                         defaultAnimate()
@@ -214,9 +225,11 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
         if(onlyShowAd){
             finish()
         }else {
+            Log.d(tag, "onAdClose----- ")
             GlobalScope.launch {
-                delay(50)
+                delay(20)
                 withContext(Dispatchers.Main) {
+                    Log.d(tag, "onAdClose-----  跳转到MainActivity")
                     Dispatcher.dispatch(this@SplashActivity) {
                         navigate(MainActivity::class.java)
                         defaultAnimate()
@@ -236,7 +249,7 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
     }
 
     override fun onAdLoaded() {
-        LogUtils.println("$tag onAdLoaded---")
+        LogUtils.println("$tag onAdLoaded--- $adLoaded")
         if(!adLoaded) {
             adLoaded = true
             if(!isFirst) {

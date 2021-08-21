@@ -57,11 +57,15 @@ class DaemonService: Service() {
                     builder.setContentText(getContent())
                     startForeground(100,builder.build())
 
+                }else if(intent.action == "stop"){
+                    stopForeground(true)
                 }
             }
-
         }
-        registerReceiver(receiver, IntentFilter("refresh_notification"))
+        registerReceiver(receiver, IntentFilter().apply {
+            addAction("refresh_notification")
+            addAction("stop")
+        })
     }
 
     private fun getContent():String{

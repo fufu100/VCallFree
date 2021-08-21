@@ -45,6 +45,7 @@
     <string name="tip_open_notification">You haven\'t grant SHOW NOTIFICATION permission,grant now?</string>
     <string name="tip_invalid_number">Invalid phone number</string>
     <string name="tip_ad_click_limit">Please do not click on ads that you are not interested in. This may cause you to miss to earn more points.</string>
+    <string name="tip_vpn">Note: Do not use the "Virtual Private Network" software, it may cause you to lose points or even the  account to be disabled.</string>
     <string name="agree">Agree</string>
     <string name="quit">Quit</string>
     <string name="congratulations">CONGRATULATIONS</string>
@@ -59,4 +60,8 @@
     <string name="exit">Exit</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
+    <string name="lucky_credits">Lucky Credits</string>
+    <string name="reward_video">Reward video</string>
+    <string name="invite_friends">Invite friends</string>
+    <string name="delete_call_record" translatable="false">Do you want to delete this record?</string>
 </resources>

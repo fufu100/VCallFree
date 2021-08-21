@@ -1,5 +1,6 @@
 package vcall.free.international.phone.wifi.calling.service
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -12,19 +13,15 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.InterstitialAd
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import vcall.free.international.phone.wifi.calling.lib.App
 import org.pjsip.pjsua2.*
+import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.pjsua.*
 import vcall.free.international.phone.wifi.calling.ui.SplashActivity
-import vcall.free.international.phone.wifi.calling.utils.AdManager
-import vcall.free.international.phone.wifi.calling.utils.Dispatcher
-import vcall.free.international.phone.wifi.calling.utils.LogUtils
-import vcall.free.international.phone.wifi.calling.utils.UserManager
+import vcall.free.international.phone.wifi.calling.utils.*
+import java.util.*
 
 /**
  * Created by lyf on 2020/5/9.
@@ -42,6 +39,9 @@ class CallService:Service(),MyAppObserver{
 //    private lateinit var mInterstitialAd: InterstitialAd
     val callStateChangeListeners:MutableList<CallStateChange> = mutableListOf()
     var regStateChangeListener:RegStateChange? = null
+    var ipCountry:String? = null
+    var getIpStatus = -1
+    var onGetIpInfo:OnGetIpInfo? = null
     override fun onBind(intent: Intent?): IBinder? {
         return CallBinder()
     }
@@ -99,20 +99,24 @@ class CallService:Service(),MyAppObserver{
                     }
                     regStatus = 0
                     app?.init(this@CallService, App.appCacheDirectory)
+                    println("$TAG initAccount ${UserManager.get().user}")
                     UserManager.get().user?.also {
-                        accCfg = AccountConfig()
-                        accCfg?.idUri = "sip:${it.sip}@${it.servers[0].host}:${it.servers[0].port}"
-                        accCfg?.regConfig?.registrarUri =
-                            "sip:${it.servers[0].host}:${it.servers[0].port}"
-                        val creds: AuthCredInfoVector? = accCfg?.sipConfig?.authCreds
-                        creds?.clear()
-                        creds?.add(AuthCredInfo("Digest", "*", it.sip, 0, it.passwd))
-                        accCfg?.natConfig?.iceEnabled = true
-                        accCfg?.videoConfig?.autoShowIncoming = true
-                        accCfg?.videoConfig?.autoShowIncoming = true
-                        accout = app?.addAcc(accCfg)
+                        if(it.servers != null && it.servers.size > 0) {
+                            accCfg = AccountConfig()
+                            accCfg?.idUri =
+                                "sip:${it.sip}@${it.servers[0].host}:${it.servers[0].port}"
+                            accCfg?.regConfig?.registrarUri =
+                                "sip:${it.servers[0].host}:${it.servers[0].port}"
+                            val creds: AuthCredInfoVector? = accCfg?.sipConfig?.authCreds
+                            creds?.clear()
+                            creds?.add(AuthCredInfo("Digest", "*", it.sip, 0, it.passwd))
+                            accCfg?.natConfig?.iceEnabled = true
+                            accCfg?.videoConfig?.autoShowIncoming = true
+                            accCfg?.videoConfig?.autoShowIncoming = true
+                            accout = app?.addAcc(accCfg)
 
-                        LogUtils.println("$TAG initAccount 成功 ${accCfg?.idUri},${accCfg?.regConfig}")
+                            LogUtils.println("$TAG initAccount 成功 ${accCfg?.idUri},${accCfg?.regConfig}")
+                        }
                     }
                 }
 
@@ -154,6 +158,7 @@ class CallService:Service(),MyAppObserver{
                 val prm = CallOpParam()
                 prm.statusCode = pjsip_status_code.PJSIP_SC_DECLINE
                 try {
+                    println("hangup 挂断电话---")
                     currentCall?.hangup(prm)
                 }catch (e:Exception){
                     LogUtils.println("$TAG,挂断电话失败")
@@ -238,6 +243,10 @@ class CallService:Service(),MyAppObserver{
             regStateChangeListener = listener
         }
 
+        fun setOnGetIpInfoListener(listener: OnGetIpInfo){
+            onGetIpInfo = listener
+        }
+
         fun getRegStatus():Int{
             return regStatus
         }
@@ -255,7 +264,32 @@ class CallService:Service(),MyAppObserver{
                 regStatus = 0
             }
         }
-//        fun isInterstitialAdLoaded() = mInterstitialAd.isLoaded
+        @SuppressLint("CheckResult")
+        fun getIpInfo(){
+            if(getIpStatus != 0) {
+                getIpStatus = 0
+                Api.getApiService().getIpInfo().compose(RxUtils.applySchedulers())
+                    .subscribe({
+                        println("ipinfo $it")
+                        getIpStatus = 1
+                        ipCountry = it.country
+                        onGetIpInfo?.onGetIpInfo(ipCountry)
+                    }, {
+                        Log.e(TAG, "getIpInfo: 通过IP获取国家失败!!!")
+                        it.printStackTrace()
+                        getIpStatus = 2
+                        ipCountry = "IN"
+                        onGetIpInfo?.onGetIpInfo(ipCountry)
+                    })
+            }else{
+                onGetIpInfo?.onGetIpInfo(ipCountry)
+            }
+        }
+
+        fun getIpCountry():String?{
+            println("CallService getIpCountry $ipCountry")
+            return ipCountry
+        }
     }
 
     private val networkCallback = object :ConnectivityManager.NetworkCallback(){
@@ -378,5 +412,9 @@ class CallService:Service(),MyAppObserver{
 
     interface RegStateChange{
         fun onRegStateChange(state:Int)
+    }
+
+    interface OnGetIpInfo{
+        fun onGetIpInfo(ip:String?)
     }
 }

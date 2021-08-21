@@ -5,8 +5,10 @@ import android.content.Context
 import android.app.ActivityManager
 import android.content.ContentUris
 import android.content.res.ColorStateList
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.provider.ContactsContract
+import android.text.TextUtils
 import android.util.Base64
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
@@ -21,6 +23,7 @@ import vcall.free.international.phone.wifi.calling.api.Contact
 import vcall.free.international.phone.wifi.calling.lib.encryptedPrefs
 import vcall.free.international.phone.wifi.calling.widget.CircleTransform
 import java.io.File
+import java.net.NetworkInterface
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
@@ -183,6 +186,25 @@ fun desDecrypt(data:String):String{
         e.printStackTrace()
         return ""
     }
+}
+
+fun isWifiProxy():Boolean{
+    val proxyHost = System.getProperty("http.proxyHost")
+    val proxyPortStr = System.getProperty("http.proxyPort")
+    val proxyPort = proxyPortStr?.toInt() ?: -1
+    println("isWifiProxy $proxyHost $proxyPortStr")
+    return proxyHost?.isNotEmpty() == true && proxyPort != -1
+}
+
+fun isDeviceInVPN():Boolean{
+    val all = NetworkInterface.getNetworkInterfaces()
+    for (networkInterface in all) {
+        println("isDeviceInVPN name=${networkInterface.name}")
+        if(networkInterface.name == "tun0" || networkInterface.name == "ppp0"){
+            return true
+        }
+    }
+    return false
 }
 
 

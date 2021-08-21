@@ -128,7 +128,7 @@ class ExitDialog(context: Context, val callback: (flag: Int) -> Unit) :
                     val map = mutableMapOf<String, String>()
                     map["ver"] = App.context?.getVersionName() ?: ""
                     map["sip"] = UserManager.get().user?.sip ?: ""
-                    map["type"] = AdManager.ad_quite
+                    map["type"] = "tuichu"
                     map["update_time"] = System.currentTimeMillis().toString()
                     map["ts"] = System.currentTimeMillis().toString()
                     Api.getApiService().addClick(map)

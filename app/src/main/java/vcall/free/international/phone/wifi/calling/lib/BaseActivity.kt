@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.umeng.analytics.MobclickAgent
+import com.umeng.message.PushAgent
 import io.reactivex.disposables.CompositeDisposable
 import vcall.free.international.phone.wifi.calling.R
 
@@ -15,6 +16,7 @@ abstract class BaseActivity :AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(getLayoutRes())
+        PushAgent.getInstance(this).onAppStart();
     }
 
     abstract fun getLayoutRes():Int

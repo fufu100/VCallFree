@@ -27,13 +27,15 @@ class AgreementActivity:BaseBackActivity<ActivityAgreementBinding>() {
                 println("click1")
                 Dispatcher.dispatch(this@AgreementActivity){
                     action(Intent.ACTION_VIEW)
-                    data(Uri.parse("https://www.privacypolicies.com/privacy/view/65134b8f86392b2bd81420bc0ac6597e"))
+                    data(Uri.parse("http://vcallfree.com/VCallFree_privacy.html"))
                     defaultAnimate()
                 }.go()
             }
         }
-        content.setSpan(UnderlineSpan(),content.length - 31,content.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
-        content.setSpan(span2,content.length - 31,content.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+        val target = "Privacy Policy and Terms of use"
+        val start = content.indexOf(target)
+        content.setSpan(UnderlineSpan(),start,start + target.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+        content.setSpan(span2,start,start + target.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
         dataBinding.text.text = content
         dataBinding.text.movementMethod = LinkMovementMethod.getInstance()
         dataBinding.text.setHintTextColor(Color.TRANSPARENT)

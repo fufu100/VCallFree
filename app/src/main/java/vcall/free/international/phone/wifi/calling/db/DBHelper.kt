@@ -69,6 +69,7 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         while (cursor.moveToNext()) {
             list.add(
                 Record(
+                    cursor.getLong(cursor.getColumnIndex(RecordTable.ID)),
                     cursor.getLong(cursor.getColumnIndex(RecordTable.PHONE_ID)),
                     cursor.getLong(cursor.getColumnIndex(RecordTable.CONTRACT_ID)),
                     cursor.getString(cursor.getColumnIndex(RecordTable.PHONE)),
@@ -106,6 +107,10 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         cv.put(RecordTable.COIN_COST, record.coinCost)
         cv.put(RecordTable.STATE, record.state)
         insert(RecordTable.TB_NAME, cv)
+    }
+
+    fun deleteCallRecord(id:Long){
+        deleteAll(RecordTable.TB_NAME,RecordTable.ID,id.toString())
     }
 
 
@@ -211,6 +216,16 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         cv.put(CountryTable.LENGTH, country.length)
         cv.put(CountryTable.PREFIX, country.prefix)
         insert(CountryTable.TB_NAME, cv)
+    }
+
+    fun updateCountry(country: Country){
+        val cv = ContentValues()
+        cv.put(CountryTable.COUNTRY, country.country)
+        cv.put(CountryTable.ISO, country.iso)
+        cv.put(CountryTable.CODE, country.code)
+        cv.put(CountryTable.LENGTH, country.length)
+        cv.put(CountryTable.PREFIX, country.prefix)
+        updateOrInsert(CountryTable.TB_NAME,cv,CountryTable.ISO)
     }
 
     fun addPlayCount(count:Int){

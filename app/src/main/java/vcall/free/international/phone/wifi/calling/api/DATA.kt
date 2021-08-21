@@ -18,6 +18,7 @@ data class Contact(
 
 @Parcelize
 data class Record(
+    val id:Long,
     val phoneId:Long,
     val contractId:Long,
     val phone:String,
@@ -36,7 +37,7 @@ data class Record(
 data class Country(
     val country: String,
     val iso:String,
-    val code:String,
+    var code:String,
     val length:Int,
     val prefix:String,
     var isHot:Boolean = false
