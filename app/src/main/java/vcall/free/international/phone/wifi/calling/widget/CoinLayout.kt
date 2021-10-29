@@ -7,6 +7,7 @@ import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -41,7 +42,6 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        println("$TAG onMeasure")
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val height = MeasureSpec.getSize(heightMeasureSpec)
 

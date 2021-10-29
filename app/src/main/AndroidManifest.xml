@@ -55,7 +55,14 @@
             android:configChanges="screenLayout|orientation"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
-            android:windowSoftInputMode="stateHidden|adjustNothing" />
+            android:windowSoftInputMode="stateHidden|adjustNothing" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="um.5ec6a4d1978eea0864b20201" />
+            </intent-filter>
+        </activity>
         <activity
             android:name="vcall.free.international.phone.wifi.calling.ui.SettingActivity"
             android:configChanges="screenLayout|orientation"

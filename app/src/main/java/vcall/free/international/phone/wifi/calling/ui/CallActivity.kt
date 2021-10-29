@@ -94,7 +94,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             addAction(CallService.ACTION_ON_AD_SHOW)
         })
         username = intent.getStringExtra("username")?:""
-        phone = intent.getStringExtra("phone")
+        phone = intent.getStringExtra("phone")?:""
         rate = intent.getIntExtra("rate", 0)
         if(username.isEmpty()){
             dataBinding.phone.text =
@@ -106,11 +106,11 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         if (LogUtils.test) {
             startTimeCount()
         }
-        AdManager.get().interstitialAdListener.add(this)
+        AdManager.get().interstitialAdListener[AdManager.ad_close] = this
     }
 
     override fun onDestroy() {
-        AdManager.get().interstitialAdListener.remove(this)
+        AdManager.get().interstitialAdListener.remove(AdManager.ad_close)
         super.onDestroy()
         if (::conn.isInitialized) {
             callBinder?.removeCallStateChangeListener(this)
@@ -197,7 +197,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             0,
             0,
             0,
-            phone!!,
+            phone?:"",
             UserManager.get().country?.iso?:"",
             UserManager.get().country?.code?:"",
             UserManager.get().country?.prefix?:"",
@@ -211,12 +211,12 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         )
         UserManager.get().user!!.points -= coin_cost
         DBHelper.get().addCallRecord(record!!)
-        if(AdManager.get().interstitialAdMap[AdManager.ad_close]?.isAdReady == true){
+        if(AdManager.get().interstitialAdMap[AdManager.ad_close] != null){
             AdManager.get().showCloseInterstitialAd(this)
             isAdShowing = true
         }else{
             try {
-                AdManager.get().loadInterstitialAd(AdManager.ad_close)
+                AdManager.get().loadInterstitialAd(this,AdManager.ad_close)
                 Dispatcher.dispatch(this) {
                     navigate(CallResultActivity::class.java)
                     extra("record", record!!)

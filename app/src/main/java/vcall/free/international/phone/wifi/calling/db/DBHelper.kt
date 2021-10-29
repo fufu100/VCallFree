@@ -38,6 +38,8 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
             db?.execSQL("alter table ${PlayCountTable.TB_NAME} add column ${PlayCountTable.AD_CLICK_COUNT} integer")
         }else if(newVersion == 8){
             db?.execSQL("alter table ${PlayCountTable.TB_NAME} add column ${PlayCountTable.CLICK_COUNT_LIMIT_TIME} integer")
+        }else if(newVersion == 9){
+            db?.execSQL("alter table ${PlayCountTable.TB_NAME} add column ${PlayCountTable.LUCKY_CREDITS_CLICK_COUNT} integer")
         }
 
         println("DBHelper onUpgrade $oldVersion $newVersion")
@@ -45,7 +47,7 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
 
     companion object {
         private val DATABASE_NAME = "vcallfree_database.db"  //数据库名
-        private val DATABASE_VERSION = 8    //数据库版本
+        private val DATABASE_VERSION = 9    //数据库版本
         var instance: DBHelper? = null
             get() {
                 if (field == null) {
@@ -297,6 +299,28 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         val format = SimpleDateFormat("yyyyMMdd",Locale.ENGLISH)
         cv.put(PlayCountTable.AD_CLICK_COUNT,count + 1)
         cv.put(PlayCountTable.CLICK_COUNT_LIMIT_TIME,System.currentTimeMillis())
+        cv.put(PlayCountTable.DATE,format.format(Date()))
+        updateOrInsert(PlayCountTable.TB_NAME,cv,PlayCountTable.DATE)
+    }
+
+    fun getLuckyCreditsClickCount():Int{
+        val format = SimpleDateFormat("yyyyMMdd",Locale.ENGLISH)
+        val date = format.format(Date())
+        println("getTodayCredits date=$date")
+        val cursor = queryAndAll(PlayCountTable.TB_NAME,PlayCountTable.DATE,date)
+        if(cursor?.moveToNext() == true){
+            val count = cursor.getInt(cursor.getColumnIndex(PlayCountTable.LUCKY_CREDITS_CLICK_COUNT))
+            return count
+        }
+        return 0
+    }
+
+
+    fun addLuckyCreditsClickCount(){
+        val count = getLuckyCreditsClickCount()
+        val cv = ContentValues()
+        val format = SimpleDateFormat("yyyyMMdd",Locale.ENGLISH)
+        cv.put(PlayCountTable.LUCKY_CREDITS_CLICK_COUNT,count + 1)
         cv.put(PlayCountTable.DATE,format.format(Date()))
         updateOrInsert(PlayCountTable.TB_NAME,cv,PlayCountTable.DATE)
     }

@@ -17,6 +17,7 @@ import vcall.free.international.phone.wifi.calling.api.Country
 import vcall.free.international.phone.wifi.calling.databinding.ActivityCoutriesBinding
 import vcall.free.international.phone.wifi.calling.databinding.ItemCountryBinding
 import vcall.free.international.phone.wifi.calling.lib.BaseBackActivity
+import vcall.free.international.phone.wifi.calling.widget.WrapLinearLayoutManager
 
 /**
  * Created by lyf on 2020/5/7.
@@ -27,7 +28,7 @@ class CountriesActivity:BaseBackActivity<ActivityCoutriesBinding>(),BaseAdapter.
 
     override fun initView(savedInstanceState: Bundle?) {
         super.initView(savedInstanceState)
-        dataBinding.recyclerView.layoutManager = LinearLayoutManager(this,
+        dataBinding.recyclerView.layoutManager = WrapLinearLayoutManager(this,
             LinearLayoutManager.VERTICAL,false)
         dataBinding.recyclerView.adapter = BaseAdapter<Country>(list){
             R.layout.item_country

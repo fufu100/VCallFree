@@ -66,7 +66,13 @@ open class BaseAdapter<T>(protected val list:MutableList<T>?,val itemViewCrator:
         if(holder is BaseViewHolder<*>){
             val realPosition = getRealPosition(position)
             onBindView?.let { it(holder.binding,realPosition) }
-            (holder as BaseViewHolder<T>).setBinding(list!![realPosition],realPosition,mOnItemClickListener)
+            if(list?.size?:0 > realPosition) {
+                (holder as BaseViewHolder<T>).setBinding(
+                    list!![realPosition],
+                    realPosition,
+                    mOnItemClickListener
+                )
+            }
         }else if(holder is BaseAdapter<*>.FootViewHolder){
             holder.setBinding()
         }

@@ -7,8 +7,8 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.webkit.WebView
-import com.anythink.core.api.ATSDK
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.RequestConfiguration
 import com.newmotor.x5.db.DBHelper
 import com.umeng.analytics.MobclickAgent
 import com.umeng.commonsdk.UMConfigure
@@ -17,6 +17,7 @@ import com.umeng.message.PushAgent
 import com.umeng.message.UTrack
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import vcall.free.international.phone.wifi.calling.BuildConfig
 import vcall.free.international.phone.wifi.calling.api.Country
 import vcall.free.international.phone.wifi.calling.service.CallService
 import vcall.free.international.phone.wifi.calling.utils.*
@@ -111,9 +112,15 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
 
         registerActivityLifecycleCallbacks(this)
 
-//        CrashHandler.getInstance().apply {
-//            init(applicationContext)
-//        }
+        if(BuildConfig.DEBUG) {
+            CrashHandler.getInstance().apply {
+                init(applicationContext)
+            }
+        }
+        MobileAds.initialize(this) {}
+//        val testDeviceIds = Arrays.asList("5303CB9D5BD32EB2B1444E27283AF0FA")
+//        val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
+//        MobileAds.setRequestConfiguration(configuration)
         UMConfigure.setLogEnabled(true)
         UMConfigure.init(
             this,
@@ -124,8 +131,9 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
         )
         MobclickAgent.setPageCollectionMode(MobclickAgent.PageMode.LEGACY_AUTO)
 //        MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL)
-        ATSDK.init(applicationContext,"a5f80854919503","bade2107cedab15a24fc76882455de56")
-        ATSDK.setNetworkLogDebug(true)
+//        ATSDK.init(applicationContext,"a5f80854919503","bade2107cedab15a24fc76882455de56")
+//        ATSDK.setNetworkLogDebug(true)
+
         initData()
 
         PushAgent.getInstance(this).register(object : IUmengRegisterCallback {
@@ -151,12 +159,12 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val processName = getProcessName()
-            if (packageName != processName) {
-                WebView.setDataDirectorySuffix(processName)
-            }
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+//            val processName = getProcessName()
+//            if (packageName != processName) {
+//                WebView.setDataDirectorySuffix(processName)
+//            }
+//        }
     }
 
     private fun initData() {
@@ -183,10 +191,15 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
                     }
                 } while (line != null)
             }else{
-                val nepal = DBHelper.get().getCountryByCode("43")
-                if(nepal != null){
-                    nepal.code = "997"
+                val nepal = DBHelper.get().getCountry("NP")
+                if(nepal != null && nepal.code != "977"){
+                    nepal.code = "977"
                     DBHelper.get().updateCountry(nepal)
+                }
+                val austria = DBHelper.get().getCountry("AT")
+                if(austria != null && austria.code != "43"){
+                    austria.code = "43"
+                    DBHelper.get().updateCountry(austria)
                 }
             }
             val dest = appCacheDirectory + "flags.zip"

@@ -258,8 +258,7 @@
             android:layout_marginEnd="16dp"
             app:layout_constraintTop_toBottomOf="@id/flag"
             android:layout_marginTop="28dp"
-            android:visibility="gone"
-            app:gnt_template_type="@layout/gnt_medium_template_view" >
+            android:visibility="gone">
             <ProgressBar
                 android:id="@+id/progressBar"
                 android:layout_width="45dp"

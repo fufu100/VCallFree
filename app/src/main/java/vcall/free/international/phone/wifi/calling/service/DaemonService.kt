@@ -29,12 +29,13 @@ class DaemonService: Service() {
     override fun onCreate() {
         super.onCreate()
         println("DaemonService onCreate---")
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val channel = NotificationChannel(
                 "default", "VCallFree",
                 NotificationManager.IMPORTANCE_HIGH
             )
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
         }
 
@@ -48,7 +49,8 @@ class DaemonService: Service() {
         builder.setContentTitle("You can get some lucky credits today!")
         builder.setContentText(getContent())
         builder.setOnlyAlertOnce(true)
-        startForeground(100,builder.build())
+//        startForeground(100,builder.build())
+        manager.notify(100,builder.build())
 
         receiver = object :BroadcastReceiver(){
             override fun onReceive(context: Context, intent: Intent) {
@@ -76,6 +78,7 @@ class DaemonService: Service() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(receiver)
+//        stopForeground(true)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

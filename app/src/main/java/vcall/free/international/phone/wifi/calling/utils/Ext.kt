@@ -293,6 +293,7 @@ fun Context.getCountry():String?{
         }else{
             println("getCountry simCountryIso=${telephonyManager.simCountryIso} ${telephonyManager.networkCountryIso}")
             return telephonyManager.simCountryIso.toUpperCase(Locale.ENGLISH)
+//            return null
         }
     }else {
         return null

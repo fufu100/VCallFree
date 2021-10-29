@@ -42,6 +42,7 @@ class CallService:Service(),MyAppObserver{
     var ipCountry:String? = null
     var getIpStatus = -1
     var onGetIpInfo:OnGetIpInfo? = null
+    var registerStartTime = 0L
     override fun onBind(intent: Intent?): IBinder? {
         return CallBinder()
     }
@@ -77,6 +78,7 @@ class CallService:Service(),MyAppObserver{
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d(TAG, "onDestroy---- ")
         if (receiver != null) {
             unregisterReceiver(receiver)
         }
@@ -101,21 +103,27 @@ class CallService:Service(),MyAppObserver{
                     app?.init(this@CallService, App.appCacheDirectory)
                     println("$TAG initAccount ${UserManager.get().user}")
                     UserManager.get().user?.also {
-                        if(it.servers != null && it.servers.size > 0) {
-                            accCfg = AccountConfig()
-                            accCfg?.idUri =
-                                "sip:${it.sip}@${it.servers[0].host}:${it.servers[0].port}"
-                            accCfg?.regConfig?.registrarUri =
-                                "sip:${it.servers[0].host}:${it.servers[0].port}"
-                            val creds: AuthCredInfoVector? = accCfg?.sipConfig?.authCreds
-                            creds?.clear()
-                            creds?.add(AuthCredInfo("Digest", "*", it.sip, 0, it.passwd))
-                            accCfg?.natConfig?.iceEnabled = true
-                            accCfg?.videoConfig?.autoShowIncoming = true
-                            accCfg?.videoConfig?.autoShowIncoming = true
-                            accout = app?.addAcc(accCfg)
+                        if(it.servers != null && it.servers.isNotEmpty()) {
+                            try {
+                                accCfg = AccountConfig()
+                                accCfg?.idUri =
+                                    "sip:${it.sip}@${it.servers[0].host}:${it.servers[0].port}"
+                                accCfg?.regConfig?.registrarUri =
+                                    "sip:${it.servers[0].host}:${it.servers[0].port}"
+                                val creds: AuthCredInfoVector? = accCfg?.sipConfig?.authCreds
+                                creds?.clear()
+                                creds?.add(AuthCredInfo("Digest", "*", it.sip, 0, it.passwd))
+                                accCfg?.natConfig?.iceEnabled = true
+                                accCfg?.videoConfig?.autoShowIncoming = true
+                                accCfg?.videoConfig?.autoShowIncoming = true
+                                accout = app?.addAcc(accCfg)
 
-                            LogUtils.println("$TAG initAccount 成功 ${accCfg?.idUri},${accCfg?.regConfig}")
+                                LogUtils.println("$TAG initAccount 成功 ${accCfg?.idUri},${accCfg?.regConfig}")
+                            }catch (e:Exception){
+                                e.printStackTrace()
+                                LogUtils.println("$TAG initAccount 失败--")
+                            }
+
                         }
                     }
                 }
@@ -264,25 +272,32 @@ class CallService:Service(),MyAppObserver{
                 regStatus = 0
             }
         }
+        fun getGetIpStatus():Int = getIpStatus
         @SuppressLint("CheckResult")
         fun getIpInfo(){
+            println("getIpInfo getIpStatus=$getIpStatus ipCountry=$ipCountry")
+//            toast("开始请求ipinfo.io获取国家...")
             if(getIpStatus != 0) {
                 getIpStatus = 0
                 Api.getApiService().getIpInfo().compose(RxUtils.applySchedulers())
                     .subscribe({
+//                        toast("请求ipinfo.io获取国家成功")
                         println("ipinfo $it")
                         getIpStatus = 1
                         ipCountry = it.country
                         onGetIpInfo?.onGetIpInfo(ipCountry)
                     }, {
                         Log.e(TAG, "getIpInfo: 通过IP获取国家失败!!!")
+//                        toast("请求ipinfo.io获取国家失败")
                         it.printStackTrace()
                         getIpStatus = 2
                         ipCountry = "IN"
                         onGetIpInfo?.onGetIpInfo(ipCountry)
                     })
             }else{
-                onGetIpInfo?.onGetIpInfo(ipCountry)
+                if(ipCountry != null) {
+                    onGetIpInfo?.onGetIpInfo(ipCountry)
+                }
             }
         }
 
@@ -298,7 +313,7 @@ class CallService:Service(),MyAppObserver{
 //            ActivityUtils.from(this@TranslateService).action(ACTION_SHOW_AD).send()
         }
 
-        override fun onCapabilitiesChanged(network: Network?, networkCapabilities: NetworkCapabilities?) {
+        override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
             super.onCapabilitiesChanged(network, networkCapabilities)
             Log.d(TAG,"net onCapabilitiesChanged，$network")
 

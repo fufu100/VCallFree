@@ -6,13 +6,15 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.service.autofill.Validators.and
 import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import com.anythink.core.api.ATAdInfo
-import com.anythink.core.api.AdError
-import com.anythink.rewardvideo.api.ATRewardVideoListener
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.OnUserEarnedRewardListener
+import com.google.android.gms.ads.rewarded.RewardItem
 import com.newmotor.x5.db.DBHelper
 import kotlinx.android.synthetic.main.fragment_tab_coins.*
 import kotlinx.coroutines.*
@@ -51,13 +53,17 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         dataBinding.totalPlayCount.text = (UserManager.get().user?.max_wheel?:1000).toString()
         playCount = DBHelper.get().getPlayCount()
         dataBinding.playCountTv.text = playCount.toString()
-        AdManager.get().interstitialAdListener.add(this)
-        AdManager.get().rewardedAdListener.add(this)
+        AdManager.get().interstitialAdListener[AdManager.ad_preclick] = this
+        AdManager.get().interstitialAdListener[AdManager.ad_point] = this
+        AdManager.get().interstitialAdListener[AdManager.ad_rewarded] = rewardAdLoadCallback
+//        AdManager.get().rewardedAdListener.add(this)
 
     }
 
     override fun onResume() {
         super.onResume()
+        AdManager.get().interstitialAdListener[AdManager.ad_preclick] = this
+        AdManager.get().interstitialAdListener[AdManager.ad_point] = this
         if(dataBinding.totalCoins != UserManager.get().user?.points.toString()){
             dataBinding.totalCoins= (UserManager.get().user?.points?:1000).toString()
             val animatorSet = AnimatorSet()
@@ -100,74 +106,80 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         }else{
             dataBinding.checkInBtn.setBackgroundResource(R.drawable.bg_blue_round)
         }
+        val count = DBHelper.get().getLuckyCreditsClickCount()
+        LogUtils.println("$tag onResume showLuckyCredits=${AdManager.get().showLuckyCredits} count=$count")
+        if(AdManager.get().showLuckyCredits && count < 10){
+            if(animator == null) {
+                animator = tata(dataBinding.luckyCreditsIv, 1f)
+                animator?.repeatCount = ValueAnimator.INFINITE
+            }else{
+                animator?.currentPlayTime = currentPlayTime
+            }
+            animator?.start()
+        }
+        if(AdManager.get().rewardedAd != null && AdManager.get().interstitialAdLoadStatus[AdManager.ad_rewarded] == 1){
+            dataBinding.rewardedVideoTv.setBackgroundResource(R.drawable.bg_blue_round)
+        }else{
+            dataBinding.rewardedVideoTv.setBackgroundResource(R.drawable.bg_gray_round)
+        }
 
         refreshAdStatusLayout()
     }
 
+    override fun onPause() {
+        super.onPause()
+        if(!AdManager.get().showLuckyCredits){
+            if(animator?.isRunning == true){
+                currentPlayTime = animator!!.currentPlayTime
+                animator?.cancel()
+            }
+        }
+    }
+
     override fun onDestroy() {
-        AdManager.get().interstitialAdListener.remove(this)
-        AdManager.get().rewardedAdListener.remove(this)
+        AdManager.get().interstitialAdListener.remove(AdManager.ad_point)
+        AdManager.get().interstitialAdListener.remove(AdManager.ad_preclick)
+        AdManager.get().interstitialAdListener.remove(AdManager.ad_rewarded)
+//        AdManager.get().rewardedAdListener.remove(this)
         job?.cancel()
         super.onDestroy()
     }
 
     fun showRewardedAd(v:View){
-        if(AdManager.get().rewardedAd?.isAdReady == true) {
-            AdManager.get().rewardedAd?.setAdListener(object :ATRewardVideoListener{
-                var earned = false
-                override fun onRewardedVideoAdClosed(p0: ATAdInfo?) {
-                    AdManager.get().loadRewardedAd()
-                    if(earned){
-                        pointsToAdd = PointStrategy.videoPoints[getVideotPoints()]
-                        GameResultDialog(context!!,{
-                            if(AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == true) {
-                                adState = 5
-                                AdManager.get().showPointInterstitialAd(activity)
-                            }else{
-                                AdManager.get().loadInterstitialAd(AdManager.ad_point)
-                                //如果广告没有加载仍然增加积分
-                                addPoint(pointsToAdd,"reward")
-                            }
+        if(AdManager.get().rewardedAd != null) {
+            AdManager.get().rewardedAd!!.fullScreenContentCallback = object :FullScreenContentCallback(){
+                override fun onAdDismissedFullScreenContent() {
+                    AdManager.get().rewardedAd = null
+                    AdManager.get().loadRewardedAd(context)
+                }
 
-                        }).apply {
-                            setResult("+$pointsToAdd")
-                        }.show()
+                override fun onAdFailedToShowFullScreenContent(p0: AdError) {
+                    AdManager.get().rewardedAd = null
+                }
+
+                override fun onAdShowedFullScreenContent() {
+                    Log.d(tag, "onAdShowedFullScreenContent---")
+                }
+            }
+            AdManager.get().rewardedAd!!.show(activity, OnUserEarnedRewardListener {
+                pointsToAdd = PointStrategy.videoPoints[getVideotPoints()]
+                GameResultDialog(context!!,{
+                    if(AdManager.get().interstitialAdMap[AdManager.ad_point] != null) {
+                        adState = 5
+                        AdManager.get().showPointInterstitialAd(activity)
+                    }else{
+                        AdManager.get().loadInterstitialAd(context,AdManager.ad_point)
+                        //如果广告没有加载仍然增加积分
+                        addPoint(pointsToAdd,"reward")
                     }
-                }
 
-                override fun onReward(p0: ATAdInfo?) {
-
-                }
-
-                override fun onRewardedVideoAdPlayFailed(p0: AdError?, p1: ATAdInfo?) {
-                }
-
-                override fun onRewardedVideoAdLoaded() {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onRewardedVideoAdPlayStart(p0: ATAdInfo?) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onRewardedVideoAdFailed(p0: AdError?) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onRewardedVideoAdPlayEnd(p0: ATAdInfo?) {
-
-                    earned = true
-                }
-
-                override fun onRewardedVideoAdPlayClicked(p0: ATAdInfo?) {
-                    TODO("Not yet implemented")
-                }
-
+                }).apply {
+                    setResult("+$pointsToAdd")
+                }.show()
             })
-            AdManager.get().rewardedAd?.show(activity)
         }else{
             Log.d(fragmentTag, "showRewardedAd-- not load ")
-            AdManager.get().loadRewardedAd()
+            AdManager.get().loadRewardedAd(context)
             GlobalScope.launch(Dispatchers.Main) {
                 dataBinding.rewardedVideoTv.text = "Retry"
                 withContext(Dispatchers.IO){
@@ -186,22 +198,43 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
     }
 
     fun luckyCredits(v: View){
-        if(AdManager.get().showLuckyCredits) {
-            GameResultDialog(context!!, {
-                if (AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == true) {
-                    adState = 10
-                    AdManager.get().showPointInterstitialAd(activity)
-                }
-            }).apply {
-                val r = Random()
-                pointsToAdd = (r.nextInt(5) + 5) * 10
-                setResult("+$pointsToAdd")
-            }.show()
-            currentPlayTime = animator!!.currentPlayTime
-            animator?.cancel()
-            AdManager.get().showLuckyCredits = false
-        }
+        val count = DBHelper.get().getLuckyCreditsClickCount()
+        if(count < 10) {
+            if (AdManager.get().showLuckyCredits) {
+                DBHelper.get().addLuckyCreditsClickCount()
+                GameResultDialog(context!!, {
+                    if (AdManager.get().rewardedAd != null) {
+//                        adState = 10
+//                        AdManager.get().showPointInterstitialAd(activity)
+                        AdManager.get().rewardedAd?.fullScreenContentCallback = object :FullScreenContentCallback(){
+                            override fun onAdDismissedFullScreenContent() {
+                                Log.d(tag, "onAdDismissedFullScreenContent--- ")
+                                AdManager.get().rewardedAd = null
+                                AdManager.get().loadRewardedAd(context)
+                            }
 
+                            override fun onAdFailedToShowFullScreenContent(p0: AdError) {
+                                Log.d(tag, "onAdFailedToShowFullScreenContent--- $p0")
+                                AdManager.get().rewardedAd = null
+                            }
+                        }
+                        AdManager.get().rewardedAd?.show(activity!!,object :OnUserEarnedRewardListener{
+                            override fun onUserEarnedReward(p0: RewardItem) {
+                                addPoint(pointsToAdd,"reward")
+                            }
+
+                        })
+                    }
+                }).apply {
+                    val r = Random()
+                    pointsToAdd = (r.nextInt(5) + 5) * 10
+                    setResult("+$pointsToAdd")
+                }.show()
+                currentPlayTime = animator!!.currentPlayTime
+                animator?.cancel()
+                AdManager.get().showLuckyCredits = false
+            }
+        }
 
     }
 
@@ -211,11 +244,11 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 //            addPoint(it,"checkin")
             pointsToAdd = it
             GameResultDialog(context!!,{
-                if(AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == true) {
+                if(AdManager.get().interstitialAdMap[AdManager.ad_point] != null) {
                     adState = 7
                     AdManager.get().showPointInterstitialAd(activity)
                 }else{
-                    AdManager.get().loadInterstitialAd(AdManager.ad_point)
+                    AdManager.get().loadInterstitialAd(context,AdManager.ad_point)
                     //如果广告没有加载仍然增加积分
                     addPoint(pointsToAdd,"checkin")
                 }
@@ -244,11 +277,11 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                 if(isDeviceInVPN() && prefs.getBooleanValue("show_tip_vpn",true)){
                     showVPNDialog()
                 }else{
-                    LogUtils.println("$fragmentTag start--${AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady}")
-                    if (AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady == true) {
+                    LogUtils.println("$fragmentTag start--${AdManager.get().interstitialAdMap[AdManager.ad_preclick] != null}")
+                    if (AdManager.get().interstitialAdMap[AdManager.ad_preclick] != null) {
                         AdManager.get().showPreclickInterstitialAd(activity)
                     } else {
-                        AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
+                        AdManager.get().loadInterstitialAd(context,AdManager.ad_preclick)
                         wheelStartRotate(1000)
                     }
                 }
@@ -277,11 +310,11 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         prefs.save("show_tip_vpn",false)
         AlertDialog.Builder(context!!).setMessage(R.string.tip_vpn)
             .setPositiveButton(R.string.confirm){_,_ ->
-                LogUtils.println("$fragmentTag start--${AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady}")
-                if (AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady == true) {
+                LogUtils.println("$fragmentTag start--${AdManager.get().interstitialAdMap[AdManager.ad_preclick] != null}")
+                if (AdManager.get().interstitialAdMap[AdManager.ad_preclick] != null) {
                     AdManager.get().showPreclickInterstitialAd(activity)
                 } else {
-                    AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
+                    AdManager.get().loadInterstitialAd(context,AdManager.ad_preclick)
                     wheelStartRotate(1000)
                 }
             }
@@ -296,24 +329,24 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 //            endPos = 0
 //            AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
         }
-        if((AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady != true) and (AdManager.get().rewardedAd?.isAdReady != true)){
+        if((AdManager.get().interstitialAdMap[AdManager.ad_point] == null) and (AdManager.get().rewardedAd == null)){
             LogUtils.println("$fragmentTag 积分广告还没加载")
-            if(AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady == true) {
+            if(AdManager.get().interstitialAdMap[AdManager.ad_preclick] != null) {
                 endPos = 0
             }else{
                 endPos = 0
             }
-            AdManager.get().loadInterstitialAd(AdManager.ad_point)
-        }else if((AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady != true) and (AdManager.get().rewardedAd?.isAdReady == true)){
+            AdManager.get().loadInterstitialAd(context,AdManager.ad_point)
+        }else if((AdManager.get().interstitialAdMap[AdManager.ad_point] == null) and (AdManager.get().rewardedAd != null)){
             endPos = 3//积分广告没加载 激励视频加载了，给50积分
-            AdManager.get().loadInterstitialAd(AdManager.ad_point)
-        }else if((AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == true) and (AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady != true)){
+            AdManager.get().loadInterstitialAd(context,AdManager.ad_point)
+        }else if((AdManager.get().interstitialAdMap[AdManager.ad_point] != null) and (AdManager.get().interstitialAdMap[AdManager.ad_preclick] == null)){
             endPos = 0//积分广告加载了，预触发广告没加载，给5积分，2021-2-10新增
         }
         if(endPos == 0){
             adState = -1
         }
-        println("CoinFragment wheelStartRotate endPos=$endPos ,${AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady} ${AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady} ${AdManager.get().rewardedAd?.isAdReady}")
+        println("CoinFragment wheelStartRotate endPos=$endPos ,${AdManager.get().interstitialAdMap[AdManager.ad_preclick] != null} ${AdManager.get().interstitialAdMap[AdManager.ad_point] != null} ${AdManager.get().rewardedAd != null}")
         val animatorSet = AnimatorSet()
         animatorSet.playTogether(
             ObjectAnimator.ofFloat(dataBinding.goIv, "scaleX", 1f, 1.2f, 0.9f, 1.0f),
@@ -337,11 +370,22 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
     private fun showObtainCoinsAlert(pos:Int){
         if(context != null) {
             GameResultDialog(context!!, {
-                if ((AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady != true) and (AdManager.get().rewardedAd?.isAdReady == true)) {
+                if ((AdManager.get().interstitialAdMap[AdManager.ad_point] == null) and (AdManager.get().rewardedAd != null)) {
                     pointsToAdd = PointStrategy.points[pos]
-                    AdManager.get().rewardedAd?.setAdListener(rewardedAdCallback)
-                    AdManager.get().rewardedAd?.show(activity)
-                } else if ((AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == true)) {
+                    AdManager.get().rewardedAd?.fullScreenContentCallback = object :FullScreenContentCallback(){
+                        override fun onAdDismissedFullScreenContent() {
+                            Log.d(tag, "onAdDismissedFullScreenContent--- ")
+                            AdManager.get().rewardedAd = null
+                            AdManager.get().loadRewardedAd(context)
+                        }
+
+                        override fun onAdFailedToShowFullScreenContent(p0: AdError) {
+                            Log.d(tag, "onAdFailedToShowFullScreenContent--- $p0")
+                            AdManager.get().rewardedAd = null
+                        }
+                    }
+                    AdManager.get().rewardedAd?.show(activity!!,rewardedAdCallback)
+                } else if ((AdManager.get().interstitialAdMap[AdManager.ad_point] != null)) {
                     pointsToAdd = PointStrategy.points[pos]
                     if (adState != 2) {
                         adState = 2
@@ -353,16 +397,25 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                 }
             }, {
                 pointsToAdd = PointStrategy.points[pos] * 2
-                AdManager.get().rewardedAd?.setAdListener(rewardedAdCallback)
-                AdManager.get().rewardedAd?.show(activity)
+                AdManager.get().rewardedAd?.fullScreenContentCallback = object :FullScreenContentCallback(){
+                    override fun onAdDismissedFullScreenContent() {
+                        AdManager.get().rewardedAd = null
+                        AdManager.get().loadRewardedAd(context)
+                    }
+
+                    override fun onAdFailedToShowFullScreenContent(p0: AdError) {
+                        AdManager.get().rewardedAd = null
+                    }
+                }
+                AdManager.get().rewardedAd?.show(activity!!,rewardedAdCallback)
             }).apply {
                 setResult("+${PointStrategy.points[pos]}")
 //            pointsToAdd = min(200,PointStrategy.points[pos] * 2)//如果转到500就不翻倍了
-                if (AdManager.get().rewardedAd?.isAdReady == true and (AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == true) and (pos < 6)) {
+                if ((AdManager.get().rewardedAd != null) and (AdManager.get().interstitialAdMap[AdManager.ad_point] != null) and (pos < 6)) {
                     showMore()
                 } else {
-                    if (AdManager.get().rewardedAd?.isAdReady == false) {
-                        AdManager.get().loadRewardedAd()
+                    if (AdManager.get().rewardedAd == null) {
+                        AdManager.get().loadRewardedAd(context)
                     }
                 }
             }.show()
@@ -560,18 +613,18 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         LogUtils.println("$fragmentTag onAdClose adState=$adState")
         if(adState == 2){
             wheelStartRotate(1000L)
-            AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
+            AdManager.get().loadInterstitialAd(context,AdManager.ad_preclick)
         }else if(adState == 4){
-            AdManager.get().loadInterstitialAd(AdManager.ad_point)
+            AdManager.get().loadInterstitialAd(context,AdManager.ad_point)
             addPoint(pointsToAdd,"wheel")
         }else if(adState == 7){
-            AdManager.get().loadInterstitialAd(AdManager.ad_point)
+            AdManager.get().loadInterstitialAd(context,AdManager.ad_point)
             addPoint(pointsToAdd,"reward")
         }else if(adState == 9){
-            AdManager.get().loadInterstitialAd(AdManager.ad_point)
+            AdManager.get().loadInterstitialAd(context,AdManager.ad_point)
             addPoint(pointsToAdd,"checkin")
         }else if(adState == 12){
-            AdManager.get().loadInterstitialAd(AdManager.ad_point)
+            AdManager.get().loadInterstitialAd(context,AdManager.ad_point)
             addPoint(pointsToAdd,"reward")
         }
         refreshAdStatusLayout()
@@ -579,6 +632,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
     override fun onAdShow() {
         adState++
+        LogUtils.println("${fragmentTag}  onAdShow-- $adState")
         if(!AdManager.get().showLuckyCredits){
             if(animator?.isRunning == true){
                 currentPlayTime = animator!!.currentPlayTime
@@ -594,19 +648,11 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             dataBinding.goIv.setImageResource(R.drawable.ic_go3)
         }
         refreshAdStatusLayout()
-        if(AdManager.get().showLuckyCredits){
-            if(animator == null) {
-                animator = tata(dataBinding.luckyCreditsIv, 1f)
-                animator?.repeatCount = ValueAnimator.INFINITE
-            }else{
-                animator?.currentPlayTime = currentPlayTime
-            }
-            animator?.start()
-        }
+
     }
 
     override fun onAdLoadFail() {
-        if(AdManager.get().interstitialAdMap[AdManager.ad_preclick]?.isAdReady == false and (AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == false) and (AdManager.get().rewardedAd?.isAdReady == false)){
+        if((AdManager.get().interstitialAdMap[AdManager.ad_preclick] == null) and (AdManager.get().interstitialAdMap[AdManager.ad_point] == null) and (AdManager.get().rewardedAd == null)){
             dataBinding.goIv.isClickable = false
             dataBinding.goIv.setImageResource(R.drawable.ic_go2)
         }else{
@@ -616,47 +662,29 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         refreshAdStatusLayout()
     }
 
-    private val rewardedAdCallback = object : ATRewardVideoListener {
-        var earned = false
-        override fun onRewardedVideoAdClosed(p0: ATAdInfo?) {
-            //转盘的激励视频如果没有看完视频则不增加转盘积分
-            AdManager.get().loadRewardedAd()
-            if(earned){
-                addPoint(pointsToAdd,"wheel")
-            }else{
-                adState = 0
-                startTimeCount()
-                Log.d(fragmentTag, "onRewardedAdClosed:earn is false ")
-            }
+    private val rewardedAdCallback = object : OnUserEarnedRewardListener {
+        override fun onUserEarnedReward(rewardItem: RewardItem) {
+            Log.d(tag, "onUserEarnedReward--- $rewardItem ")
+            addPoint(pointsToAdd,"wheel")
         }
+    }
 
-        override fun onReward(p0: ATAdInfo?) {
+    private val rewardAdLoadCallback = object :AdManager.VCallAdListener{
+        override fun onAdClose() {
 
         }
 
-        override fun onRewardedVideoAdPlayFailed(p0: AdError?, p1: ATAdInfo?) {
-
+        override fun onAdShow() {
         }
 
-        override fun onRewardedVideoAdLoaded() {
-
+        override fun onAdLoaded() {
+            dataBinding.rewardedVideoTv.setBackgroundResource(R.drawable.bg_blue_round)
         }
 
-        override fun onRewardedVideoAdPlayStart(p0: ATAdInfo?) {
-
+        override fun onAdLoadFail() {
+            dataBinding.rewardedVideoTv.setBackgroundResource(R.drawable.bg_gray_round)
         }
 
-        override fun onRewardedVideoAdFailed(p0: AdError?) {
-
-        }
-
-        override fun onRewardedVideoAdPlayEnd(p0: ATAdInfo?) {
-            earned = true
-        }
-
-        override fun onRewardedVideoAdPlayClicked(p0: ATAdInfo?) {
-
-        }
     }
 
     val receiver:BroadcastReceiver = object :BroadcastReceiver(){
@@ -731,22 +759,21 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             println("refreshAdStatusLayout ${AdManager.get().interstitialAdLoadStatus}")
             dataBinding.adStatusLayout.removeAllViews()
             AdManager.get().interstitialAdLoadStatus.forEach {
-                var p = -1
-                if (it.value == 1) {
-                    p =
-                        AdManager.get().interstitialAdMap[it.key]?.checkAdStatus()?.atTopAdInfo?.adsourceIndex
-                            ?: -1
-                    if (it.key == AdManager.ad_rewarded) {
-                        p = AdManager.get().rewardedAd?.checkAdStatus()?.atTopAdInfo?.adsourceIndex
-                            ?: -1
-                    }
-                }
+//                var p = -1
+//                if (it.value == 1) {
+//                    p =
+//                        AdManager.get().interstitialAdMap[it.key]?.checkAdStatus()?.atTopAdInfo?.adsourceIndex
+//                            ?: -1
+//                    if (it.key == AdManager.ad_rewarded) {
+//                        p = AdManager.get().rewardedAd?.checkAdStatus()?.atTopAdInfo?.adsourceIndex
+//                            ?: -1
+//                    }
+//                }
                 dataBinding.adStatusLayout.addView(TextView(context).apply {
                     text = String.format(
-                        "%s:%s,位置:%d",
+                        "%s:%s,",
                         it.key,
-                        if (it.value === 0) "加载中" else if (it.value === 1) "加载成功" else "加载失败",
-                        p
+                        if (it.value === 3) "加载中" else if (it.value === 1) "加载成功" else "加载失败"
                     )
                     setTextColor(Color.RED)
                 })

@@ -25,6 +25,7 @@ import vcall.free.international.phone.wifi.calling.databinding.FragmentTabContra
 import vcall.free.international.phone.wifi.calling.lib.BaseDataBindingFragment
 import vcall.free.international.phone.wifi.calling.utils.Dispatcher
 import vcall.free.international.phone.wifi.calling.utils.UserManager
+import vcall.free.international.phone.wifi.calling.widget.WrapLinearLayoutManager
 import java.lang.Exception
 import java.util.*
 
@@ -43,7 +44,7 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
     override fun initView(v: View) {
         dataBinding.fragment = this
         dataBinding.recyclerView.layoutManager =
-            LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+            WrapLinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         dataBinding.recyclerView.adapter = BaseAdapter<Contact>(list){
             R.layout.item_contacts
         }.apply {
@@ -117,9 +118,12 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
         while (phoneCursor?.moveToNext() == true) {
             val phoneId = phoneCursor.getLong(4)
             val contactId = phoneCursor.getLong(0)
-            val phone = phoneCursor.getString(2)
+            var phone = phoneCursor.getString(2)
             val username = phoneCursor.getString(1)?:""
             val photoId = phoneCursor.getLong(3)
+            if(phone == null){
+                phone = ""
+            }
             list.add(Contact(phoneId,contactId, username, phone, photoId))
 //            println("$fragmentTag ${phoneCursor.getString(5)}")
         }

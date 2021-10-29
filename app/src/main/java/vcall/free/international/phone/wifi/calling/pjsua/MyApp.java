@@ -18,6 +18,8 @@ import org.pjsip.pjsua2.pjsip_transport_type_e;
 import java.io.File;
 import java.util.ArrayList;
 
+import vcall.free.international.phone.wifi.calling.utils.LogUtils;
+
 /**
  * Created by lyf on 2020/5/9.
  */
@@ -32,8 +34,13 @@ public class MyApp {
             System.out.println("This could be safely ignored if you " +
                     "don't need video.");
         }
-        System.loadLibrary("pjsua2-c");
-        System.out.println("Library loaded");
+        try {
+            System.loadLibrary("pjsua2-c");
+            System.out.println("Library loaded");
+        }catch (UnsatisfiedLinkError e){
+            Log.e("MyApp", "static initializer: so文件加载错误！！！" );
+            System.out.println("UnsatisfiedLinkError: " + e.getMessage());
+        }
     }
 
     public static Endpoint ep = new Endpoint();

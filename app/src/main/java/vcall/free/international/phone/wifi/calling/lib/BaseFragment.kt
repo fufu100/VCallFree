@@ -34,6 +34,7 @@ abstract class BaseFragment: Fragment() {
 
     override fun onResume() {
         super.onResume()
+        println("fragment onResume $fragmentTag")
         MobclickAgent.onPageStart(fragmentTag)
     }
 }

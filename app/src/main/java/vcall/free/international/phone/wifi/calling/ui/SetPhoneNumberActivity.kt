@@ -96,7 +96,7 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>(),
             }
         }
 
-        AdManager.get().interstitialAdListener.add(this)
+        AdManager.get().interstitialAdListener[AdManager.ad_point] = this
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -118,7 +118,7 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>(),
 
     override fun onDestroy() {
         super.onDestroy()
-        AdManager.get().interstitialAdListener.remove(this)
+        AdManager.get().interstitialAdListener.remove(AdManager.ad_point)
     }
 
     fun selectCountry(v: View){
@@ -155,10 +155,10 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>(),
                                     UserManager.get().user?.phone = dataBinding.phoneTv.text.toString()
                                     GameResultDialog(this,{
                                         UserManager.get().user!!.points += 1000
-                                        if(AdManager.get().interstitialAdMap[AdManager.ad_point]?.isAdReady == true){
-                                            AdManager.get().loadInterstitialAd(AdManager.ad_point)
+                                        if(AdManager.get().interstitialAdMap[AdManager.ad_point] != null){
+                                            AdManager.get().loadInterstitialAd(this,AdManager.ad_point)
                                         }else{
-                                            AdManager.get().loadInterstitialAd(AdManager.ad_point)
+                                            AdManager.get().loadInterstitialAd(this,AdManager.ad_point)
                                             finish()
                                         }
                                     }).apply {
@@ -225,7 +225,7 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>(),
     }
 
     override fun onAdClose() {
-        AdManager.get().loadInterstitialAd(AdManager.ad_point)
+        AdManager.get().loadInterstitialAd(this,AdManager.ad_point)
         finish()
     }
 

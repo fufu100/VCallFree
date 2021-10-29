@@ -18,6 +18,7 @@ import vcall.free.international.phone.wifi.calling.api.Record
 import vcall.free.international.phone.wifi.calling.lib.BaseFragment
 import vcall.free.international.phone.wifi.calling.utils.Dispatcher
 import vcall.free.international.phone.wifi.calling.utils.UserManager
+import vcall.free.international.phone.wifi.calling.widget.WrapLinearLayoutManager
 
 /**
  * Created by lyf on 2020/4/28.
@@ -28,7 +29,7 @@ class RecentFragment:BaseFragment() ,BaseAdapter.OnItemClick<Record>{
 
     override fun initView(v: View) {
         recyclerView.layoutManager =
-            LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+            WrapLinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         recyclerView.adapter = BaseAdapter<Record>(list){
             R.layout.item_call_record
         }.apply {

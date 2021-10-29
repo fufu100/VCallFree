@@ -16,6 +16,7 @@ import vcall.free.international.phone.wifi.calling.databinding.ItemCallRateBindi
 import vcall.free.international.phone.wifi.calling.lib.BaseBackActivity
 import vcall.free.international.phone.wifi.calling.utils.RxUtils
 import vcall.free.international.phone.wifi.calling.utils.closeKeyBoard
+import vcall.free.international.phone.wifi.calling.widget.WrapLinearLayoutManager
 
 /**
  * Created by lyf on 2020/5/7.
@@ -28,7 +29,7 @@ class CallRatesActivity : BaseBackActivity<ActivityCallRatesBinding>() , TextWat
     override fun initView(savedInstanceState: Bundle?) {
         super.initView(savedInstanceState)
         dataBinding.recyclerView.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+            WrapLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         dataBinding.recyclerView.adapter = BaseAdapter<Array<String>>(list) {
             R.layout.item_call_rate
         }.apply {

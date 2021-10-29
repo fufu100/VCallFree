@@ -77,7 +77,7 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
                 callBinder = service as CallService.CallBinder
                 if(ContextCompat.checkSelfPermission(this@SplashActivity,
                         Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
-                    if(!this@SplashActivity.hasSim()){
+                    if(callBinder?.getGetIpStatus() == -1 && getCountry() == null) {
                         callBinder?.getIpInfo()
                     }
                 }
@@ -89,12 +89,13 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
             addAction(CallService.ACTION_ON_AD_SHOW)
         })
 
+        LogUtils.d(tag,"onCreate--- onlyShowAd=$onlyShowAd")
         if(onlyShowAd){
-            AdManager.get().showSplashInterstitialAd(this)
+            AdManager.get().showInterstitialAd(this,AdManager.ad_splash)
         }else {
             getAdData()
         }
-        AdManager.get().interstitialAdListener.add(this)
+        AdManager.get().interstitialAdListener[AdManager.ad_splash] = this
         //for test
 //        prefs.save("last_check_day","20200826")
 //        prefs.save("check_max_day",1)
@@ -109,14 +110,14 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
 
     override fun onStop() {
         super.onStop()
-        if(AdManager.get().interstitialAdMap[AdManager.ad_splash]?.isAdReady == false){
+        if(AdManager.get().interstitialAdMap[AdManager.ad_splash] == null){
             println("$tag onStop 加载广告")
-            AdManager.get().loadInterstitialAd(AdManager.ad_splash)
+            AdManager.get().loadInterstitialAd(this,AdManager.ad_splash)
         }
     }
 
     override fun onDestroy() {
-        AdManager.get().interstitialAdListener.remove(this)
+        AdManager.get().interstitialAdListener.remove(AdManager.ad_splash)
         super.onDestroy()
         unbindService(conn)
         unregisterReceiver(receiver)
@@ -176,11 +177,12 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
     }
 
     private fun getAdData(){
+        Log.d(tag, "getAdData--- ")
         compositeDisposable.add(Api.getApiService().getAd()
             .compose(RxUtils.applySchedulers())
             .subscribe({
                 AdManager.get().adData = it
-                AdManager.get().loadInterstitialAd(AdManager.ad_splash)
+                AdManager.get().loadInterstitialAd(this,AdManager.ad_splash)
 
             },{
                 it.printStackTrace()
@@ -255,10 +257,12 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
             if(!isFirst) {
                 AdManager.get().showSplashInterstitialAd(this)
             }
-            AdManager.get().loadInterstitialAd(AdManager.ad_preclick)
-            AdManager.get().loadInterstitialAd(AdManager.ad_point)
-            AdManager.get().loadInterstitialAd(AdManager.ad_close)
-            AdManager.get().loadRewardedAd()
+            AdManager.get().loadInterstitialAd(this,AdManager.ad_preclick)
+            AdManager.get().loadInterstitialAd(this,AdManager.ad_point)
+            AdManager.get().loadInterstitialAd(this,AdManager.ad_close)
+            AdManager.get().loadRewardedAd(this)
+            AdManager.get().loadNativeAd(this,AdManager.ad_quite)
+            AdManager.get().loadNativeAd(this,AdManager.ad_call_result)
         }
     }
 

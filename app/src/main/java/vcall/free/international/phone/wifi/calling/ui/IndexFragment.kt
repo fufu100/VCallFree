@@ -4,6 +4,7 @@ import android.view.View
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.ViewPager
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.adapter.CacheFragmentStatePagerAdapter
@@ -22,9 +23,15 @@ class IndexFragment:BaseDataBindingFragment<FragmentIndexBinding>() ,RadioGroup.
         fragments.add(ContractsFragment())
         fragments.add(RecentFragment())
         fragments.add(CoinsFragment())
-        dataBinding.viewPager.adapter = object : CacheFragmentStatePagerAdapter(childFragmentManager){
-            override fun createItem(position: Int): Fragment = fragments[position]
-            override fun getCount(): Int = fragments.size
+        dataBinding.viewPager.adapter = object : FragmentStatePagerAdapter(childFragmentManager,FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT){
+            override fun getCount(): Int {
+                return fragments.size
+            }
+
+            override fun getItem(position: Int): Fragment {
+                return fragments[position]
+            }
+
         }
         dataBinding.viewPager.addOnPageChangeListener(this)
         dataBinding.viewPager.offscreenPageLimit = 2

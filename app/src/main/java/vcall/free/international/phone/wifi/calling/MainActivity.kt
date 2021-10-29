@@ -18,20 +18,14 @@ import android.os.IBinder
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.telephony.TelephonyManager
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
-import com.anythink.core.api.ATAdInfo
-import com.anythink.core.api.ATSDK
-import com.anythink.core.api.AdError
-import com.anythink.interstitial.api.ATInterstitial
-import com.anythink.interstitial.api.ATInterstitialListener
-import com.google.android.ads.nativetemplates.TemplateView
+import com.google.android.gms.ads.AdRequest
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -43,9 +37,6 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.newmotor.x5.db.DBHelper
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.lib.App
 import vcall.free.international.phone.wifi.calling.lib.BaseActivity
@@ -83,7 +74,7 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
             }
         }
         supportFragmentManager.beginTransaction()
-            .replace(R.id.frameLayout, IndexFragment(), "Index").commit()
+            .replace(R.id.frameLayout, IndexFragment(), "Index").commitAllowingStateLoss()
         drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
             override fun onDrawerStateChanged(newState: Int) {}
 
@@ -140,6 +131,10 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
 
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 callBinder = service as CallService.CallBinder
+                Log.d(tag, "onServiceConnected:${callBinder?.getGetIpStatus()} ${getCountry()}")
+                if(callBinder?.getGetIpStatus() == -1 && getCountry() == null){
+                    callBinder?.getIpInfo()
+                }
                 callBinder?.setOnGetIpInfoListener(object : CallService.OnGetIpInfo {
                     override fun onGetIpInfo(ip: String?) {
                         println("$tag onGetIpInfo $ip")
@@ -172,14 +167,16 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
         if (!NotificationUtils.get().areNotificationsEnable()) {
             NotificationUtils.get().remindOpenNotification(this)
         }else{
-            if(Build.VERSION.SDK_INT >= 26) {
-                LogUtils.println("$tag onCreate startForegroundService--")
-                val intent = Intent(applicationContext, DaemonService::class.java)
-                startForegroundService(intent)
-            }else{
-                val intent = Intent(applicationContext, DaemonService::class.java)
-                startService(intent)
-            }
+//            if(Build.VERSION.SDK_INT >= 26) {
+//                LogUtils.println("$tag onCreate startForegroundService--")
+//                val intent = Intent(applicationContext, DaemonService::class.java)
+//                startForegroundService(intent)
+//            }else{
+//                val intent = Intent(applicationContext, DaemonService::class.java)
+//                startService(intent)
+//            }
+            val intent = Intent(applicationContext, DaemonService::class.java)
+            startService(intent)
         }
         exitDialog = ExitDialog(this){
             if(it == 0){
@@ -223,11 +220,12 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
 //            toast(it.message?:"addOnFailureListener")
         }
 
-        if(LogUtils.LOG_ON) {
-            ATSDK.integrationChecking(applicationContext)
-        }
+//        if(LogUtils.LOG_ON) {
+//            ATSDK.integrationChecking(applicationContext)
+//        }
 
         if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
+            Log.d(tag, " 已经有权限 开始signup---")
             signup()
             val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
             println("simCountryIso:${telephonyManager.simCountryIso}")
@@ -238,6 +236,7 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
 
         val isProxy = isWifiProxy()
         println("$tag isProxy=$isProxy ${isDeviceInVPN()} ")
+
     }
 
 
@@ -250,12 +249,13 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
 
     public fun signup() {
         val map = mutableMapOf<String,String>()
-        var country = this.getCountry()
+        var country:String? = getCountry()
         if(country == null){
-            println("尝试通过IP获取国家。。。")
+            println("尝试通过IP获取国家。。。 ${callBinder?.getIpCountry()}")
             if(callBinder?.getIpCountry() != null){
                 country = callBinder?.getIpCountry()
             }else {
+                println("$tag getIpInfo ${callBinder == null}")
                 callBinder?.getIpInfo()
                 return
             }
@@ -267,6 +267,7 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
         map.put("country",country!!)
         println("$tag signup $map")
         compositeDisposable.add(Api.getApiService().signup(map)
+//            .delay(4000,TimeUnit.MILLISECONDS)
             .compose(RxUtils.applySchedulers())
             .subscribe({
                 loading.dismiss()
@@ -401,45 +402,45 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
             .show()
     }
 
-    fun testATAd(){
-        val mInterstitialAd = ATInterstitial(this,"b5f984badd3116")
-        mInterstitialAd.setAdListener(object :ATInterstitialListener{
-            override fun onInterstitialAdLoadFail(p0: AdError?) {
-                println("$tag onInterstitialAdLoadFail, ${p0?.desc}")
-                p0?.printStackTrace()
-            }
-
-            override fun onInterstitialAdLoaded() {
-                println("$tag onInterstitialAdLoaded")
-                mInterstitialAd.show(this@MainActivity)
-            }
-
-            override fun onInterstitialAdVideoEnd(p0: ATAdInfo?) {
-
-            }
-
-            override fun onInterstitialAdShow(p0: ATAdInfo?) {
-                println("$tag onInterstitialAdShow")
-            }
-
-            override fun onInterstitialAdVideoError(p0: AdError?) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onInterstitialAdClicked(p0: ATAdInfo?) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onInterstitialAdVideoStart(p0: ATAdInfo?) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onInterstitialAdClose(p0: ATAdInfo?) {
-                println("$tag onInterstitialAdClose")
-            }
-
-        })
-        mInterstitialAd.load()
-    }
+//    fun testATAd(){
+//        val mInterstitialAd = ATInterstitial(this,"b5f984badd3116")
+//        mInterstitialAd.setAdListener(object :ATInterstitialListener{
+//            override fun onInterstitialAdLoadFail(p0: AdError?) {
+//                println("$tag onInterstitialAdLoadFail, ${p0?.desc}")
+//                p0?.printStackTrace()
+//            }
+//
+//            override fun onInterstitialAdLoaded() {
+//                println("$tag onInterstitialAdLoaded")
+//                mInterstitialAd.show(this@MainActivity)
+//            }
+//
+//            override fun onInterstitialAdVideoEnd(p0: ATAdInfo?) {
+//
+//            }
+//
+//            override fun onInterstitialAdShow(p0: ATAdInfo?) {
+//                println("$tag onInterstitialAdShow")
+//            }
+//
+//            override fun onInterstitialAdVideoError(p0: AdError?) {
+//                TODO("Not yet implemented")
+//            }
+//
+//            override fun onInterstitialAdClicked(p0: ATAdInfo?) {
+//                TODO("Not yet implemented")
+//            }
+//
+//            override fun onInterstitialAdVideoStart(p0: ATAdInfo?) {
+//                TODO("Not yet implemented")
+//            }
+//
+//            override fun onInterstitialAdClose(p0: ATAdInfo?) {
+//                println("$tag onInterstitialAdClose")
+//            }
+//
+//        })
+//        mInterstitialAd.load()
+//    }
 
 }
