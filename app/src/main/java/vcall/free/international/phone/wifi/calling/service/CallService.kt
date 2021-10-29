@@ -14,6 +14,7 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import vcall.free.international.phone.wifi.calling.lib.App
 import org.pjsip.pjsua2.*
@@ -92,15 +93,20 @@ class CallService:Service(),MyAppObserver{
         fun initAccount(){
             if(!LogUtils.test) {
                 GlobalScope.launch {
+                    registerStartTime = System.currentTimeMillis()
+                    Log.d(TAG, "initAccount, whether app is null:${app == null}")
                     if (app == null) {
                         app = MyApp()
                     }
-                    try {
-                        Thread.sleep(5000)
-                    } catch (e: InterruptedException) {
-                    }
                     regStatus = 0
+                    Log.d(TAG, "delay结束 执行init---- ")
                     app?.init(this@CallService, App.appCacheDirectory)
+//                    try {
+//                        Thread.sleep(5000)
+//                    } catch (e: InterruptedException) {
+//                    }
+                    delay(4000)
+
                     println("$TAG initAccount ${UserManager.get().user}")
                     UserManager.get().user?.also {
                         if(it.servers != null && it.servers.isNotEmpty()) {
@@ -381,6 +387,8 @@ class CallService:Service(),MyAppObserver{
         LogUtils.println("$TAG notifyRegState $msg_str $expiration $reason")
         if(code!!.swigValue() / 100 == 2){
             regStatus = 1
+            val t = System.currentTimeMillis()
+            Log.d(TAG, "notifyRegState: 注册成功，注册用时${t- registerStartTime}")
         }else{
             regStatus = 2
         }

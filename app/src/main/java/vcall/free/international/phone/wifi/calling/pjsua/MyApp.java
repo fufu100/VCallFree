@@ -61,6 +61,7 @@ public class MyApp {
     private final int LOG_LEVEL = 4;
 
     public void init(MyAppObserver obs, String app_dir) {
+        Log.d("MyApp", "init: ---------");
         init(obs, app_dir, false);
     }
 
