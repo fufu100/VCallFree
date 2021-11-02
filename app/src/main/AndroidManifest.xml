@@ -107,6 +107,10 @@
             android:name="vcall.free.international.phone.wifi.calling.ui.AgreementActivity"
             android:screenOrientation="portrait"
             android:configChanges="screenLayout|orientation" />
+        <activity
+            android:name="vcall.free.international.phone.wifi.calling.ui.WebActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="screenLayout|orientation" />
 
         <service android:name="vcall.free.international.phone.wifi.calling.service.CallService" />
         <service android:name=".service.DaemonService" />

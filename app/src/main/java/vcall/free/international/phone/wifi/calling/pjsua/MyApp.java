@@ -82,12 +82,12 @@ public class MyApp {
         String configPath = appDir + "/" + configName;
         File f = new File(configPath);
         Log.d("MyApp", "init: " + f.exists());
-        if (f.exists()) {
-            loadConfig(configPath);
-        } else {
+//        if (f.exists()) {
+//            loadConfig(configPath);
+//        } else {
             /* Set 'default' values */
             sipTpConfig.setPort(SIP_PORT);
-        }
+//        }
 
         /* Override log level setting */
         epConfig.getLogConfig().setLevel(LOG_LEVEL);

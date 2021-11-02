@@ -105,7 +105,7 @@ class CallService:Service(),MyAppObserver{
 //                        Thread.sleep(5000)
 //                    } catch (e: InterruptedException) {
 //                    }
-                    delay(4000)
+//                    delay(4000)
 
                     println("$TAG initAccount ${UserManager.get().user}")
                     UserManager.get().user?.also {
@@ -314,7 +314,7 @@ class CallService:Service(),MyAppObserver{
     }
 
     private val networkCallback = object :ConnectivityManager.NetworkCallback(){
-        override fun onAvailable(network: Network?) {
+        override fun onAvailable(network: Network) {
             Log.d(TAG,"net onAvailable $network")
 //            ActivityUtils.from(this@TranslateService).action(ACTION_SHOW_AD).send()
         }

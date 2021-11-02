@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">VCallFree</string>
+    <string name="app_name" translatable="false">VCall</string>
     <string name="tab_contacts">Contacts</string>
     <string name="tab_recents">Recents</string>
     <string name="tab_coins">Coins</string>

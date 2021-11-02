@@ -264,7 +264,7 @@ fun Activity.closeKeyBoard(){
 fun Context.isNetworkConnected():Boolean{
     try {
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val networkInfo:NetworkInfo = connectivityManager.activeNetworkInfo
+        val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
         return networkInfo != null && networkInfo.state == NetworkInfo.State.CONNECTED
     }catch (e:Exception){
         e.printStackTrace()

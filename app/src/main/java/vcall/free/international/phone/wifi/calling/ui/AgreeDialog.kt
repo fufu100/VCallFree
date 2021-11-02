@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.text.Html
 import android.text.SpannableString
 import android.text.TextPaint
 import android.text.method.LinkMovementMethod
@@ -28,21 +29,34 @@ class AgreementDialog(context: Context, val callback:(result:Boolean) -> Unit) :
         dataBinding.dialog = this
         setContentView(dataBinding.root)
         setCancelable(false)
-        val content = SpannableString(FileUtils.readStringFromAssetFile(context.assets,"agreement.txt"))
+        val content =  SpannableString(Html.fromHtml(FileUtils.readStringFromAssetFile(context.assets,"agreement.txt")))
         val span2 = object :MyClickSpan(context.resources.getColor(R.color.blue)){
             override fun onClick(widget: View) {
                 println("click1")
                 Dispatcher.dispatch(context){
-                    action(Intent.ACTION_VIEW)
-                    data(Uri.parse("http://vcallfree.com/VCallFree_privacy.html"))
+                    navigate(WebActivity::class.java)
+                    extra("url","http://vcallfree.com/VCallFree_privacy.html")
+                    extra("title","")
                     defaultAnimate()
                 }.go()
             }
         }
-        val target = "Privacy Policy and Terms of use"
+        val span3 = object :MyClickSpan(context.resources.getColor(R.color.blue)){
+            override fun onClick(widget: View) {
+                println("click1")
+                TermUseDialog(context).show()
+            }
+        }
+        val target = "Privacy Policy"
+        val target2 = "Terms of Service"
         val start = content.indexOf(target)
         content.setSpan(UnderlineSpan(),start,start + target.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
         content.setSpan(span2,start,start + target.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        val start2 = content.indexOf(target2)
+        content.setSpan(UnderlineSpan(),start2,start2 + target2.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+        content.setSpan(span3,start2,start2 + target2.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+
         dataBinding.text.text = content
         dataBinding.text.movementMethod = LinkMovementMethod.getInstance()
         dataBinding.text.setHintTextColor(Color.TRANSPARENT)

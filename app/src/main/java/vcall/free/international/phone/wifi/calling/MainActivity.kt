@@ -188,6 +188,7 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
                     }.go()
                 }else {
                     finish()
+                    System.exit(0)
                 }
             }else {
 

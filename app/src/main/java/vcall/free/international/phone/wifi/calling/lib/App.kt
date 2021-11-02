@@ -32,11 +32,11 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
     var start = 0
     var stop = 0
     var isInBackgrounnd = false
-    override fun onActivityPaused(activity: Activity?) {
-        println("App onActivityPaused ${activity?.localClassName}")
+    override fun onActivityPaused(activity: Activity) {
+        println("App onActivityPaused ${activity.localClassName}")
     }
 
-    override fun onActivityResumed(activity: Activity?) {
+    override fun onActivityResumed(activity: Activity) {
         println("App onActivityResumed ${activity!!::class.java.canonicalName} ")
         if(isInBackgrounnd){
 //            toast("应用从后台回来了")
@@ -53,21 +53,21 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
 
     }
 
-    override fun onActivityStarted(activity: Activity?) {
+    override fun onActivityStarted(activity: Activity) {
         println("App onActivityStarted ${activity!!::class.java.canonicalName}")
         println("App stop=$stop start=$start")
         start++
     }
 
-    override fun onActivityDestroyed(activity: Activity?) {
+    override fun onActivityDestroyed(activity: Activity) {
         println("App onActivityDestroyed")
     }
 
-    override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
         println("App onActivitySaveInstanceState ${activity!!::class.java.canonicalName}")
     }
 
-    override fun onActivityStopped(activity: Activity?) {
+    override fun onActivityStopped(activity: Activity) {
         println("App onActivityStopped ${activity!!::class.java.canonicalName}")
         stop++
         println("App stop=$stop start=$start")
@@ -77,8 +77,8 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
         }
     }
 
-    override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
-        println("App onActivityCreated ${activity!!::class.java.canonicalName}")
+    override fun onActivityCreated(activity: Activity, p1: Bundle?) {
+        println("App onActivityCreated ${activity::class.java.canonicalName}")
     }
 
     companion object{
@@ -122,12 +122,12 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
 //        val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
 //        MobileAds.setRequestConfiguration(configuration)
         UMConfigure.setLogEnabled(true)
-        UMConfigure.init(
+        UMConfigure.preInit(
             this,
             "5ec6a4d1978eea0864b20201",
-            "umeng",
-            UMConfigure.DEVICE_TYPE_PHONE,
-            "5d2adf7eaf90221648e0e554485336fc"
+            "umeng"
+//            UMConfigure.DEVICE_TYPE_PHONE,
+//            "5d2adf7eaf90221648e0e554485336fc"
         )
         MobclickAgent.setPageCollectionMode(MobclickAgent.PageMode.LEGACY_AUTO)
 //        MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL)

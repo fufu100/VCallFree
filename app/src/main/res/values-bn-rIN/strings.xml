@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">VCallFree</string>
     <string name="tab_contacts">যোগাযোগ</string>
     <string name="tab_recents">সাম্প্রতিককালে</string>
     <string name="tab_coins">মুদ্রা</string>

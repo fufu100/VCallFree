@@ -40,7 +40,7 @@ class CallResultActivity:BaseBackActivity<ActivityCallResultBinding>() {
     var currentNativeAd: NativeAd? = null
     override fun initView(savedInstanceState: Bundle?) {
         super.initView(savedInstanceState)
-        record = intent.getParcelableExtra("record")
+        record = intent.getParcelableExtra("record")!!
         dataBinding.activity = this
         if(record.username?.isNotEmpty() == true){
             dataBinding.phone = record.username

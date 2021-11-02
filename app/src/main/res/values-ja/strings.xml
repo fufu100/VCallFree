@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">VCallFree</string>
     <string name="tab_contacts">連絡先</string>
     <string name="tab_recents">最近</string>
     <string name="tab_coins">コイン</string>
