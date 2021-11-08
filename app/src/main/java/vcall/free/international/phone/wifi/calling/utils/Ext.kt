@@ -83,6 +83,10 @@ fun Context.dip2px(px:Int):Int{
     return (px * scale + 0.5).toInt()
 }
 
+fun Activity.isNotDestroy():Boolean{
+    return !this.isFinishing && !this.isDestroyed
+}
+
 fun Context.checkIfCanDrawOverlay():Boolean{
     if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M){
         return Settings.canDrawOverlays(this)

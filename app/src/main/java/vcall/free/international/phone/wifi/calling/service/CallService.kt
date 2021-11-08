@@ -97,10 +97,11 @@ class CallService:Service(),MyAppObserver{
                     Log.d(TAG, "initAccount, whether app is null:${app == null}")
                     if (app == null) {
                         app = MyApp()
+                        Log.d(TAG, "delay结束 执行init---- ")
+                        app?.init(this@CallService, App.appCacheDirectory)
                     }
                     regStatus = 0
-                    Log.d(TAG, "delay结束 执行init---- ")
-                    app?.init(this@CallService, App.appCacheDirectory)
+
 //                    try {
 //                        Thread.sleep(5000)
 //                    } catch (e: InterruptedException) {

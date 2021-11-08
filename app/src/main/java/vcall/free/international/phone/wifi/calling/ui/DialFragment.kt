@@ -62,7 +62,7 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>(),CallService.Re
             }
         }
         context?.bindService(Intent(context, CallService::class.java), conn, Context.BIND_AUTO_CREATE)
-        dialEffect = DialEffectHelper(context!!)
+        dialEffect = DialEffectHelper(requireContext())
 
         with(arguments) {
 //            canInput = this?.getBoolean("can_input",false)?:false
@@ -82,7 +82,7 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>(),CallService.Re
     override fun onResume() {
         super.onResume()
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if(ContextCompat.checkSelfPermission(context!!,
+            if(ContextCompat.checkSelfPermission(requireContext(),
                     Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED){
                 requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO),1)
             }
@@ -126,7 +126,7 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>(),CallService.Re
     fun call(v:View?){
         LogUtils.println("call ${dataBinding.phoneTv.text}")
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if(ContextCompat.checkSelfPermission(context!!,
+            if(ContextCompat.checkSelfPermission(requireContext(),
                     Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED ){
                 requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO),2)
                 return
@@ -158,7 +158,7 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>(),CallService.Re
 //                username = ""
 //            }
             if (phoneNumberUtil.isValidNumber(phoneNumber)) {
-                if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && ActivityCompat.checkSelfPermission(context!!,
+                if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && ActivityCompat.checkSelfPermission(requireContext(),
                         Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED)){
                     var where:String = "${ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER} like ?"
                     var values:Array<String> = arrayOf("%$phone%")
@@ -181,7 +181,7 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>(),CallService.Re
                         }
                     }
                 }
-                val dialog = CallDialog(context!!) {
+                val dialog = CallDialog(requireContext()) {
                     val e164 =
                         phoneNumberUtil.format(phoneNumber, PhoneNumberUtil.PhoneNumberFormat.E164)
                             .replace("+", UserManager.get().country!!.prefix)

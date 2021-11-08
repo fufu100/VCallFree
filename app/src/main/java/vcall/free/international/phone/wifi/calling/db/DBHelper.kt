@@ -92,8 +92,11 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         return list
     }
 
-    fun addCallRecord(record: Record) {
+    fun addCallRecord(record: Record?) {
         println("DBHelper 存入通话记录：$record")
+        if(record == null){
+            return
+        }
         val cv = ContentValues()
         cv.put(RecordTable.USERNAME, record.username)
         cv.put(RecordTable.USER_PHOTO, record.userPhoto)
@@ -270,7 +273,7 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
     fun getAdClickCount():Int{
         val format = SimpleDateFormat("yyyyMMdd",Locale.ENGLISH)
         val date = format.format(Date())
-        println("getTodayCredits date=$date")
+        println("getAdClickCount date=$date")
         val cursor = queryAndAll(PlayCountTable.TB_NAME,PlayCountTable.DATE,date)
         if(cursor?.moveToNext() == true){
             val count = cursor.getInt(cursor.getColumnIndex(PlayCountTable.AD_CLICK_COUNT))
@@ -306,7 +309,7 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
     fun getLuckyCreditsClickCount():Int{
         val format = SimpleDateFormat("yyyyMMdd",Locale.ENGLISH)
         val date = format.format(Date())
-        println("getTodayCredits date=$date")
+        println("getLuckyCreditsClickCount date=$date")
         val cursor = queryAndAll(PlayCountTable.TB_NAME,PlayCountTable.DATE,date)
         if(cursor?.moveToNext() == true){
             val count = cursor.getInt(cursor.getColumnIndex(PlayCountTable.LUCKY_CREDITS_CLICK_COUNT))

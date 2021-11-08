@@ -1,5 +1,6 @@
 package vcall.free.international.phone.wifi.calling.utils
 
+import android.app.Activity
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.app.ActivityManager
@@ -90,15 +91,18 @@ fun loadFlag(imageView: ImageView,iso:String?){
 
 @BindingAdapter("flag_circle")
 fun loadFlagCircle(imageView: ImageView,iso:String?){
-    if(iso != null && iso.isNotEmpty()){
-        GlobalScope.launch (Dispatchers.IO){
-            val file = File(App.appCacheDirectory + "flags/" + iso + ".png")
-            withContext(Dispatchers.Main){
-                Glide.with(imageView.context).load(file).bitmapTransform(CircleTransform(imageView.context)).into(imageView)
+    if(imageView.context != null && (imageView.context as Activity).isNotDestroy()) {
+        if (iso != null && iso.isNotEmpty()) {
+            GlobalScope.launch(Dispatchers.IO) {
+                val file = File(App.appCacheDirectory + "flags/" + iso + ".png")
+                withContext(Dispatchers.Main) {
+                    Glide.with(imageView.context as Activity).load(file)
+                        .bitmapTransform(CircleTransform(imageView.context)).into(imageView)
+                }
             }
+        } else {
+            imageView.setImageResource(R.drawable.bg_setting_item)
         }
-    }else{
-        imageView.setImageResource(R.drawable.bg_setting_item)
     }
 }
 

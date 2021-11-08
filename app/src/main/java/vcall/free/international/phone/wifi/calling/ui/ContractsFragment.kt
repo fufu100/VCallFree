@@ -54,9 +54,11 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
         dataBinding.search.addTextChangedListener(this)
         GlobalScope.launch {
             println("-----")
-            getContacts()
+            val l = getContacts()
             println("+++++")
             withContext(Dispatchers.Main){
+                list.clear()
+                list.addAll(l)
                 dataBinding.recyclerView.adapter?.notifyDataSetChanged()
             }
         }
@@ -68,24 +70,27 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
         job = GlobalScope.launch {
             delay(500)
             println("搜索$keyword")
-            getContacts(keyword)
+            val l = getContacts(keyword)
 
             withContext(Dispatchers.Main){
+                list.clear()
+                list.addAll(l)
                 dataBinding.recyclerView.adapter?.notifyDataSetChanged()
             }
         }
     }
 
-    private fun getContacts(keyword: String = ""){
+    private fun getContacts(keyword: String = ""):MutableList<Contact>{
         println("getContact ${context != null}")
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && ActivityCompat.checkSelfPermission(context!!,
+        val _list = mutableListOf<Contact>()
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && ActivityCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_DENIED){
             if (lackPermission()) {
                 requestPermissions( PERMISSIONS, 0)
             }
-            return
+            return _list
         }
-        list.clear()
+
         var where:String? = null
         var values:Array<String>? = null
         if(keyword.isNotEmpty()){
@@ -124,10 +129,11 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
             if(phone == null){
                 phone = ""
             }
-            list.add(Contact(phoneId,contactId, username, phone, photoId))
+            _list.add(Contact(phoneId,contactId, username, phone, photoId))
 //            println("$fragmentTag ${phoneCursor.getString(5)}")
         }
         phoneCursor?.close()
+        return _list
     }
 
     override fun onDetach() {
@@ -146,9 +152,11 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
         println("ContractsFragment onRequestPermissionsResult $permissions,$grantResults")
         GlobalScope.launch {
             println("-----")
-            getContacts()
+            val l = getContacts()
             println("+++++")
             withContext(Dispatchers.Main){
+                list.clear()
+                list.addAll(l)
                 dataBinding.recyclerView.adapter?.notifyDataSetChanged()
             }
         }
@@ -202,7 +210,7 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
     private fun lackPermission(): Boolean {
         for (permission in PERMISSIONS) {
             if (ContextCompat.checkSelfPermission(
-                    context!!,
+                    requireContext(),
                     permission
                 ) == PackageManager.PERMISSION_DENIED
             ) {

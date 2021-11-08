@@ -131,17 +131,17 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
 
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 callBinder = service as CallService.CallBinder
-                Log.d(tag, "onServiceConnected:${callBinder?.getGetIpStatus()} ${getCountry()}")
-                if(callBinder?.getGetIpStatus() == -1 && getCountry() == null){
-                    callBinder?.getIpInfo()
-                }
                 callBinder?.setOnGetIpInfoListener(object : CallService.OnGetIpInfo {
                     override fun onGetIpInfo(ip: String?) {
                         println("$tag onGetIpInfo $ip")
                         signup()
                     }
-
                 })
+                Log.d(tag, "onServiceConnected:${callBinder?.getGetIpStatus()} ${getCountry()}")
+                if(getCountry() == null){
+                    callBinder?.getIpInfo()
+                }
+
             }
         }
         bindService(Intent(this, CallService::class.java), conn, Context.BIND_AUTO_CREATE)

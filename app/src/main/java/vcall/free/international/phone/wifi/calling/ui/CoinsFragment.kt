@@ -48,7 +48,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
     override fun initView(v: View) {
         dataBinding.fragment = this
         dataBinding.coinLayout.checker = this
-        loading = Loading(activity!!)
+        loading = Loading(requireActivity())
 
         dataBinding.totalPlayCount.text = (UserManager.get().user?.max_wheel?:1000).toString()
         playCount = DBHelper.get().getPlayCount()
@@ -163,7 +163,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             }
             AdManager.get().rewardedAd!!.show(activity, OnUserEarnedRewardListener {
                 pointsToAdd = PointStrategy.videoPoints[getVideotPoints()]
-                GameResultDialog(context!!,{
+                GameResultDialog(requireContext(),{
                     if(AdManager.get().interstitialAdMap[AdManager.ad_point] != null) {
                         adState = 5
                         AdManager.get().showPointInterstitialAd(activity)
@@ -199,10 +199,14 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
     fun luckyCredits(v: View){
         val count = DBHelper.get().getLuckyCreditsClickCount()
+        Log.d(fragmentTag, "luckyCredits count=$count,showLuckyCredits=${AdManager.get().showLuckyCredits} context:${context == null}")
         if(count < 10) {
             if (AdManager.get().showLuckyCredits) {
+                if(context == null){
+                    return
+                }
                 DBHelper.get().addLuckyCreditsClickCount()
-                GameResultDialog(context!!, {
+                GameResultDialog(requireContext(), {
                     if (AdManager.get().rewardedAd != null) {
 //                        adState = 10
 //                        AdManager.get().showPointInterstitialAd(activity)
@@ -218,7 +222,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                                 AdManager.get().rewardedAd = null
                             }
                         }
-                        AdManager.get().rewardedAd?.show(activity!!,object :OnUserEarnedRewardListener{
+                        AdManager.get().rewardedAd?.show(requireActivity(),object :OnUserEarnedRewardListener{
                             override fun onUserEarnedReward(p0: RewardItem) {
                                 addPoint(pointsToAdd,"reward")
                             }
@@ -230,8 +234,10 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                     pointsToAdd = (r.nextInt(5) + 5) * 10
                     setResult("+$pointsToAdd")
                 }.show()
-                currentPlayTime = animator!!.currentPlayTime
-                animator?.cancel()
+                if(animator != null) {
+                    currentPlayTime = animator!!.currentPlayTime
+                    animator?.cancel()
+                }
                 AdManager.get().showLuckyCredits = false
             }
         }
@@ -239,11 +245,11 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
     }
 
     fun signIn(v:View){
-        CheckInDialog(context!!){
+        CheckInDialog(requireContext()){
 //            AdManager.get().showPointInterstitialAd()
 //            addPoint(it,"checkin")
             pointsToAdd = it
-            GameResultDialog(context!!,{
+            GameResultDialog(requireContext(),{
                 if(AdManager.get().interstitialAdMap[AdManager.ad_point] != null) {
                     adState = 7
                     AdManager.get().showPointInterstitialAd(activity)
@@ -289,7 +295,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                 LogUtils.println("过期了，重新获取")
                 val map = mutableMapOf<String,String>()
                 map.putAll(App.requestMap)
-                map.put("uuid",context!!.getDeviceId())
+                map.put("uuid",requireContext().getDeviceId())
                 Api.getApiService().signup(map)
                     .compose(RxUtils.applySchedulers())
                     .subscribe({
@@ -308,7 +314,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
     private fun showVPNDialog(){
         prefs.save("show_tip_vpn",false)
-        AlertDialog.Builder(context!!).setMessage(R.string.tip_vpn)
+        AlertDialog.Builder(requireContext()).setMessage(R.string.tip_vpn)
             .setPositiveButton(R.string.confirm){_,_ ->
                 LogUtils.println("$fragmentTag start--${AdManager.get().interstitialAdMap[AdManager.ad_preclick] != null}")
                 if (AdManager.get().interstitialAdMap[AdManager.ad_preclick] != null) {
@@ -369,7 +375,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
     private fun showObtainCoinsAlert(pos:Int){
         if(context != null) {
-            GameResultDialog(context!!, {
+            GameResultDialog(requireContext(), {
                 if ((AdManager.get().interstitialAdMap[AdManager.ad_point] == null) and (AdManager.get().rewardedAd != null)) {
                     pointsToAdd = PointStrategy.points[pos]
                     AdManager.get().rewardedAd?.fullScreenContentCallback = object :FullScreenContentCallback(){
@@ -384,7 +390,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                             AdManager.get().rewardedAd = null
                         }
                     }
-                    AdManager.get().rewardedAd?.show(activity!!,rewardedAdCallback)
+                    AdManager.get().rewardedAd?.show(requireActivity(),rewardedAdCallback)
                 } else if ((AdManager.get().interstitialAdMap[AdManager.ad_point] != null)) {
                     pointsToAdd = PointStrategy.points[pos]
                     if (adState != 2) {
@@ -407,7 +413,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                         AdManager.get().rewardedAd = null
                     }
                 }
-                AdManager.get().rewardedAd?.show(activity!!,rewardedAdCallback)
+                AdManager.get().rewardedAd?.show(requireActivity(),rewardedAdCallback)
             }).apply {
                 setResult("+${PointStrategy.points[pos]}")
 //            pointsToAdd = min(200,PointStrategy.points[pos] * 2)//如果转到500就不翻倍了
@@ -432,9 +438,9 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         loading.show()
         Api.getApiService().addPoints(
             mutableMapOf(
-                "uuid" to context!!.getDeviceId(),
+                "uuid" to requireContext().getDeviceId(),
                 "type" to type,
-                "ver" to context!!.getVersionName(),
+                "ver" to requireContext().getVersionName(),
                 "ts" to System.currentTimeMillis(),
                 "points" to points,
                 "country" to Locale.getDefault().country

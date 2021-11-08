@@ -57,10 +57,14 @@ class DaemonService: Service() {
                 println("DaemonService onReceive ${intent.action}")
                 if(intent.action == "refresh_notification"){
                     builder.setContentText(getContent())
-                    startForeground(100,builder.build())
+//                    startForeground(100,builder.build())
+                    val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    manager.notify(100,builder.build())
 
                 }else if(intent.action == "stop"){
-                    stopForeground(true)
+//                    stopForeground(true)
+                    val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    manager.cancel(100)
                 }
             }
         }

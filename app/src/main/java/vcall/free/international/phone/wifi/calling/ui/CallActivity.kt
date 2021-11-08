@@ -135,7 +135,11 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         dataBinding.phone2.insert(number)
         dialEffectHelper?.dialNumber(number)
         if (!LogUtils.test) {
-            callBinder?.getCurrentCall()?.dialDtmf(number)
+            try {
+                callBinder?.getCurrentCall()?.dialDtmf(number)
+            }catch (e:Exception){
+                e.printStackTrace()
+            }
         }
     }
 
@@ -185,47 +189,52 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
     }
 
     private fun onDisconnect(){
-        var state = 2//state=1接通
-        var coin_cost = 0
+        try {
+            var state = 2//state=1接通
+            var coin_cost = 0
 
-        if(count > 0) {
-            state = 1
-            coin_cost = (rate * ceil(count * 1.0f / 60)).toInt()
-        }
-        Log.d(TAG, "onDisConnect: state=$state ")
-        record = Record(
-            0,
-            0,
-            0,
-            phone?:"",
-            UserManager.get().country?.iso?:"",
-            UserManager.get().country?.code?:"",
-            UserManager.get().country?.prefix?:"",
-            username,
-            0L,
-            System.currentTimeMillis(),
-            count,
-            rate,
-            coin_cost,
-            state
-        )
-        UserManager.get().user!!.points -= coin_cost
-        DBHelper.get().addCallRecord(record!!)
-        if(AdManager.get().interstitialAdMap[AdManager.ad_close] != null){
-            AdManager.get().showCloseInterstitialAd(this)
-            isAdShowing = true
-        }else{
-            try {
-                AdManager.get().loadInterstitialAd(this,AdManager.ad_close)
+            if (count > 0) {
+                state = 1
+                coin_cost = (rate * ceil(count * 1.0f / 60)).toInt()
+            }
+            Log.d(TAG, "onDisConnect: state=$state ")
+            record = Record(
+                0,
+                0,
+                0,
+                phone ?: "",
+                UserManager.get().country?.iso ?: "",
+                UserManager.get().country?.code ?: "",
+                UserManager.get().country?.prefix ?: "",
+                username,
+                0L,
+                System.currentTimeMillis(),
+                count,
+                rate,
+                coin_cost,
+                state
+            )
+            Log.d(TAG, "after new Record")
+            if (UserManager.get().user != null) {
+                UserManager.get().user!!.points -= coin_cost
+            }
+            Log.d(TAG, "after cut points")
+            DBHelper.get().addCallRecord(record)
+            Log.d(TAG, "after add Record ${AdManager.get().interstitialAdMap[AdManager.ad_close] == null}")
+            if (AdManager.get().interstitialAdMap[AdManager.ad_close] != null) {
+                AdManager.get().showCloseInterstitialAd(this)
+                isAdShowing = true
+            } else {
+                AdManager.get().loadInterstitialAd(this, AdManager.ad_close)
                 Dispatcher.dispatch(this) {
                     navigate(CallResultActivity::class.java)
                     extra("record", record!!)
                     defaultAnimate()
                 }.go()
-            }catch (e:Exception){
-                e.printStackTrace()
+                finish()
             }
-
+        } catch (e: Exception) {
+            e.printStackTrace()
             finish()
         }
     }

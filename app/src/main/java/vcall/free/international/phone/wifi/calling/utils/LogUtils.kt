@@ -6,7 +6,7 @@ import vcall.free.international.phone.wifi.calling.BuildConfig
 import java.lang.Exception
 
 object LogUtils {
-    public val LOG_ON = BuildConfig.DEBUG
+    public val LOG_ON = true
     public val test = Build.SUPPORTED_ABIS.contains("x86")
 
     fun DebugLog(message: String){
