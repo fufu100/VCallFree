@@ -104,7 +104,17 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
 
         LogUtils.d(tag,"onCreate--- onlyShowAd=$onlyShowAd")
         if(onlyShowAd){
-            AdManager.get().showInterstitialAd(this,AdManager.ad_splash)
+//            AdManager.get().showInterstitialAd(this,AdManager.ad_splash)
+            AdManager.get().appOpenManager?.showAdIfAvailable(this,false,object :OnShowAdCompleteListener{
+                override fun onShowAdComplete() {
+                    Dispatcher.dispatch(this@SplashActivity) {
+                        navigate(MainActivity::class.java)
+                        defaultAnimate()
+                    }.go()
+                    finish()
+                }
+
+            })
         }else {
             getAdData()
         }
@@ -195,7 +205,18 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
             .compose(RxUtils.applySchedulers())
             .subscribe({
                 AdManager.get().adData = it
-                AdManager.get().loadInterstitialAd(this,AdManager.ad_splash)
+//                AdManager.get().loadInterstitialAd(this,AdManager.ad_splash)
+                AdManager.get().appOpenManager?.showAdIfAvailable(this,true,object :OnShowAdCompleteListener{
+                    override fun onShowAdComplete() {
+                        println("$tag onShowAdComplete---")
+                        Dispatcher.dispatch(this@SplashActivity) {
+                            navigate(MainActivity::class.java)
+                            defaultAnimate()
+                        }.go()
+                        finish()
+                    }
+
+                })
 
             },{
                 it.printStackTrace()

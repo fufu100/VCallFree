@@ -51,7 +51,7 @@ class AdManager {
             return instance!!
         }
     }
-
+    var appOpenManager:AppOpenManager? = null
     var adData: AdResp? = null
     var interstitialAdMap: MutableMap<String, InterstitialAd?> = mutableMapOf()
     var nativeAdMap: MutableMap<String, NativeAd?> = mutableMapOf()
@@ -68,6 +68,7 @@ class AdManager {
         InstallReferrerClient.newBuilder(App.context).build()
 
     init {
+        appOpenManager = AppOpenManager()
         referrerClient.startConnection(object : InstallReferrerStateListener {
 
             override fun onInstallReferrerSetupFinished(responseCode: Int) {
