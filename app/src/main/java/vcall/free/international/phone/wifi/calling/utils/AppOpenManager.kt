@@ -11,7 +11,8 @@ import com.google.android.gms.ads.appopen.AppOpenAd
 import java.util.*
 
 class AppOpenManager {
-    private val AD_UNIT_ID = "ca-app-pub-3940256099942544/3419835294"
+//    private val AD_UNIT_ID = "ca-app-pub-3940256099942544/3419835294"
+    private val AD_UNIT_ID = "ca-app-pub-2764389811554448/5221221339"
     private val LOG_TAG = "AppOpenAdManager"
     private var appOpenAd: AppOpenAd? = null
     private var isLoadingAd = false
@@ -94,6 +95,7 @@ class AppOpenManager {
                 override fun onShowAdComplete() {
                     // Empty because the user will go back to the activity that shows the ad.
                 }
+                override fun onShowAd(){}
             })
     }
 
@@ -154,6 +156,7 @@ class AppOpenManager {
                     /** Called when fullscreen content is shown. */
                     override fun onAdShowedFullScreenContent() {
                         Log.d(LOG_TAG, "onAdShowedFullScreenContent.")
+                        onShowAdCompleteListener.onShowAd()
                     }
                 })
             isShowingAd = true
@@ -164,4 +167,5 @@ class AppOpenManager {
 
 interface OnShowAdCompleteListener {
     fun onShowAdComplete()
+    fun onShowAd()
 }

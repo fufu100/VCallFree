@@ -114,6 +114,10 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
                     finish()
                 }
 
+                override fun onShowAd() {
+                    isAdShowing = true
+                }
+
             })
         }else {
             getAdData()
@@ -214,6 +218,10 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
                             defaultAnimate()
                         }.go()
                         finish()
+                    }
+
+                    override fun onShowAd() {
+                        isAdShowing = true
                     }
 
                 })

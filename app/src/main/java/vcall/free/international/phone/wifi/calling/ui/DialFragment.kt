@@ -158,28 +158,37 @@ class DialFragment:BaseDataBindingFragment<FragmentDialBinding>(),CallService.Re
 //                username = ""
 //            }
             if (phoneNumberUtil.isValidNumber(phoneNumber)) {
-                if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && ActivityCompat.checkSelfPermission(requireContext(),
-                        Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED)){
-                    var where:String = "${ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER} like ?"
-                    var values:Array<String> = arrayOf("%$phone%")
-                    val phoneCursor = context?.contentResolver?.query(
-                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                        arrayOf(
-                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-                            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                            ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER,
-                            ContactsContract.CommonDataKinds.Phone.PHOTO_ID,
-                            ContactsContract.CommonDataKinds.Phone._ID
-                        ),
-                        where, values, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " COLLATE LOCALIZED"
-                    )
-                    while (phoneCursor?.moveToNext() == true){
-                        val name = phoneCursor.getString(1)
-                        if(name?.isNotEmpty() == true){
-                            username = name
-                            break
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && ActivityCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.READ_CONTACTS
+                    ) == PackageManager.PERMISSION_GRANTED)
+                ) {
+                    GlobalScope.launch {
+                        var where: String =
+                            "${ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER} like ?"
+                        var values: Array<String> = arrayOf("%$phone%")
+                        val phoneCursor = context?.contentResolver?.query(
+                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                            arrayOf(
+                                ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                                ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER,
+                                ContactsContract.CommonDataKinds.Phone.PHOTO_ID,
+                                ContactsContract.CommonDataKinds.Phone._ID
+                            ),
+                            where,
+                            values,
+                            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " COLLATE LOCALIZED"
+                        )
+                        while (phoneCursor?.moveToNext() == true) {
+                            val name = phoneCursor.getString(1)
+                            if (name?.isNotEmpty() == true) {
+                                username = name
+                                break
+                            }
                         }
                     }
+
                 }
                 val dialog = CallDialog(requireContext()) {
                     val e164 =

@@ -67,7 +67,7 @@ class CallResultActivity:BaseBackActivity<ActivityCallResultBinding>() {
 
         println("CallResultActivity duration=${record.duration}")
         val likeCount = prefs.getIntValue("like_count",0)
-        if(record.duration > 60 && likeCount < 6){
+        if(record.duration > 30 && likeCount < 6){
             dataBinding.group.visibility = View.VISIBLE
         }else{
             if(AdManager.get().adData?.ads?.count {
