@@ -105,7 +105,7 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
         LogUtils.d(tag,"onCreate--- onlyShowAd=$onlyShowAd")
         if(onlyShowAd){
 //            AdManager.get().showInterstitialAd(this,AdManager.ad_splash)
-            AdManager.get().appOpenManager?.showAdIfAvailable(this,false,object :OnShowAdCompleteListener{
+            AdManager.get().appOpenManager?.showAdIfAvailable(this,true,object :OnShowAdCompleteListener{
                 override fun onShowAdComplete() {
                     Dispatcher.dispatch(this@SplashActivity) {
                         navigate(MainActivity::class.java)
@@ -225,6 +225,13 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
                     }
 
                 })
+
+                AdManager.get().loadInterstitialAd(this,AdManager.ad_preclick)
+                AdManager.get().loadInterstitialAd(this,AdManager.ad_point)
+                AdManager.get().loadInterstitialAd(this,AdManager.ad_close)
+                AdManager.get().loadRewardedAd(this)
+                AdManager.get().loadNativeAd(this,AdManager.ad_quite)
+                AdManager.get().loadNativeAd(this,AdManager.ad_call_result)
 
             },{
                 it.printStackTrace()

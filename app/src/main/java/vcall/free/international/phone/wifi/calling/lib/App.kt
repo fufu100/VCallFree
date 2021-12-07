@@ -7,6 +7,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.webkit.WebView
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
 import com.newmotor.x5.db.DBHelper
@@ -117,10 +118,14 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
                 init(applicationContext)
             }
         }
-        MobileAds.initialize(this) {}
-//        val testDeviceIds = Arrays.asList("5303CB9D5BD32EB2B1444E27283AF0FA")
-//        val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
-//        MobileAds.setRequestConfiguration(configuration)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val processName = getProcessName()
+            if (packageName != processName) {
+                WebView.setDataDirectorySuffix(processName)
+            }
+        }
+
         UMConfigure.setLogEnabled(true)
         UMConfigure.preInit(
             this,
@@ -159,12 +164,12 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
             }
         }
 
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-//            val processName = getProcessName()
-//            if (packageName != processName) {
-//                WebView.setDataDirectorySuffix(processName)
-//            }
-//        }
+
+
+        MobileAds.initialize(this) {}
+//        val testDeviceIds = Arrays.asList("5303CB9D5BD32EB2B1444E27283AF0FA")
+//        val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
+//        MobileAds.setRequestConfiguration(configuration)
     }
 
     private fun initData() {
