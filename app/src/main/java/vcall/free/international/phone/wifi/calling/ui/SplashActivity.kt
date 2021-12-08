@@ -16,7 +16,6 @@ import androidx.core.content.ContextCompat
 import androidx.viewpager.widget.PagerAdapter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.umeng.commonsdk.UMConfigure
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_splash.*
@@ -57,24 +56,12 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
         window?.statusBarColor = Color.TRANSPARENT
         if(!onlyShowAd) {
             if (!isFirst) {
-                UMConfigure.init(
-                    applicationContext, "5ec6a4d1978eea0864b20201",
-                    "umeng",
-                    UMConfigure.DEVICE_TYPE_PHONE,
-                    "5d2adf7eaf90221648e0e554485336fc"
-                )
                 startCountDownTime(29)
             } else {
                 AgreementDialog(this) {
                     if (it) {
                         viewPager.visibility = View.VISIBLE
                         viewPager.adapter = ImagePageAdapter()
-                        UMConfigure.init(
-                            applicationContext, "5ec6a4d1978eea0864b20201",
-                            "umeng",
-                            UMConfigure.DEVICE_TYPE_PHONE,
-                            "5d2adf7eaf90221648e0e554485336fc"
-                        )
                     } else {
                         finish()
                     }

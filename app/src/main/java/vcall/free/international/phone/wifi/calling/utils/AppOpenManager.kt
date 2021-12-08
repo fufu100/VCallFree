@@ -51,7 +51,7 @@ class AppOpenManager {
                     loadTime = Date().time
                     Log.d(LOG_TAG, "onAdLoaded.")
                     if(showAfterLoad && onShowAdCompleteListener != null && !(context as Activity).isFinishing){
-                        showAdIfAvailable(context as Activity,showAfterLoad,onShowAdCompleteListener!!)
+                        showAdIfAvailable(context,showAfterLoad,onShowAdCompleteListener)
                     }
                 }
 

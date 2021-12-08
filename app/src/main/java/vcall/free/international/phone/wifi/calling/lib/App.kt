@@ -11,11 +11,6 @@ import android.webkit.WebView
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
 import com.newmotor.x5.db.DBHelper
-import com.umeng.analytics.MobclickAgent
-import com.umeng.commonsdk.UMConfigure
-import com.umeng.message.IUmengRegisterCallback
-import com.umeng.message.PushAgent
-import com.umeng.message.UTrack
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import vcall.free.international.phone.wifi.calling.BuildConfig
@@ -126,45 +121,7 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
             }
         }
 
-        UMConfigure.setLogEnabled(true)
-        UMConfigure.preInit(
-            this,
-            "5ec6a4d1978eea0864b20201",
-            "umeng"
-//            UMConfigure.DEVICE_TYPE_PHONE,
-//            "5d2adf7eaf90221648e0e554485336fc"
-        )
-        MobclickAgent.setPageCollectionMode(MobclickAgent.PageMode.LEGACY_AUTO)
-//        MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL)
-//        ATSDK.init(applicationContext,"a5f80854919503","bade2107cedab15a24fc76882455de56")
-//        ATSDK.setNetworkLogDebug(true)
-
         initData()
-
-        PushAgent.getInstance(this).register(object : IUmengRegisterCallback {
-            override fun onSuccess(p0: String?) {
-                println("umeng regist success $p0")
-            }
-
-            override fun onFailure(p0: String?, p1: String?) {
-                println("umeng regist fail $p0 ,$p1")
-            }
-
-        })
-
-        PushAgent.getInstance(this).setMessageHandler { context, msg ->
-            println("setMessageHandler ${msg.custom}")
-            val isClickOrDismissed = true
-            if (isClickOrDismissed) {
-                //自定义消息的点击统计
-                UTrack.getInstance(applicationContext).trackMsgClick(msg)
-            } else {
-                //自定义消息的忽略统计
-                UTrack.getInstance(applicationContext).trackMsgDismissed(msg)
-            }
-        }
-
-
 
         MobileAds.initialize(this) {}
 //        val testDeviceIds = Arrays.asList("5303CB9D5BD32EB2B1444E27283AF0FA")

@@ -3,8 +3,6 @@ package vcall.free.international.phone.wifi.calling.lib
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.umeng.analytics.MobclickAgent
-import com.umeng.message.PushAgent
 import io.reactivex.disposables.CompositeDisposable
 import vcall.free.international.phone.wifi.calling.R
 
@@ -16,7 +14,6 @@ abstract class BaseActivity :AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(getLayoutRes())
-        PushAgent.getInstance(this).onAppStart();
     }
 
     abstract fun getLayoutRes():Int
@@ -29,19 +26,11 @@ abstract class BaseActivity :AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         println("onResume  $tag ${supportFragmentManager.fragments.size}")
-        if (supportFragmentManager.fragments.size == 0) {
-            MobclickAgent.onPageStart(tag)
-        }
-        MobclickAgent.onResume(this)
     }
 
     override fun onPause() {
         super.onPause()
         println("onPause $tag ${supportFragmentManager.fragments.size}")
-        if (supportFragmentManager.fragments.size == 0) {
-            MobclickAgent.onPageEnd(tag)
-        }
-        MobclickAgent.onPause(this)
     }
 
     override fun onDestroy() {
