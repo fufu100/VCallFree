@@ -2,21 +2,14 @@ package vcall.free.international.phone.wifi.calling
 
 import android.Manifest
 import android.app.Activity
+import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.media.AudioAttributes
-import android.media.AudioManager
-import android.media.RingtoneManager
-import android.media.SoundPool
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.KeyEvent
@@ -25,7 +18,6 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import com.google.android.gms.ads.AdRequest
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -35,19 +27,16 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.newmotor.x5.db.DBHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.lib.App
 import vcall.free.international.phone.wifi.calling.lib.BaseActivity
 import vcall.free.international.phone.wifi.calling.lib.prefs
 import vcall.free.international.phone.wifi.calling.service.CallService
-import vcall.free.international.phone.wifi.calling.service.DaemonService
 import vcall.free.international.phone.wifi.calling.ui.*
 import vcall.free.international.phone.wifi.calling.utils.*
 import vcall.free.international.phone.wifi.calling.widget.Loading
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 class MainActivity : BaseActivity(),InstallStateUpdatedListener {
     private val PERMISSION_REQUEST_CODE = 0
@@ -141,6 +130,11 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
                 if(getCountry() == null){
                     callBinder?.getIpInfo()
                 }
+                if (!NotificationUtils.get().areNotificationsEnable()) {
+                    NotificationUtils.get().remindOpenNotification(this@MainActivity)
+                }else{
+                    callBinder?.createNotification()
+                }
 
             }
         }
@@ -164,20 +158,7 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
             e.printStackTrace()
         }
 
-        if (!NotificationUtils.get().areNotificationsEnable()) {
-            NotificationUtils.get().remindOpenNotification(this)
-        }else{
-//            if(Build.VERSION.SDK_INT >= 26) {
-//                LogUtils.println("$tag onCreate startForegroundService--")
-//                val intent = Intent(applicationContext, DaemonService::class.java)
-//                startForegroundService(intent)
-//            }else{
-//                val intent = Intent(applicationContext, DaemonService::class.java)
-//                startService(intent)
-//            }
-            val intent = Intent(applicationContext, DaemonService::class.java)
-            startService(intent)
-        }
+
         exitDialog = ExitDialog(this){
             if(it == 0){
                 if(UserManager.get().user == null){
@@ -187,6 +168,8 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
                         category(Intent.CATEGORY_HOME)
                     }.go()
                 }else {
+                    val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    manager.cancel(100)
                     finish()
                     System.exit(0)
                 }

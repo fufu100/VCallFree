@@ -9,8 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import android.webkit.WebView
 import com.google.android.gms.ads.MobileAds
-import com.google.android.gms.ads.RequestConfiguration
-import com.newmotor.x5.db.DBHelper
+import vcall.free.international.phone.wifi.calling.db.DBHelper
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import vcall.free.international.phone.wifi.calling.BuildConfig

@@ -1,8 +1,6 @@
 package vcall.free.international.phone.wifi.calling.utils
 
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdLoader
-import com.newmotor.x5.db.DBHelper
+import vcall.free.international.phone.wifi.calling.db.DBHelper
 import vcall.free.international.phone.wifi.calling.lib.prefs
 import vcall.free.international.phone.wifi.calling.api.Country
 import vcall.free.international.phone.wifi.calling.api.User

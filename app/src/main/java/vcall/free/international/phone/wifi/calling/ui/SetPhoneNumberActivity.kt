@@ -17,7 +17,7 @@ import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.newmotor.x5.db.DBHelper
+import vcall.free.international.phone.wifi.calling.db.DBHelper
 import kotlinx.coroutines.*
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.api.Api

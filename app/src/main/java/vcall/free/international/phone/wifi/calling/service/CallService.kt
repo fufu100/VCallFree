@@ -1,11 +1,15 @@
 package vcall.free.international.phone.wifi.calling.service
 
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.BitmapFactory
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -13,11 +17,14 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import vcall.free.international.phone.wifi.calling.db.DBHelper
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import vcall.free.international.phone.wifi.calling.lib.App
 import org.pjsip.pjsua2.*
+import vcall.free.international.phone.wifi.calling.MainActivity
+import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.pjsua.*
 import vcall.free.international.phone.wifi.calling.ui.SplashActivity
@@ -70,6 +77,8 @@ class CallService:Service(),MyAppObserver{
             ConnectivityManager.CONNECTIVITY_ACTION
         )
         intentFilter.addAction(ACTION_SHOW_AD)
+        intentFilter.addAction("refresh_notification")
+        intentFilter.addAction("stop")
         registerReceiver(receiver, intentFilter)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
             connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -87,6 +96,36 @@ class CallService:Service(),MyAppObserver{
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
             connectivityManager.unregisterNetworkCallback(networkCallback)
         }
+    }
+    var builder:NotificationCompat.Builder? = null
+    fun createNotification(){
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            val channel = NotificationChannel(
+                "default", "VCallFree",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            manager.createNotificationChannel(channel)
+        }
+
+        builder = NotificationCompat.Builder(this,"default")
+        builder?.setSmallIcon(R.mipmap.ic_notification_logo)
+        builder?.setLargeIcon(BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
+        builder?.setContentTitle(resources.getString(R.string.app_name))
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        builder?.setContentIntent(PendingIntent.getActivity(this,0,intent,0))
+        builder?.setContentTitle("You can get some lucky credits today!")
+        builder?.setContentText(getContent())
+        builder?.setOnlyAlertOnce(true)
+        manager.notify(100,builder?.build())
+    }
+
+    private fun getContent():String{
+        println("getContent : ${UserManager.get().user}")
+        return String.format("Today's credits:%d,Wheel count:%d/%d",
+            DBHelper.get().getTodayCredits(),
+            DBHelper.get().getPlayCount(),UserManager.get().user?.max_wheel ?: 0)
     }
 
     inner class CallBinder:Binder(){
@@ -199,59 +238,9 @@ class CallService:Service(),MyAppObserver{
             return currentCall
         }
 
-//        fun initInterstitialAd(){
-//            mInterstitialAd = InterstitialAd(this@CallService).apply {
-//                adUnitId = "ca-app-pub-3940256099942544/1033173712"
-//                adListener = object : AdListener() {
-//                    override fun onAdLoaded() {
-//                        Log.d(TAG, "onAdLoaded--- ")
-//                        if (showAdOnLoad) {
-//                            mInterstitialAd.show()
-//                        }
-//                    }
-//
-//                    override fun onAdFailedToLoad(errorCode: Int) {
-//                        Log.d(TAG, "onAdFailedToLoad,errorCode=$errorCode")
-//                        Dispatcher.dispatch(this@CallService){
-//                            action(ACTION_ON_AD_LOAD_FAIL)
-//                        }.send()
-//                    }
-//
-//                    override fun onAdOpened() {
-//                        Log.d(TAG, "onAdOpened--- ")
-//                        Dispatcher.dispatch(this@CallService){
-//                            action(ACTION_ON_AD_SHOW)
-//                        }.send()
-//                    }
-//
-//                    override fun onAdClosed() {
-//                        super.onAdClosed()
-//                        Log.d(TAG, "onAdClosed---")
-//                        Dispatcher.dispatch(this@CallService){
-//                            action(ACTION_ON_AD_CLOSE)
-//                        }.send()
-//                    }
-//
-//                }
-//
-//            }
-//            mInterstitialAd.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
-//
-//        }
 
         fun setShowAdOnLoad(f:Boolean){
             showAdOnLoad = f
-        }
-
-//        fun showFullScreenAd(){
-//            if(mInterstitialAd.isLoaded){
-//                mInterstitialAd.show()
-//            }
-//        }
-        fun hideFullScreenAd(){
-//            if(mInterstitialAd.isLoaded){
-//                mInterstitialAd.
-//            }
         }
 
         fun setRegStateChangeListener(listener: RegStateChange?){
@@ -312,6 +301,10 @@ class CallService:Service(),MyAppObserver{
             println("CallService getIpCountry $ipCountry")
             return ipCountry
         }
+
+        fun createNotification(){
+            this@CallService.createNotification()
+        }
     }
 
     private val networkCallback = object :ConnectivityManager.NetworkCallback(){
@@ -336,21 +329,18 @@ class CallService:Service(),MyAppObserver{
             LogUtils.println("MyBroadcastReceiver ${intent.action}")
             if(intent.action == ACTION_SHOW_AD){
                 LogUtils.d(TAG, "ACTION_SHOW_AD  ")
-//                if(AdManager.get().interstitialAdMap[AdManager.ad_splash]?.isLoaded == true){
-//                    AdManager.get().showSplashInterstitialAd()
-                    Dispatcher.dispatch(this@CallService){
-                        navigate(SplashActivity::class.java)
-                        flag(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        extra("only_show_ad",true)
-                    }.go()
-//                }else{
-//                    LogUtils.println("广告没有加载好")
-//                    AdManager.get().loadInterstitialAd(AdManager.ad_splash)
-//                }
-//                if(!mInterstitialAd.isLoading){
-//                    showAdOnLoad = true
-//                    mInterstitialAd.loadAd(AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build())
-//                }
+                Dispatcher.dispatch(this@CallService){
+                    navigate(SplashActivity::class.java)
+                    flag(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    extra("only_show_ad",true)
+                }.go()
+            } else if (intent.action == "refresh_notification") {
+                builder?.setContentText(getContent())
+                val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                manager.notify(100,builder?.build())
+            } else if (intent.action == "stop") {
+                val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                manager.cancel(100)
             }else {
                 if (isNetworkChange(context)) {
                     notifyChangeNetwork()

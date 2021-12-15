@@ -7,10 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.graphics.ColorFilter
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.os.Build
 import android.os.IBinder
 import android.provider.ContactsContract
@@ -19,7 +15,7 @@ import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.newmotor.x5.db.DBHelper
+import vcall.free.international.phone.wifi.calling.db.DBHelper
 import kotlinx.android.synthetic.main.side_header.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

@@ -1,4 +1,4 @@
-package com.newmotor.x5.db
+package vcall.free.international.phone.wifi.calling.db
 
 import android.content.ContentValues
 import android.database.Cursor
@@ -7,9 +7,6 @@ import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.lib.App
 import vcall.free.international.phone.wifi.calling.api.Country
 import vcall.free.international.phone.wifi.calling.api.Record
-import vcall.free.international.phone.wifi.calling.db.CountryTable
-import vcall.free.international.phone.wifi.calling.db.PlayCountTable
-import vcall.free.international.phone.wifi.calling.db.RecordTable
 import vcall.free.international.phone.wifi.calling.utils.toast
 import java.text.SimpleDateFormat
 import java.util.*

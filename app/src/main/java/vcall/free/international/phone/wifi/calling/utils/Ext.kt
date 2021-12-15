@@ -87,6 +87,10 @@ fun Activity.isNotDestroy():Boolean{
     return !this.isFinishing && !this.isDestroyed
 }
 
+fun Context.isNotDestroy():Boolean{
+    return (this is Activity && this.isNotDestroy()) || this !is Activity
+}
+
 fun Context.checkIfCanDrawOverlay():Boolean{
     if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M){
         return Settings.canDrawOverlays(this)

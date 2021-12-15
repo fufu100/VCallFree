@@ -8,11 +8,12 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
+import vcall.free.international.phone.wifi.calling.lib.App
 import java.util.*
 
 class AppOpenManager {
-//    private val AD_UNIT_ID = "ca-app-pub-3940256099942544/3419835294"
-    private val AD_UNIT_ID = "ca-app-pub-2764389811554448/5221221339"
+    private val AD_UNIT_ID = "ca-app-pub-3940256099942544/3419835294"
+//    private val AD_UNIT_ID = "ca-app-pub-2764389811554448/5221221339"
     private val LOG_TAG = "AppOpenAdManager"
     private var appOpenAd: AppOpenAd? = null
     private var isLoadingAd = false
@@ -50,6 +51,7 @@ class AppOpenManager {
                     isLoadingAd = false
                     loadTime = Date().time
                     Log.d(LOG_TAG, "onAdLoaded.")
+                    App.context?.toast("开屏广告加载成功")
                     if(showAfterLoad && onShowAdCompleteListener != null && !(context as Activity).isFinishing){
                         showAdIfAvailable(context,showAfterLoad,onShowAdCompleteListener)
                     }
@@ -62,7 +64,9 @@ class AppOpenManager {
                  */
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isLoadingAd = false
+                    App.context?.toast("开屏广告加载失败")
                     Log.d(LOG_TAG, "onAdFailedToLoad: " + loadAdError.message)
+                    onShowAdCompleteListener?.onAdFailedToLoad()
                 }
             })
     }
@@ -92,10 +96,9 @@ class AppOpenManager {
             activity,
             false,
             object : OnShowAdCompleteListener {
-                override fun onShowAdComplete() {
-                    // Empty because the user will go back to the activity that shows the ad.
-                }
+                override fun onShowAdComplete() {}
                 override fun onShowAd(){}
+                override fun onAdFailedToLoad() {}
             })
     }
 
@@ -168,4 +171,5 @@ class AppOpenManager {
 interface OnShowAdCompleteListener {
     fun onShowAdComplete()
     fun onShowAd()
+    fun onAdFailedToLoad()
 }

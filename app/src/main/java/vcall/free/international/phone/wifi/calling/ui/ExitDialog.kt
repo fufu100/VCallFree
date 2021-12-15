@@ -1,24 +1,18 @@
 package vcall.free.international.phone.wifi.calling.ui
 
-import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.databinding.DataBindingUtil
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.nativead.MediaView
 import com.google.android.gms.ads.nativead.NativeAd
-import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.android.gms.ads.nativead.NativeAdView
-import com.newmotor.x5.db.DBHelper
 import vcall.free.international.phone.wifi.calling.R
-import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.databinding.DialogExitBinding
-import vcall.free.international.phone.wifi.calling.lib.App
 import vcall.free.international.phone.wifi.calling.lib.prefs
 import vcall.free.international.phone.wifi.calling.utils.*
 import java.text.SimpleDateFormat

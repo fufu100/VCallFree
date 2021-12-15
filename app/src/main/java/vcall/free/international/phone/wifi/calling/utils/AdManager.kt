@@ -2,7 +2,6 @@ package vcall.free.international.phone.wifi.calling.utils
 
 import android.app.Activity
 import android.content.Context
-import android.os.Build
 import android.util.Log
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
@@ -12,17 +11,12 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdOptions
-import com.google.android.gms.ads.nativead.NativeAdView
-import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
-import com.newmotor.x5.db.DBHelper
+import vcall.free.international.phone.wifi.calling.db.DBHelper
 import kotlinx.coroutines.*
-import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.api.AdResp
-import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.lib.App
-import vcall.free.international.phone.wifi.calling.lib.prefs
 
 /**
  * Created by lyf on 2020/8/14.

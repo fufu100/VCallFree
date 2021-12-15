@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.service.autofill.Validators.and
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -15,7 +14,7 @@ import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.OnUserEarnedRewardListener
 import com.google.android.gms.ads.rewarded.RewardItem
-import com.newmotor.x5.db.DBHelper
+import vcall.free.international.phone.wifi.calling.db.DBHelper
 import kotlinx.android.synthetic.main.fragment_tab_coins.*
 import kotlinx.coroutines.*
 import vcall.free.international.phone.wifi.calling.BuildConfig
@@ -30,7 +29,6 @@ import vcall.free.international.phone.wifi.calling.widget.CoinLayout
 import vcall.free.international.phone.wifi.calling.widget.Loading
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.min
 
 /**
  * Created by lyf on 2020/4/28.
@@ -760,7 +758,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
     }
 
     private fun refreshAdStatusLayout() {
-        if(BuildConfig.DEBUG) {
+//        if(BuildConfig.DEBUG) {
             dataBinding.adStatusLayout.visibility = View.VISIBLE
             println("refreshAdStatusLayout ${AdManager.get().interstitialAdLoadStatus}")
             dataBinding.adStatusLayout.removeAllViews()
@@ -784,6 +782,6 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                     setTextColor(Color.RED)
                 })
             }
-        }
+//        }
     }
 }

@@ -56,7 +56,7 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
         window?.statusBarColor = Color.TRANSPARENT
         if(!onlyShowAd) {
             if (!isFirst) {
-                startCountDownTime(29)
+                startCountDownTime(10)
             } else {
                 AgreementDialog(this) {
                     if (it) {
@@ -68,7 +68,7 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
                 }.show()
             }
         }else{
-            startCountDownTime(29)
+            startCountDownTime(10)
         }
 
         conn = object : ServiceConnection {
@@ -105,6 +105,9 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
                     isAdShowing = true
                 }
 
+                override fun onAdFailedToLoad() {
+                    AdManager.get().loadInterstitialAd(this@SplashActivity,AdManager.ad_splash)
+                }
             })
         }else {
             getAdData()
@@ -211,6 +214,10 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
                         isAdShowing = true
                     }
 
+                    override fun onAdFailedToLoad() {
+                        AdManager.get().loadInterstitialAd(this@SplashActivity,AdManager.ad_splash)
+                    }
+
                 })
 
                 AdManager.get().loadInterstitialAd(this,AdManager.ad_preclick)
@@ -293,12 +300,12 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
             if(!isFirst) {
                 AdManager.get().showSplashInterstitialAd(this)
             }
-            AdManager.get().loadInterstitialAd(this,AdManager.ad_preclick)
-            AdManager.get().loadInterstitialAd(this,AdManager.ad_point)
-            AdManager.get().loadInterstitialAd(this,AdManager.ad_close)
-            AdManager.get().loadRewardedAd(this)
-            AdManager.get().loadNativeAd(this,AdManager.ad_quite)
-            AdManager.get().loadNativeAd(this,AdManager.ad_call_result)
+//            AdManager.get().loadInterstitialAd(this,AdManager.ad_preclick)
+//            AdManager.get().loadInterstitialAd(this,AdManager.ad_point)
+//            AdManager.get().loadInterstitialAd(this,AdManager.ad_close)
+//            AdManager.get().loadRewardedAd(this)
+//            AdManager.get().loadNativeAd(this,AdManager.ad_quite)
+//            AdManager.get().loadNativeAd(this,AdManager.ad_call_result)
         }
     }
 

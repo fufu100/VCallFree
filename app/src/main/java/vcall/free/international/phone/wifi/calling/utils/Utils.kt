@@ -58,17 +58,28 @@ fun loadCircleImage(imageView: ImageView, url: String?) {
 @BindingAdapter("contact_photo")
 fun loadContactPhoto(imageView: ImageView,contact:Contact){
     if(contact.photoId != 0L){
-        GlobalScope.launch(Dispatchers.IO) {
-            val contentUri: Uri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI,contact.contractId)
-            val photoUri: Uri = Uri.withAppendedPath(contentUri, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY)
-            val cursor = imageView.context.contentResolver.query(photoUri,
-                arrayOf(ContactsContract.Contacts.Photo.PHOTO),null,null,null)
-            while (cursor?.moveToNext() == true){
-                withContext(Dispatchers.Main){
-                    Glide.with(imageView.context).load(cursor.getBlob(0)).bitmapTransform(CircleTransform(imageView.context)).into(imageView)
+        if(imageView.context.isNotDestroy()) {
+            GlobalScope.launch(Dispatchers.IO) {
+                val contentUri: Uri = ContentUris.withAppendedId(
+                    ContactsContract.Contacts.CONTENT_URI,
+                    contact.contractId
+                )
+                val photoUri: Uri = Uri.withAppendedPath(
+                    contentUri,
+                    ContactsContract.Contacts.Photo.CONTENT_DIRECTORY
+                )
+                val cursor = imageView.context.contentResolver.query(
+                    photoUri,
+                    arrayOf(ContactsContract.Contacts.Photo.PHOTO), null, null, null
+                )
+                while (cursor?.moveToNext() == true) {
+                    withContext(Dispatchers.Main) {
+                        Glide.with(imageView.context).load(cursor.getBlob(0))
+                            .bitmapTransform(CircleTransform(imageView.context)).into(imageView)
+                    }
                 }
+                cursor?.close()
             }
-            cursor?.close()
         }
     }else{
         imageView.setImageResource(R.drawable.ic_avatar_default)
@@ -78,10 +89,12 @@ fun loadContactPhoto(imageView: ImageView,contact:Contact){
 @BindingAdapter("flag")
 fun loadFlag(imageView: ImageView,iso:String?){
     if(iso != null && iso.isNotEmpty()){
-        GlobalScope.launch (Dispatchers.IO){
-            val file = File(App.appCacheDirectory + "flags/" + iso + ".png")
-            withContext(Dispatchers.Main){
-                Glide.with(imageView.context).load(file).into(imageView)
+        if(imageView.context.isNotDestroy()) {
+            GlobalScope.launch(Dispatchers.IO) {
+                val file = File(App.appCacheDirectory + "flags/" + iso + ".png")
+                withContext(Dispatchers.Main) {
+                    Glide.with(imageView.context).load(file).into(imageView)
+                }
             }
         }
     }else{
@@ -91,12 +104,12 @@ fun loadFlag(imageView: ImageView,iso:String?){
 
 @BindingAdapter("flag_circle")
 fun loadFlagCircle(imageView: ImageView,iso:String?){
-    if(imageView.context != null && (imageView.context as Activity).isNotDestroy()) {
+    if(imageView.context.isNotDestroy()) {
         if (iso != null && iso.isNotEmpty()) {
             GlobalScope.launch(Dispatchers.IO) {
                 val file = File(App.appCacheDirectory + "flags/" + iso + ".png")
                 withContext(Dispatchers.Main) {
-                    Glide.with(imageView.context as Activity).load(file)
+                    Glide.with(imageView.context).load(file)
                         .bitmapTransform(CircleTransform(imageView.context)).into(imageView)
                 }
             }

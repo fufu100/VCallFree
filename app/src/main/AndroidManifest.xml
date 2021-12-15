@@ -111,7 +111,7 @@
             android:configChanges="screenLayout|orientation" />
 
         <service android:name="vcall.free.international.phone.wifi.calling.service.CallService" />
-        <service android:name=".service.DaemonService" />
+<!--        <service android:name=".service.DaemonService" />-->
 
         <meta-data
             android:name="CHANNEL"
