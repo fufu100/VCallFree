@@ -683,10 +683,12 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
         override fun onAdLoaded() {
             dataBinding.rewardedVideoTv.setBackgroundResource(R.drawable.bg_blue_round)
+            refreshAdStatusLayout()
         }
 
         override fun onAdLoadFail() {
             dataBinding.rewardedVideoTv.setBackgroundResource(R.drawable.bg_gray_round)
+            refreshAdStatusLayout()
         }
 
     }

@@ -112,7 +112,7 @@ class CallService:Service(),MyAppObserver{
         builder?.setSmallIcon(R.mipmap.ic_notification_logo)
         builder?.setLargeIcon(BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
         builder?.setContentTitle(resources.getString(R.string.app_name))
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, SplashActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         builder?.setContentIntent(PendingIntent.getActivity(this,0,intent,0))
         builder?.setContentTitle("You can get some lucky credits today!")

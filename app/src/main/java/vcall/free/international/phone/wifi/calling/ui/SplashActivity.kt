@@ -91,8 +91,10 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
 
         LogUtils.d(tag,"onCreate--- onlyShowAd=$onlyShowAd")
         if(onlyShowAd){
-//            AdManager.get().showInterstitialAd(this,AdManager.ad_splash)
-            AdManager.get().appOpenManager?.showAdIfAvailable(this,true,object :OnShowAdCompleteListener{
+            if(AdManager.get().appOpenManager?.isAdAvailable() != true){
+                AdManager.get().showInterstitialAd(this,AdManager.ad_splash)
+            }
+            AdManager.get().appOpenManager?.showAdIfAvailable(this,object :OnShowAdCompleteListener{
                 override fun onShowAdComplete() {
                     Dispatcher.dispatch(this@SplashActivity) {
                         navigate(MainActivity::class.java)
@@ -107,6 +109,12 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
 
                 override fun onAdFailedToLoad() {
                     AdManager.get().loadInterstitialAd(this@SplashActivity,AdManager.ad_splash)
+                }
+                override fun onAdLoad() {
+                    if(!isAdShowing) {
+                        isAdShowing = true
+                        AdManager.get().appOpenManager?.showAdIfAvailable(this@SplashActivity,this)
+                    }
                 }
             })
         }else {
@@ -199,8 +207,8 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
             .compose(RxUtils.applySchedulers())
             .subscribe({
                 AdManager.get().adData = it
-//                AdManager.get().loadInterstitialAd(this,AdManager.ad_splash)
-                AdManager.get().appOpenManager?.showAdIfAvailable(this,true,object :OnShowAdCompleteListener{
+                AdManager.get().loadInterstitialAd(this,AdManager.ad_splash)
+                AdManager.get().appOpenManager?.showAdIfAvailable(this,object :OnShowAdCompleteListener{
                     override fun onShowAdComplete() {
                         println("$tag onShowAdComplete---")
                         Dispatcher.dispatch(this@SplashActivity) {
@@ -216,6 +224,13 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
 
                     override fun onAdFailedToLoad() {
                         AdManager.get().loadInterstitialAd(this@SplashActivity,AdManager.ad_splash)
+                    }
+
+                    override fun onAdLoad() {
+                        if(!isAdShowing) {
+                            isAdShowing = true
+                            AdManager.get().appOpenManager?.showAdIfAvailable(this@SplashActivity,this)
+                        }
                     }
 
                 })
@@ -295,7 +310,7 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
 
     override fun onAdLoaded() {
         LogUtils.println("$tag onAdLoaded--- $adLoaded")
-        if(!adLoaded) {
+        if(!adLoaded && !isAdShowing) {
             adLoaded = true
             if(!isFirst) {
                 AdManager.get().showSplashInterstitialAd(this)

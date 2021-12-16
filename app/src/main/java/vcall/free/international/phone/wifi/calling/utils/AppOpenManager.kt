@@ -27,12 +27,12 @@ class AppOpenManager {
      *
      * @param context the context of the activity that loads the ad
      */
-    fun loadAd(context: Context,showAfterLoad:Boolean = false,onShowAdCompleteListener: OnShowAdCompleteListener? = null) {
+    fun loadAd(context: Context,onShowAdCompleteListener: OnShowAdCompleteListener? = null) {
         // Do not load ad if there is an unused ad or one is already loading.
         if (isLoadingAd || isAdAvailable()) {
             return
         }
-        println("$LOG_TAG loadAd showAfterLoad=$showAfterLoad")
+        println("$LOG_TAG loadAd")
         isLoadingAd = true
         val request = AdRequest.Builder().build()
         AppOpenAd.load(
@@ -52,8 +52,9 @@ class AppOpenManager {
                     loadTime = Date().time
                     Log.d(LOG_TAG, "onAdLoaded.")
                     App.context?.toast("开屏广告加载成功")
-                    if(showAfterLoad && onShowAdCompleteListener != null && !(context as Activity).isFinishing){
-                        showAdIfAvailable(context,showAfterLoad,onShowAdCompleteListener)
+                    if( onShowAdCompleteListener != null && !(context as Activity).isFinishing){
+//                        showAdIfAvailable(context,showAfterLoad,onShowAdCompleteListener)
+                        onShowAdCompleteListener.onAdLoad()
                     }
                 }
 
@@ -79,7 +80,7 @@ class AppOpenManager {
     }
 
     /** Check if ad exists and can be shown. */
-    private fun isAdAvailable(): Boolean {
+    public fun isAdAvailable(): Boolean {
         // Ad references in the app open beta will time out after four hours, but this time limit
         // may change in future beta versions. For details, see:
         // https://support.google.com/admob/answer/9341964?hl=en
@@ -94,11 +95,11 @@ class AppOpenManager {
     fun showAdIfAvailable(activity: Activity) {
         showAdIfAvailable(
             activity,
-            false,
             object : OnShowAdCompleteListener {
                 override fun onShowAdComplete() {}
                 override fun onShowAd(){}
                 override fun onAdFailedToLoad() {}
+                override fun onAdLoad() {}
             })
     }
 
@@ -110,7 +111,6 @@ class AppOpenManager {
      */
     fun showAdIfAvailable(
         activity: Activity,
-        showAfterLoad: Boolean = false,
         onShowAdCompleteListener: OnShowAdCompleteListener
     ) {
         // If the app open ad is already showing, do not show the ad again.
@@ -122,11 +122,11 @@ class AppOpenManager {
         // If the app open ad is not available yet, invoke the callback then load the ad.
         if (!isAdAvailable()) {
             Log.d(LOG_TAG, "The app open ad is not ready yet.")
-            loadAd(activity,showAfterLoad,onShowAdCompleteListener)
-            if(!showAfterLoad){
-                onShowAdCompleteListener.onShowAdComplete()
-                return
-            }
+            loadAd(activity,onShowAdCompleteListener)
+//            if(!showAfterLoad){
+//                onShowAdCompleteListener.onShowAdComplete()
+//                return
+//            }
         }
 
         Log.d(LOG_TAG, "Will show ad.")
@@ -143,7 +143,7 @@ class AppOpenManager {
                         Log.d(LOG_TAG, "onAdDismissedFullScreenContent.")
 
                         onShowAdCompleteListener.onShowAdComplete()
-                        loadAd(activity, showAfterLoad, onShowAdCompleteListener)
+                        loadAd(activity, onShowAdCompleteListener)
                     }
 
                     /** Called when fullscreen content failed to show. */
@@ -153,7 +153,7 @@ class AppOpenManager {
                         Log.d(LOG_TAG, "onAdFailedToShowFullScreenContent: " + adError.message)
 
                         onShowAdCompleteListener.onShowAdComplete()
-                        loadAd(activity, showAfterLoad, onShowAdCompleteListener)
+                        loadAd(activity,  onShowAdCompleteListener)
                     }
 
                     /** Called when fullscreen content is shown. */
@@ -172,4 +172,5 @@ interface OnShowAdCompleteListener {
     fun onShowAdComplete()
     fun onShowAd()
     fun onAdFailedToLoad()
+    fun onAdLoad()
 }

@@ -279,6 +279,7 @@ class AdManager {
             showLuckyCredits = false
             GlobalScope.launch {
                 delay(10000)
+                interstitialAdLoadStatus[ad_rewarded] = 2
                 withContext(Dispatchers.Main) {
                     loadRewardedAd(context,position + 1)
                 }
@@ -291,6 +292,7 @@ class AdManager {
             Log.d(tag, "onAdFailedToLoad-- $p0 $category")
             GlobalScope.launch {
                 delay(200)
+                interstitialAdLoadStatus[category] = 2
                 withContext(Dispatchers.Main) {
                     loadInterstitialAd(context,category, position + 1)
                 }
@@ -397,7 +399,7 @@ class AdManager {
             interstitialAdLoadStatus[category] = 0
             interstitialAdMap[category] = null
             interstitialAdListener[category]?.onAdClose()
-            if (category == ad_splash) {
+            if (category == ad_splash || category == ad_close) {
                 loadInterstitialAd(context,category)
             }
         }
