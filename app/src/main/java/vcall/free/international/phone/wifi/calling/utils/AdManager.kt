@@ -249,6 +249,15 @@ class AdManager {
                         interstitialAdListener[category]?.onAdLoadFail()
                         interstitialAdLoadStatus[category] = 2
                         LogUtils.d(tag,"广告加载失败 $category $position ${adData!!.ads[i].adSources.size}")
+                        if(category == ad_preclick){
+                            GlobalScope.launch {
+                                delay(5000)
+                                interstitialAdLoadStatus[category] = 2
+                                withContext(Dispatchers.Main) {
+                                    loadInterstitialAd(context,category,0)
+                                }
+                            }
+                        }
                     }
                     break
                 }
@@ -278,7 +287,7 @@ class AdManager {
             rewardedAd = null
             showLuckyCredits = false
             GlobalScope.launch {
-                delay(10000)
+                delay(5000)
                 interstitialAdLoadStatus[ad_rewarded] = 2
                 withContext(Dispatchers.Main) {
                     loadRewardedAd(context,position + 1)

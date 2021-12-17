@@ -660,8 +660,10 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             dataBinding.goIv.isClickable = false
             dataBinding.goIv.setImageResource(R.drawable.ic_go2)
         }else{
-            dataBinding.goIv.isClickable = true
-            dataBinding.goIv.setImageResource(R.drawable.ic_go3)
+            if(job?.isActive != true) {
+                dataBinding.goIv.isClickable = true
+                dataBinding.goIv.setImageResource(R.drawable.ic_go3)
+            }
         }
         refreshAdStatusLayout()
     }
@@ -760,7 +762,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
     }
 
     private fun refreshAdStatusLayout() {
-//        if(BuildConfig.DEBUG) {
+        if(BuildConfig.DEBUG) {
             dataBinding.adStatusLayout.visibility = View.VISIBLE
             println("refreshAdStatusLayout ${AdManager.get().interstitialAdLoadStatus}")
             dataBinding.adStatusLayout.removeAllViews()
@@ -784,6 +786,6 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                     setTextColor(Color.RED)
                 })
             }
-//        }
+        }
     }
 }
