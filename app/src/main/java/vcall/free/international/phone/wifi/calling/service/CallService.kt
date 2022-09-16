@@ -335,9 +335,12 @@ class CallService:Service(),MyAppObserver{
                     extra("only_show_ad",true)
                 }.go()
             } else if (intent.action == "refresh_notification") {
-                builder?.setContentText(getContent())
-                val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                manager.notify(100,builder?.build())
+                if(builder != null) {
+                    builder?.setContentText(getContent())
+                    val manager =
+                        getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    manager.notify(100, builder?.build())
+                }
             } else if (intent.action == "stop") {
                 val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 manager.cancel(100)

@@ -107,6 +107,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
         val count = DBHelper.get().getLuckyCreditsClickCount()
         LogUtils.println("$tag onResume showLuckyCredits=${AdManager.get().showLuckyCredits} count=$count")
         if(AdManager.get().showLuckyCredits && count < 10){
+            dataBinding.luckyCreditsTv.setBackgroundResource(R.drawable.bg_blue_round)
             if(animator == null) {
                 animator = tata(dataBinding.luckyCreditsIv, 1f)
                 animator?.repeatCount = ValueAnimator.INFINITE
@@ -114,6 +115,8 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                 animator?.currentPlayTime = currentPlayTime
             }
             animator?.start()
+        }else{
+            dataBinding.luckyCreditsTv.setBackgroundResource(R.drawable.bg_gray_round)
         }
         if(AdManager.get().rewardedAd != null && AdManager.get().interstitialAdLoadStatus[AdManager.ad_rewarded] == 1){
             dataBinding.rewardedVideoTv.setBackgroundResource(R.drawable.bg_blue_round)
@@ -237,6 +240,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                     animator?.cancel()
                 }
                 AdManager.get().showLuckyCredits = false
+                dataBinding.luckyCreditsTv.setBackgroundResource(R.drawable.bg_gray_round)
             }
         }
 
