@@ -4,7 +4,7 @@ buildscript {
     ext.kotlin_version = '1.3.72'
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven { url 'https://dl.bintray.com/umsdk/release' }
         maven { url 'https://dl.bintray.com/anythink/maven'}
     }
@@ -20,7 +20,7 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
+//        jcenter()
         mavenCentral()
         maven { url 'https://repo1.maven.org/maven2/' }
         maven { url 'https://dl.bintray.com/anythink/maven'}
