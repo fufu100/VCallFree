@@ -101,9 +101,6 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
             values = arrayOf("%$keyword%","%$keyword%")
         }
         println("搜索条件： $where")
-//        values?.forEach {
-//            println("values:$it")
-//        }
         if(contractsObserver == null){
             contractsObserver = ContractsObserver(Handler(Looper.getMainLooper()))
         }
@@ -192,6 +189,7 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
     }
 
     fun dial(v:View){
+        
         (activity as MainActivity).dial()
     }
 

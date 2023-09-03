@@ -9,7 +9,6 @@ import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import vcall.free.international.phone.wifi.calling.db.DBHelper
-import kotlinx.android.synthetic.main.activity_coutries.*
 import kotlinx.coroutines.*
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.adapter.BaseAdapter
@@ -90,9 +89,9 @@ class CountriesActivity:BaseBackActivity<ActivityCoutriesBinding>(),BaseAdapter.
             withContext(Dispatchers.Main){
                 dataBinding.recyclerView.adapter?.notifyDataSetChanged()
                 if(list.size == 0){
-                    pinned_letter.visibility = View.GONE
+                    dataBinding.pinnedLetter.visibility = View.GONE
                 }else {
-                    pinned_letter.visibility = View.VISIBLE
+                    dataBinding.pinnedLetter.visibility = View.VISIBLE
                 }
             }
         }

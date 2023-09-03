@@ -164,10 +164,10 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
                         }
                         duration = 200
                         addListener(object : Animator.AnimatorListener {
-                            override fun onAnimationRepeat(animation: Animator?) {
+                            override fun onAnimationRepeat(animation: Animator) {
                             }
 
-                            override fun onAnimationEnd(animation: Animator?) {
+                            override fun onAnimationEnd(animation: Animator) {
                                 if(!isOpen){
                                     checker?.onExpandStateChange(true)
                                 }
@@ -178,10 +178,10 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
 
                             }
 
-                            override fun onAnimationCancel(animation: Animator?) {
+                            override fun onAnimationCancel(animation: Animator) {
                             }
 
-                            override fun onAnimationStart(animation: Animator?) {
+                            override fun onAnimationStart(animation: Animator) {
                             }
 
                         })
@@ -194,10 +194,10 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
                             drawerLayout.offsetTopAndBottom(t - drawerLayout.top)
                         }
                         addListener(object : Animator.AnimatorListener {
-                            override fun onAnimationRepeat(animation: Animator?) {
+                            override fun onAnimationRepeat(animation: Animator) {
                             }
 
-                            override fun onAnimationEnd(animation: Animator?) {
+                            override fun onAnimationEnd(animation: Animator) {
                                 if(isOpen){
                                     checker?.onExpandStateChange(false)
                                 }
@@ -208,10 +208,10 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
 
                             }
 
-                            override fun onAnimationCancel(animation: Animator?) {
+                            override fun onAnimationCancel(animation: Animator) {
                             }
 
-                            override fun onAnimationStart(animation: Animator?) {
+                            override fun onAnimationStart(animation: Animator) {
                             }
 
                         })

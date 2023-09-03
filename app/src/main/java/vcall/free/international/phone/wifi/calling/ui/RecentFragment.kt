@@ -6,7 +6,6 @@ import android.net.Uri
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import vcall.free.international.phone.wifi.calling.db.DBHelper
-import kotlinx.android.synthetic.main.fragment_tab_recents.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -15,6 +14,8 @@ import vcall.free.international.phone.wifi.calling.MainActivity
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.adapter.BaseAdapter
 import vcall.free.international.phone.wifi.calling.api.Record
+import vcall.free.international.phone.wifi.calling.databinding.FragmentTabRecentsBinding
+import vcall.free.international.phone.wifi.calling.lib.BaseDataBindingFragment
 import vcall.free.international.phone.wifi.calling.lib.BaseFragment
 import vcall.free.international.phone.wifi.calling.utils.Dispatcher
 import vcall.free.international.phone.wifi.calling.utils.UserManager
@@ -23,14 +24,14 @@ import vcall.free.international.phone.wifi.calling.widget.WrapLinearLayoutManage
 /**
  * Created by lyf on 2020/4/28.
  */
-class RecentFragment:BaseFragment() ,BaseAdapter.OnItemClick<Record>{
+class RecentFragment:BaseDataBindingFragment<FragmentTabRecentsBinding>() ,BaseAdapter.OnItemClick<Record>{
     val list: MutableList<Record> = mutableListOf()
     override fun getLayoutResId(): Int = R.layout.fragment_tab_recents
 
     override fun initView(v: View) {
-        recyclerView.layoutManager =
+        dataBinding.recyclerView.layoutManager =
             WrapLinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-        recyclerView.adapter = BaseAdapter<Record>(list){
+        dataBinding.recyclerView.adapter = BaseAdapter<Record>(list){
             R.layout.item_call_record
         }.apply {
             mOnItemClickListener = this@RecentFragment
@@ -42,7 +43,7 @@ class RecentFragment:BaseFragment() ,BaseAdapter.OnItemClick<Record>{
                             .setPositiveButton(R.string.confirm){_,_ ->
                                 DBHelper.get().deleteCallRecord(list[position].id)
                                 list.removeAt(position)
-                                recyclerView.adapter?.notifyDataSetChanged()
+                                this@RecentFragment.dataBinding.recyclerView.adapter?.notifyDataSetChanged()
                             }
                             .setNegativeButton(R.string.cancel,null)
                             .create()
@@ -52,7 +53,7 @@ class RecentFragment:BaseFragment() ,BaseAdapter.OnItemClick<Record>{
                 }
             }
         }
-        dial.setOnClickListener { dial() }
+        dataBinding.dial.setOnClickListener { dial() }
 
 
     }
@@ -62,11 +63,11 @@ class RecentFragment:BaseFragment() ,BaseAdapter.OnItemClick<Record>{
         GlobalScope.launch {
             getRecentCalls()
             withContext(Dispatchers.Main){
-                recyclerView.adapter?.notifyDataSetChanged()
+                dataBinding.recyclerView.adapter?.notifyDataSetChanged()
                 if(list.size == 0){
-                    emptyLayout.visibility = View.VISIBLE
+                    dataBinding.emptyLayout.visibility = View.VISIBLE
                 }else{
-                    emptyLayout.visibility = View.GONE
+                    dataBinding.emptyLayout.visibility = View.GONE
                 }
             }
         }

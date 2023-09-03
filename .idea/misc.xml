@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
@@ -8,6 +7,7 @@
         <entry key="app/src/main/res/layout/activity_web.xml" value="0.1651469098277609" />
         <entry key="app/src/main/res/layout/dialog_agreement.xml" value="0.24139492753623187" />
         <entry key="app/src/main/res/layout/dialog_term_use.xml" value="0.23777173913043478" />
+        <entry key="app/src/main/res/layout/fragment_tab_contracts.xml" value="0.3182291666666667" />
         <entry key="app/src/main/res/menu/navigation_menu.xml" value="0.33897435897435896" />
       </map>
     </option>

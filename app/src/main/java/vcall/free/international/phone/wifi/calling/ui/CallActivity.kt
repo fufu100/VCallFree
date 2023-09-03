@@ -19,7 +19,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import vcall.free.international.phone.wifi.calling.db.DBHelper
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
-import kotlinx.android.synthetic.main.activity_call.*
 import kotlinx.coroutines.*
 import org.pjsip.pjsua2.*
 import org.pjsip.pjsua2.pjmedia_type
@@ -156,14 +155,14 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
     fun numberPad(v: View) {
         if (expand) {
             expand = false
-            number_pad.visibility = View.GONE
+            dataBinding.numberPad.root.visibility = View.GONE
             dataBinding.phone.visibility = View.VISIBLE
             dataBinding.scrollView.visibility = View.GONE
             (dataBinding.duration.layoutParams as ConstraintLayout.LayoutParams).topToBottom =
                 R.id.phone
         } else {
             expand = true
-            number_pad.visibility = View.VISIBLE
+            dataBinding.numberPad.root.visibility = View.VISIBLE
             dataBinding.phone.visibility = View.GONE
             dataBinding.scrollView.visibility = View.VISIBLE
             (dataBinding.duration.layoutParams as ConstraintLayout.LayoutParams).topToBottom =

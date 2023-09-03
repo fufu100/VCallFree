@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.content.Context
 import android.view.View
 import androidx.databinding.DataBindingUtil
-import kotlinx.android.synthetic.main.dialog_agreement.*
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.databinding.DialogDailySignInBinding
 import vcall.free.international.phone.wifi.calling.databinding.DialogSignInBinding

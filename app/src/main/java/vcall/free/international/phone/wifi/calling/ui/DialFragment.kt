@@ -16,7 +16,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import vcall.free.international.phone.wifi.calling.db.DBHelper
-import kotlinx.android.synthetic.main.side_header.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

@@ -2,7 +2,6 @@ package vcall.free.international.phone.wifi.calling.ui
 
 import android.os.Bundle
 import android.view.View
-import kotlinx.android.synthetic.main.activity_splash.*
 import vcall.free.international.phone.wifi.calling.lib.prefs
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.databinding.ActivitySettingBinding

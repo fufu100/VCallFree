@@ -27,10 +27,11 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import kotlinx.android.synthetic.main.activity_main.*
 import vcall.free.international.phone.wifi.calling.api.Api
+import vcall.free.international.phone.wifi.calling.databinding.ActivityMainBinding
 import vcall.free.international.phone.wifi.calling.lib.App
 import vcall.free.international.phone.wifi.calling.lib.BaseActivity
+import vcall.free.international.phone.wifi.calling.lib.BaseDataBindingActivity
 import vcall.free.international.phone.wifi.calling.lib.prefs
 import vcall.free.international.phone.wifi.calling.service.CallService
 import vcall.free.international.phone.wifi.calling.ui.*
@@ -38,7 +39,7 @@ import vcall.free.international.phone.wifi.calling.utils.*
 import vcall.free.international.phone.wifi.calling.widget.Loading
 import java.util.*
 
-class MainActivity : BaseActivity(),InstallStateUpdatedListener {
+class MainActivity : BaseDataBindingActivity<ActivityMainBinding>(),InstallStateUpdatedListener {
     private val PERMISSION_REQUEST_CODE = 0
 
     // 所需的全部权限
@@ -54,17 +55,17 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
     private lateinit var loading:Loading
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setSupportActionBar(toolbar)
-        toolbar.setNavigationOnClickListener {
+        setSupportActionBar(dataBinding.toolbar)
+        dataBinding.toolbar.setNavigationOnClickListener {
             if(it.layoutDirection == View.LAYOUT_DIRECTION_RTL){
-                drawerLayout.openDrawer(GravityCompat.END)
+                dataBinding.drawerLayout.openDrawer(GravityCompat.END)
             }else{
-                drawerLayout.openDrawer(GravityCompat.START)
+                dataBinding.drawerLayout.openDrawer(GravityCompat.START)
             }
         }
         supportFragmentManager.beginTransaction()
             .replace(R.id.frameLayout, IndexFragment(), "Index").commitAllowingStateLoss()
-        drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
+        dataBinding.drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
             override fun onDrawerStateChanged(newState: Int) {}
 
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
@@ -72,20 +73,20 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
             override fun onDrawerClosed(drawerView: View) {}
 
             override fun onDrawerOpened(drawerView: View) {
-                navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text =
+                dataBinding.navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text =
                     UserManager.get().user?.points.toString()
             }
 
         })
 
-        navigationView.itemTextColor = getStateListColor(
+        dataBinding.navigationView.itemTextColor = getStateListColor(
             intArrayOf(
                 getColorFromRes(R.color.text_light),
                 getColorFromRes(R.color.text_light)
             )
         )
-        navigationView.itemIconTintList = null
-        navigationView.setNavigationItemSelectedListener {
+        dataBinding.navigationView.itemIconTintList = null
+        dataBinding.navigationView.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.invite ->
                     Dispatcher.dispatch(this) {
@@ -259,7 +260,7 @@ class MainActivity : BaseActivity(),InstallStateUpdatedListener {
                     it.time = System.currentTimeMillis()
                     UserManager.get().user = it
                     (supportFragmentManager.findFragmentByTag("Index") as IndexFragment).refreshUser()
-                    navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text =
+                    dataBinding.navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text =
                         it.points.toString()
                     callBinder?.initAccount()
                     Dispatcher.dispatch(this){

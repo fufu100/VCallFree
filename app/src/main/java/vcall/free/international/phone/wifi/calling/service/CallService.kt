@@ -114,7 +114,7 @@ class CallService:Service(),MyAppObserver{
         builder?.setContentTitle(resources.getString(R.string.app_name))
         val intent = Intent(this, SplashActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        builder?.setContentIntent(PendingIntent.getActivity(this,0,intent,0))
+        builder?.setContentIntent(PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_IMMUTABLE))
         builder?.setContentTitle("You can get some lucky credits today!")
         builder?.setContentText(getContent())
         builder?.setOnlyAlertOnce(true)

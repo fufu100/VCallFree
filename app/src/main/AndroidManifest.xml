@@ -4,6 +4,7 @@
     package="vcall.free.international.phone.wifi.calling">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -40,6 +41,7 @@
             android:configChanges="screenLayout|orientation"
             android:screenOrientation="portrait"
             android:launchMode="singleTop"
+            android:exported="true"
             android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -53,6 +55,7 @@
             android:configChanges="screenLayout|orientation"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
+            android:exported="true"
             android:windowSoftInputMode="stateHidden|adjustNothing" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

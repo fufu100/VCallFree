@@ -15,7 +15,6 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.OnUserEarnedRewardListener
 import com.google.android.gms.ads.rewarded.RewardItem
 import vcall.free.international.phone.wifi.calling.db.DBHelper
-import kotlinx.android.synthetic.main.fragment_tab_coins.*
 import kotlinx.coroutines.*
 import vcall.free.international.phone.wifi.calling.BuildConfig
 import vcall.free.international.phone.wifi.calling.R
@@ -372,7 +371,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 //                startTimeCount()
 //            }
         }
-        goIv.isClickable = false
+        dataBinding.goIv.isClickable = false
     }
 
     private fun showObtainCoinsAlert(pos:Int){
@@ -483,7 +482,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                     }.send()
                 } else {
                     if(type == "wheel") {
-                        goIv.isClickable = true
+                        dataBinding.goIv.isClickable = true
                         context?.toast(it.errormsg)
                     }else if(type == "checkin"){
                         context?.toast(it.errormsg)
@@ -492,8 +491,8 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
             }, {
                 loading.dismiss()
-                if(type == "wheel" && goIv != null) {
-                    goIv.isClickable = true
+                if(type == "wheel" && dataBinding.goIv != null) {
+                    dataBinding.goIv.isClickable = true
                 }
                 context?.toast(R.string.net_error)
                 it.printStackTrace()

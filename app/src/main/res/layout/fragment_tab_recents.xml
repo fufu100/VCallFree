@@ -1,34 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/bg">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+    <data>
+
+    </data>
 
     <FrameLayout
-        android:id="@+id/emptyLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/bg">
-        <TextView
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <FrameLayout
+            android:id="@+id/emptyLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/bg">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="no content"
+                android:textColor="@color/text_normal" />
+        </FrameLayout>
+
+        <ImageView
+            android:id="@+id/dial"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="no content"
-            android:textColor="@color/text_normal"/>
+            android:contentDescription="@null"
+            android:src="@drawable/ic_dial"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="20dp" />
     </FrameLayout>
-
-    <ImageView
-        android:id="@+id/dial"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@null"
-        android:src="@drawable/ic_dial"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="20dp"/>
-</FrameLayout>
+</layout>

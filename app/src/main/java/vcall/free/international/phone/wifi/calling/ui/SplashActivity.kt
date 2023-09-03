@@ -18,14 +18,15 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import kotlinx.android.synthetic.main.activity_splash.*
-import kotlinx.android.synthetic.main.dialog_call.*
 import kotlinx.coroutines.*
 import vcall.free.international.phone.wifi.calling.MainActivity
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.api.AdResp
 import vcall.free.international.phone.wifi.calling.api.Api
+import vcall.free.international.phone.wifi.calling.databinding.ActivitySettingBinding
+import vcall.free.international.phone.wifi.calling.databinding.ActivitySplashBinding
 import vcall.free.international.phone.wifi.calling.lib.BaseActivity
+import vcall.free.international.phone.wifi.calling.lib.BaseDataBindingActivity
 import vcall.free.international.phone.wifi.calling.lib.prefs
 import vcall.free.international.phone.wifi.calling.service.CallService
 import vcall.free.international.phone.wifi.calling.utils.*
@@ -35,7 +36,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Created by lyf on 2020/5/19.
  */
-class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
+class SplashActivity:BaseDataBindingActivity<ActivitySplashBinding>(),AdManager.VCallAdListener {
     private var isAdShowing = false
     private var adLoaded = false
     private var onlyShowAd = false
@@ -60,8 +61,8 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
             } else {
                 AgreementDialog(this) {
                     if (it) {
-                        viewPager.visibility = View.VISIBLE
-                        viewPager.adapter = ImagePageAdapter()
+                        dataBinding.viewPager.visibility = View.VISIBLE
+                        dataBinding.viewPager.adapter = ImagePageAdapter()
                     } else {
                         finish()
                     }
@@ -304,8 +305,8 @@ class SplashActivity:BaseActivity(),AdManager.VCallAdListener {
     override fun onAdShow() {
         isAdShowing = true
         compositeDisposable.dispose()
-        jumpBtn.visibility = View.GONE
-        progressBar.visibility = View.GONE
+        dataBinding.jumpBtn.visibility = View.GONE
+        dataBinding.progressBar.visibility = View.GONE
     }
 
     override fun onAdLoaded() {

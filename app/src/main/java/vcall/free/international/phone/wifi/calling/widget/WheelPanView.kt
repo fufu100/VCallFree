@@ -137,7 +137,7 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
             f[0]
         }
         anim.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
+            override fun onAnimationEnd(animation: Animator) {
                 super.onAnimationEnd(animation)
                 //当旋转结束的时候回调给调用者当前所选择的内容
                 if (rotateListener != null) {
