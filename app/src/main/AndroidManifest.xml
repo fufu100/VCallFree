@@ -121,7 +121,7 @@
             android:value="google-play" />
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-7362854813130172~8439045494" />
+            android:value="ca-app-pub-2764389811554448~4955670096" />
         <meta-data
             android:name="com.google.android.gms.ads.AD_MANAGER_APP"
             android:value="true" />

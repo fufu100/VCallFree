@@ -9,11 +9,16 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.Toast
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.viewpager.widget.PagerAdapter
+import com.google.android.gms.ads.MobileAds
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.reactivex.Observable
@@ -43,6 +48,7 @@ class SplashActivity:BaseDataBindingActivity<ActivitySplashBinding>(),AdManager.
     private var isFirst = prefs.getBooleanValue("is_first", true)
     private lateinit var conn: ServiceConnection
     private var callBinder: CallService.CallBinder? = null
+    private lateinit var googleMobileAdsConsentManager: GoogleMobileAdsConsentManager
     override fun getLayoutRes(): Int = R.layout.activity_splash
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,14 +61,17 @@ class SplashActivity:BaseDataBindingActivity<ActivitySplashBinding>(),AdManager.
         }
         onlyShowAd = intent.getBooleanExtra("only_show_ad",false)
         window?.statusBarColor = Color.TRANSPARENT
+        googleMobileAdsConsentManager = GoogleMobileAdsConsentManager.getInstance(this)
         if(!onlyShowAd) {
             if (!isFirst) {
                 startCountDownTime(10)
+                gatherConsent()
             } else {
                 AgreementDialog(this) {
                     if (it) {
                         dataBinding.viewPager.visibility = View.VISIBLE
                         dataBinding.viewPager.adapter = ImagePageAdapter()
+                        gatherConsent()
                     } else {
                         finish()
                     }
@@ -127,6 +136,28 @@ class SplashActivity:BaseDataBindingActivity<ActivitySplashBinding>(),AdManager.
 //        prefs.save("check_max_day",1)
 
 
+    }
+
+    private fun gatherConsent(){
+        googleMobileAdsConsentManager.gatherConsent(this){consentError ->
+            if(consentError != null){
+                Log.w(tag, "${consentError.errorCode}: ${consentError.message}")
+            }
+            Log.d(tag, "onCreate googleMobileAdsConsentManager.canRequestAds:${googleMobileAdsConsentManager.canRequestAds}")
+            if (googleMobileAdsConsentManager.canRequestAds) {
+                MobileAds.initialize(applicationContext) {
+                    if(AdManager.get().adData != null){
+                        AdManager.get().loadInterstitialAd(this, AdManager.ad_splash)
+                        AdManager.get().loadInterstitialAd(this, AdManager.ad_preclick)
+                        AdManager.get().loadInterstitialAd(this, AdManager.ad_point)
+                        AdManager.get().loadInterstitialAd(this, AdManager.ad_close)
+                        AdManager.get().loadRewardedAd(this)
+                        AdManager.get().loadNativeAd(this, AdManager.ad_quite)
+                        AdManager.get().loadNativeAd(this, AdManager.ad_call_result)
+                    }
+                }
+            }
+        }
     }
 
     override fun onStart() {
@@ -203,46 +234,53 @@ class SplashActivity:BaseDataBindingActivity<ActivitySplashBinding>(),AdManager.
     }
 
     private fun getAdData(){
-        Log.d(tag, "getAdData--- ")
+        Log.d(tag, "getAdData--- ${googleMobileAdsConsentManager.canRequestAds}")
         compositeDisposable.add(Api.getApiService().getAd()
             .compose(RxUtils.applySchedulers())
             .subscribe({
                 AdManager.get().adData = it
-                AdManager.get().loadInterstitialAd(this,AdManager.ad_splash)
-                AdManager.get().appOpenManager?.showAdIfAvailable(this,object :OnShowAdCompleteListener{
-                    override fun onShowAdComplete() {
-                        println("$tag onShowAdComplete---")
-                        Dispatcher.dispatch(this@SplashActivity) {
-                            navigate(MainActivity::class.java)
-                            defaultAnimate()
-                        }.go()
-                        finish()
-                    }
 
-                    override fun onShowAd() {
-                        isAdShowing = true
-                    }
+                if(googleMobileAdsConsentManager.canRequestAds) {
+                    AdManager.get().loadInterstitialAd(this, AdManager.ad_splash)
+                    AdManager.get().appOpenManager?.showAdIfAvailable(this,
+                        object : OnShowAdCompleteListener {
+                            override fun onShowAdComplete() {
+                                println("$tag onShowAdComplete---")
+                                Dispatcher.dispatch(this@SplashActivity) {
+                                    navigate(MainActivity::class.java)
+                                    defaultAnimate()
+                                }.go()
+                                finish()
+                            }
 
-                    override fun onAdFailedToLoad() {
-                        AdManager.get().loadInterstitialAd(this@SplashActivity,AdManager.ad_splash)
-                    }
+                            override fun onShowAd() {
+                                isAdShowing = true
+                            }
 
-                    override fun onAdLoad() {
-                        if(!isAdShowing) {
-                            isAdShowing = true
-                            AdManager.get().appOpenManager?.showAdIfAvailable(this@SplashActivity,this)
-                        }
-                    }
+                            override fun onAdFailedToLoad() {
+                                AdManager.get()
+                                    .loadInterstitialAd(this@SplashActivity, AdManager.ad_splash)
+                            }
 
-                })
+                            override fun onAdLoad() {
+                                if (!isAdShowing) {
+                                    isAdShowing = true
+                                    AdManager.get().appOpenManager?.showAdIfAvailable(
+                                        this@SplashActivity,
+                                        this
+                                    )
+                                }
+                            }
 
-                AdManager.get().loadInterstitialAd(this,AdManager.ad_preclick)
-                AdManager.get().loadInterstitialAd(this,AdManager.ad_point)
-                AdManager.get().loadInterstitialAd(this,AdManager.ad_close)
-                AdManager.get().loadRewardedAd(this)
-                AdManager.get().loadNativeAd(this,AdManager.ad_quite)
-                AdManager.get().loadNativeAd(this,AdManager.ad_call_result)
+                        })
 
+//                    AdManager.get().loadInterstitialAd(this, AdManager.ad_preclick)
+//                    AdManager.get().loadInterstitialAd(this, AdManager.ad_point)
+//                    AdManager.get().loadInterstitialAd(this, AdManager.ad_close)
+//                    AdManager.get().loadRewardedAd(this)
+//                    AdManager.get().loadNativeAd(this, AdManager.ad_quite)
+//                    AdManager.get().loadNativeAd(this, AdManager.ad_call_result)
+                }
             },{
                 it.printStackTrace()
             }))

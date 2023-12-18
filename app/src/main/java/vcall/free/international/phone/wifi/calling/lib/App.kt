@@ -122,7 +122,7 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
 
         initData()
 
-        MobileAds.initialize(this) {}
+//        MobileAds.initialize(this) {}
 //        val testDeviceIds = Arrays.asList("5303CB9D5BD32EB2B1444E27283AF0FA")
 //        val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
 //        MobileAds.setRequestConfiguration(configuration)

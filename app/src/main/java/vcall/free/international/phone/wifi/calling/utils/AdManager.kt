@@ -45,6 +45,7 @@ class AdManager {
             return instance!!
         }
     }
+    var googleMobileAdsConsentManager:GoogleMobileAdsConsentManager
     var appOpenManager:AppOpenManager? = null
     var adData: AdResp? = null
     var interstitialAdMap: MutableMap<String, InterstitialAd?> = mutableMapOf()
@@ -62,6 +63,7 @@ class AdManager {
         InstallReferrerClient.newBuilder(App.context).build()
 
     init {
+        googleMobileAdsConsentManager = GoogleMobileAdsConsentManager.getInstance(App.context!!)
         appOpenManager = AppOpenManager()
         referrerClient.startConnection(object : InstallReferrerStateListener {
 
@@ -141,6 +143,9 @@ class AdManager {
     }
 
     fun loadNativeAd(context: Context?,category: String){
+        if(!googleMobileAdsConsentManager.canRequestAds){
+            return
+        }
         if(interstitialAdLoadStatus[category] == 3){
             LogUtils.d(tag, "loadNativeAd  $category 广告正在加载中...")
             return
@@ -193,6 +198,9 @@ class AdManager {
     }
 
     fun loadRewardedAd(context: Context?,position: Int = 0) {
+        if(!googleMobileAdsConsentManager.canRequestAds){
+            return
+        }
         val count = DBHelper.get().getAdClickCount()
         println("$tag loadRewardedAd count=$count")
         if (count >= 10) {
@@ -222,6 +230,9 @@ class AdManager {
     }
 
     fun loadInterstitialAd(context: Context?,category: String, position: Int = 0) {
+        if(!googleMobileAdsConsentManager.canRequestAds){
+            return
+        }
         val count = DBHelper.get().getAdClickCount()
         LogUtils.println("loadInterstitialAd count=$count $category $position")
         if (count >= 10 || context == null) {

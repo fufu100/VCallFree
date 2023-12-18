@@ -18,16 +18,23 @@ class AppOpenManager {
     private var appOpenAd: AppOpenAd? = null
     private var isLoadingAd = false
     var isShowingAd = false
+    var googleMobileAdsConsentManager:GoogleMobileAdsConsentManager
 
     /** Keep track of the time an app open ad is loaded to ensure you don't show an expired ad. */
     private var loadTime: Long = 0
 
+    init {
+        googleMobileAdsConsentManager = GoogleMobileAdsConsentManager.getInstance(App.context!!)
+    }
     /**
      * Load an ad.
      *
      * @param context the context of the activity that loads the ad
      */
     fun loadAd(context: Context,onShowAdCompleteListener: OnShowAdCompleteListener? = null) {
+        if(!googleMobileAdsConsentManager.canRequestAds){
+            return
+        }
         // Do not load ad if there is an unused ad or one is already loading.
         if (isLoadingAd || isAdAvailable()) {
             return

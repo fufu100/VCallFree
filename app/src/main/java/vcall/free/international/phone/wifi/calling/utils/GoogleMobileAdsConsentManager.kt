@@ -8,6 +8,7 @@ import com.google.android.ump.ConsentInformation
 import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.FormError
 import com.google.android.ump.UserMessagingPlatform
+import kotlin.random.Random
 
 /**
  * The Google Mobile Ads SDK provides the User Messaging Platform (Google's IAB Certified consent
@@ -41,6 +42,7 @@ class GoogleMobileAdsConsentManager private constructor(context: Context) {
         activity: Activity,
         onConsentGatheringCompleteListener: OnConsentGatheringCompleteListener
     ) {
+        println("GoogleMobileAdsConsentManager-- gatherConsent--")
         // For testing purposes, you can force a DebugGeography of EEA or NOT_EEA.
         val debugSettings =
             ConsentDebugSettings.Builder(activity)
@@ -48,12 +50,14 @@ class GoogleMobileAdsConsentManager private constructor(context: Context) {
                 // Check your logcat output for the hashed device ID e.g.
                 // "Use new ConsentDebugSettings.Builder().addTestDeviceHashedId("ABCDEF012345")" to use
                 // the debug functionality.
-                .addTestDeviceHashedId("TEST-DEVICE-HASHED-ID")
+//                .setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA)
+//                .addTestDeviceHashedId("5303CB9D5BD32EB2B1444E27283AF0FA")
                 .build()
 
         val params = ConsentRequestParameters.Builder().setConsentDebugSettings(debugSettings).build()
 
         // Requesting an update to consent information should be called on every app launch.
+//        consentInformation.reset()
         consentInformation.requestConsentInfoUpdate(
             activity,
             params,
@@ -64,7 +68,9 @@ class GoogleMobileAdsConsentManager private constructor(context: Context) {
                 }
             },
             { requestConsentError ->
+                println("requestConsentError----------")
                 onConsentGatheringCompleteListener.consentGatheringComplete(requestConsentError)
+
             }
         )
     }
@@ -76,6 +82,8 @@ class GoogleMobileAdsConsentManager private constructor(context: Context) {
     ) {
         UserMessagingPlatform.showPrivacyOptionsForm(activity, onConsentFormDismissedListener)
     }
+
+//    var random = Random.nextInt(100)
 
     companion object {
         @Volatile private var instance: GoogleMobileAdsConsentManager? = null

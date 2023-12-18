@@ -161,7 +161,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                     Log.d(tag, "onAdShowedFullScreenContent---")
                 }
             }
-            AdManager.get().rewardedAd!!.show(activity, OnUserEarnedRewardListener {
+            AdManager.get().rewardedAd!!.show(requireActivity(), OnUserEarnedRewardListener {
                 pointsToAdd = PointStrategy.videoPoints[getVideotPoints()]
                 GameResultDialog(requireContext(),{
                     if(AdManager.get().interstitialAdMap[AdManager.ad_point] != null) {
