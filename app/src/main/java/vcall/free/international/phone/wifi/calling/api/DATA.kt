@@ -3,8 +3,14 @@ package vcall.free.international.phone.wifi.calling.api
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import kotlinx.android.parcel.Parcelize
+import vcall.free.international.phone.wifi.calling.utils.AESUtils
+import java.lang.Integer.min
 
-/**
+
+open class Base(
+    val errcode:Int = 0,
+    val errormsg: String = ""
+)/**
  * Created by lyf on 2020/4/29.
  */
 @Parcelize
@@ -88,7 +94,6 @@ data class InviteCountryPoints(
 }
 
 data class User(
-    val errcode:Int,
     val sip:String,
     var points:Int,
     val passwd:String,
@@ -109,7 +114,17 @@ data class User(
     var phone:String,
     val ads_config:AdConfig,
     var time:Long
-)
+):Base(){
+    fun getDecryptSip():String{
+        val key = Api.token.substring(0,min(16,Api.token.length)).padEnd(16,'0')
+        return AESUtils.decrypt(key,sip)
+    }
+
+    fun getDecryptPasswd():String{
+        val key = Api.token.substring(0,min(16,Api.token.length)).padEnd(16,'0')
+        return AESUtils.decrypt(key,passwd)
+    }
+}
 
 data class Price(
     val errcode:Int,
@@ -133,8 +148,8 @@ data class AddPointsResp(
 )
 
 data class AdResp(
-    var ads:List<AdCategory>
-)
+    var ads:List<AdCategory>,
+):Base()
 
 data class AdCategory(
     var adPlaceID:String,

@@ -437,6 +437,8 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             dataBinding.playCountTv.text = playCount.toString()
         }
         loading.show()
+        val ts = System.currentTimeMillis()
+        val key = AESUtils.encrypt(ts.toString(),(ts - Api.ts).toString())
         Api.getApiService().addPoints(
             mutableMapOf(
                 "uuid" to requireContext().getDeviceId(),
@@ -444,7 +446,9 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                 "ver" to requireContext().getVersionName(),
                 "ts" to System.currentTimeMillis(),
                 "points" to points,
-                "country" to Locale.getDefault().country
+                "country" to Locale.getDefault().country,
+                "ts" to ts,
+                "key" to key
             )
         )
             .doOnNext {

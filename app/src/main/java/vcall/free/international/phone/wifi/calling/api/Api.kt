@@ -7,11 +7,20 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import vcall.free.international.phone.wifi.calling.BuildConfig
+import vcall.free.international.phone.wifi.calling.lib.prefs
 import java.util.concurrent.TimeUnit
 
 object Api {
-    private const val baseUrl = "https://vcallfree.com"
+    const val baseUrl = "https://zwtestv.xyz/"
     private var mRetrofit:Retrofit? = null
+
+    var ts:Long = 0L
+    var token = ""
+        get() = prefs.getStringValue("token","")
+        set(value) {
+            field = value
+            prefs.save("token",value)
+        }
 
     fun getApiService():ApiService{
         if(mRetrofit == null) {

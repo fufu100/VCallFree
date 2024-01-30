@@ -53,9 +53,7 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
         }
         dataBinding.search.addTextChangedListener(this)
         GlobalScope.launch {
-            println("-----")
             val l = getContacts()
-            println("+++++")
             withContext(Dispatchers.Main){
                 list.clear()
                 list.addAll(l)
@@ -148,9 +146,7 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         println("ContractsFragment onRequestPermissionsResult $permissions,$grantResults")
         GlobalScope.launch {
-            println("-----")
             val l = getContacts()
-            println("+++++")
             withContext(Dispatchers.Main){
                 list.clear()
                 list.addAll(l)

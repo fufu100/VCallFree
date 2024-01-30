@@ -238,41 +238,45 @@ class SplashActivity:BaseDataBindingActivity<ActivitySplashBinding>(),AdManager.
         compositeDisposable.add(Api.getApiService().getAd()
             .compose(RxUtils.applySchedulers())
             .subscribe({
-                AdManager.get().adData = it
+                if(it.errcode == 0) {
+                    AdManager.get().adData = it
 
-                if(googleMobileAdsConsentManager.canRequestAds) {
-                    AdManager.get().loadInterstitialAd(this, AdManager.ad_splash)
-                    AdManager.get().appOpenManager?.showAdIfAvailable(this,
-                        object : OnShowAdCompleteListener {
-                            override fun onShowAdComplete() {
-                                println("$tag onShowAdComplete---")
-                                Dispatcher.dispatch(this@SplashActivity) {
-                                    navigate(MainActivity::class.java)
-                                    defaultAnimate()
-                                }.go()
-                                finish()
-                            }
-
-                            override fun onShowAd() {
-                                isAdShowing = true
-                            }
-
-                            override fun onAdFailedToLoad() {
-                                AdManager.get()
-                                    .loadInterstitialAd(this@SplashActivity, AdManager.ad_splash)
-                            }
-
-                            override fun onAdLoad() {
-                                if (!isAdShowing) {
-                                    isAdShowing = true
-                                    AdManager.get().appOpenManager?.showAdIfAvailable(
-                                        this@SplashActivity,
-                                        this
-                                    )
+                    if (googleMobileAdsConsentManager.canRequestAds) {
+                        AdManager.get().loadInterstitialAd(this, AdManager.ad_splash)
+                        AdManager.get().appOpenManager?.showAdIfAvailable(this,
+                            object : OnShowAdCompleteListener {
+                                override fun onShowAdComplete() {
+                                    println("$tag onShowAdComplete---")
+                                    Dispatcher.dispatch(this@SplashActivity) {
+                                        navigate(MainActivity::class.java)
+                                        defaultAnimate()
+                                    }.go()
+                                    finish()
                                 }
-                            }
 
-                        })
+                                override fun onShowAd() {
+                                    isAdShowing = true
+                                }
+
+                                override fun onAdFailedToLoad() {
+                                    AdManager.get()
+                                        .loadInterstitialAd(
+                                            this@SplashActivity,
+                                            AdManager.ad_splash
+                                        )
+                                }
+
+                                override fun onAdLoad() {
+                                    if (!isAdShowing) {
+                                        isAdShowing = true
+                                        AdManager.get().appOpenManager?.showAdIfAvailable(
+                                            this@SplashActivity,
+                                            this
+                                        )
+                                    }
+                                }
+
+                            })
 
 //                    AdManager.get().loadInterstitialAd(this, AdManager.ad_preclick)
 //                    AdManager.get().loadInterstitialAd(this, AdManager.ad_point)
@@ -280,6 +284,7 @@ class SplashActivity:BaseDataBindingActivity<ActivitySplashBinding>(),AdManager.
 //                    AdManager.get().loadRewardedAd(this)
 //                    AdManager.get().loadNativeAd(this, AdManager.ad_quite)
 //                    AdManager.get().loadNativeAd(this, AdManager.ad_call_result)
+                    }
                 }
             },{
                 it.printStackTrace()

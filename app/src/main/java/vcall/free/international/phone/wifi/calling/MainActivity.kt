@@ -247,9 +247,14 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>(),InstallState
         }
         loading.show()
         App.requestMap["from"] = AdManager.get().referrer
+        val ts = System.currentTimeMillis()
+        Api.ts = ts
+        val uuid = getDeviceId()
         map.putAll(App.requestMap)
-        map.put("uuid",getDeviceId())
+        map.put("uuid",uuid)
         map.put("country",country!!)
+        map.put("ts",ts.toString())
+        map.put("sign",EncryptUtils.generateSignature(uuid,packageName,ts.toString(),uuid))
         println("$tag signup $map")
         compositeDisposable.add(Api.getApiService().signup(map)
 //            .delay(4000,TimeUnit.MILLISECONDS)

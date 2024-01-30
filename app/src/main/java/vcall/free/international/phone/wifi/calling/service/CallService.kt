@@ -130,6 +130,7 @@ class CallService:Service(),MyAppObserver{
 
     inner class CallBinder:Binder(){
         fun initAccount(){
+            Log.d(TAG, "initAccount: test:${LogUtils.test} ${Build.SUPPORTED_ABIS.joinToString(",")}")
             if(!LogUtils.test) {
                 GlobalScope.launch {
                     registerStartTime = System.currentTimeMillis()
@@ -153,12 +154,12 @@ class CallService:Service(),MyAppObserver{
                             try {
                                 accCfg = AccountConfig()
                                 accCfg?.idUri =
-                                    "sip:${it.sip}@${it.servers[0].host}:${it.servers[0].port}"
+                                    "sip:${it.getDecryptSip()}@${it.servers[0].host}:${it.servers[0].port}"
                                 accCfg?.regConfig?.registrarUri =
                                     "sip:${it.servers[0].host}:${it.servers[0].port}"
                                 val creds: AuthCredInfoVector? = accCfg?.sipConfig?.authCreds
                                 creds?.clear()
-                                creds?.add(AuthCredInfo("Digest", "*", it.sip, 0, it.passwd))
+                                creds?.add(AuthCredInfo("Digest", "*", it.getDecryptSip(), 0, it.getDecryptPasswd()))
                                 accCfg?.natConfig?.iceEnabled = true
                                 accCfg?.videoConfig?.autoShowIncoming = true
                                 accCfg?.videoConfig?.autoShowIncoming = true
@@ -174,6 +175,8 @@ class CallService:Service(),MyAppObserver{
                     }
                 }
 
+            }else{
+                Log.d(TAG, "initAccount:${UserManager.get().user?.sip},${UserManager.get().user?.passwd} ${UserManager.get().user?.getDecryptSip()},${UserManager.get().user?.getDecryptPasswd()}")
             }
         }
 
