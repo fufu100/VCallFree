@@ -34,7 +34,7 @@ class RateDialog(val activity: Activity):Dialog(activity,R.style.CustomDialog) {
                     "VersionName:%s<br>VersionCode:%d<br>sip:%s<br>Device Manufacture:%s<br>Device Brand/Model:%s/%s<br>System Version:%d",
             context.getVersionName(),
             context.getVersionCode(),
-            UserManager.get().user?.sip ?: "",
+            UserManager.get().user?.getDecryptSip() ?: "",
             Build.MANUFACTURER,
             Build.BRAND,
             Build.MODEL,

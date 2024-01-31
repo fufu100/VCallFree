@@ -52,7 +52,7 @@ class FeedbackActivity:BaseBackActivity<ActivityFeedbackBinding>() {
             ShareCompat.IntentBuilder.from(this).setType("message/rfc822")
                 .addEmailTo("VCallFree_Feedback@hotmail.com")
                 .setSubject(subject)
-                .setHtmlText("$content <br>sip:${UserManager.get().user?.sip}")
+                .setHtmlText("$content <br>sip:${UserManager.get().user?.getDecryptSip()}")
                 .setChooserTitle("Choose email")
                 .startChooser();
         }else{

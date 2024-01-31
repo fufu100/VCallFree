@@ -80,7 +80,7 @@ class CallResultActivity:BaseBackActivity<ActivityCallResultBinding>() {
                     "VersionName:%s<br>VersionCode:%d<br>sip:%s<br>Device Manufacture:%s<br>Device Brand/Model:%s/%s<br>System Version:%d",
             getVersionName(),
             getVersionCode(),
-            UserManager.get().user?.sip ?: "",
+            UserManager.get().user?.getDecryptSip() ?: "",
             Build.MANUFACTURER,
             Build.BRAND,
             Build.MODEL,
