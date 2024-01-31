@@ -130,14 +130,13 @@ class CallService:Service(),MyAppObserver{
 
     inner class CallBinder:Binder(){
         fun initAccount(){
-            Log.d(TAG, "initAccount: test:${LogUtils.test} ${Build.SUPPORTED_ABIS.joinToString(",")}")
+            LogUtils.d(TAG, "initAccount: test:${LogUtils.test} ${Build.SUPPORTED_ABIS.joinToString(",")}")
             if(!LogUtils.test) {
                 GlobalScope.launch {
                     registerStartTime = System.currentTimeMillis()
-                    Log.d(TAG, "initAccount, whether app is null:${app == null}")
                     if (app == null) {
                         app = MyApp()
-                        Log.d(TAG, "delay结束 执行init---- ")
+                        LogUtils.d(TAG, "delay结束 执行init---- ")
                         app?.init(this@CallService, App.appCacheDirectory)
                     }
                     regStatus = 0
@@ -162,7 +161,7 @@ class CallService:Service(),MyAppObserver{
                                 creds?.add(AuthCredInfo("Digest", "*", it.getDecryptSip(), 0, it.getDecryptPasswd()))
                                 accCfg?.natConfig?.iceEnabled = true
                                 accCfg?.videoConfig?.autoShowIncoming = true
-                                accCfg?.videoConfig?.autoShowIncoming = true
+//                                accCfg?.videoConfig?.autoShowIncoming = true
                                 accout = app?.addAcc(accCfg)
 
                                 LogUtils.println("$TAG initAccount 成功 ${accCfg?.idUri},${accCfg?.regConfig}")
@@ -176,7 +175,7 @@ class CallService:Service(),MyAppObserver{
                 }
 
             }else{
-                Log.d(TAG, "initAccount:${UserManager.get().user?.sip},${UserManager.get().user?.passwd} ${UserManager.get().user?.getDecryptSip()},${UserManager.get().user?.getDecryptPasswd()}")
+                LogUtils.d(TAG, "initAccount:${UserManager.get().user?.sip},${UserManager.get().user?.passwd} ${UserManager.get().user?.getDecryptSip()},${UserManager.get().user?.getDecryptPasswd()}")
             }
         }
 

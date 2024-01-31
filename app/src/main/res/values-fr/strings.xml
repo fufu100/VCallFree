@@ -45,6 +45,7 @@
     <string name="tip_invalid_number">Numéro de téléphone invalide</string>
     <string name="tip_ad_click_limit">Veuillez ne pas cliquer sur les annonces qui ne vous intéressent pas. Cela pourrait vous faire manquer pour gagner plus de points.</string>
     <string name="tip_vpn">Note : N\'utilisez pas le logiciel "Virtual Private Network", il peut vous faire perdre des points ou même désactiver le compte.</string>
+    <string name="tip_reward_video">Regardez cette vidéo publicitaire maintenant pour gagner 10~500 points, Bonne chance.</string>
     <string name="agree">Accepter</string>
     <string name="quit">Quitter</string>
     <string name="congratulations">TOUTES NOS FÉLICITATIONS</string>

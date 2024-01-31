@@ -179,31 +179,31 @@ fun formatTime(duration:Long):String{
     return SimpleDateFormat("MM-dd HH:mm",Locale.getDefault()).format(duration)
 }
 
-fun desEncrypt(data:String):String{
-    try {
-        val cipher = Cipher.getInstance("DES/CBC/PKCS5Padding")
-        val paramSpec = IvParameterSpec("87493871".toByteArray())
-        val secretKeySpec = SecretKeySpec("86101100".toByteArray(),"DES")
-        cipher.init(Cipher.ENCRYPT_MODE,secretKeySpec,paramSpec)
-        return URLEncoder.encode(Base64.encodeToString(cipher.doFinal(data.toByteArray()),Base64.DEFAULT))
-    }catch (e:Exception){
-        e.printStackTrace()
-        return ""
-    }
-}
-
-fun desDecrypt(data:String):String{
-    try {
-        val cipher = Cipher.getInstance("DES/CBC/PKCS5Padding")
-        val paramSpec = IvParameterSpec(encryptedPrefs.getKey("iv").toByteArray())
-        val secretKeySpec = SecretKeySpec(encryptedPrefs.getKey("key").toByteArray(),"DES")
-        cipher.init(Cipher.DECRYPT_MODE,secretKeySpec,paramSpec)
-        return String(cipher.doFinal(Base64.decode(URLDecoder.decode(data),Base64.DEFAULT)))
-    }catch (e:Exception){
-        e.printStackTrace()
-        return ""
-    }
-}
+//fun desEncrypt(data:String):String{
+//    try {
+//        val cipher = Cipher.getInstance("DES/CBC/PKCS5Padding")
+//        val paramSpec = IvParameterSpec("87493871".toByteArray())
+//        val secretKeySpec = SecretKeySpec("86101100".toByteArray(),"DES")
+//        cipher.init(Cipher.ENCRYPT_MODE,secretKeySpec,paramSpec)
+//        return URLEncoder.encode(Base64.encodeToString(cipher.doFinal(data.toByteArray()),Base64.DEFAULT))
+//    }catch (e:Exception){
+//        e.printStackTrace()
+//        return ""
+//    }
+//}
+//
+//fun desDecrypt(data:String):String{
+//    try {
+//        val cipher = Cipher.getInstance("DES/CBC/PKCS5Padding")
+//        val paramSpec = IvParameterSpec(encryptedPrefs.getKey("iv").toByteArray())
+//        val secretKeySpec = SecretKeySpec(encryptedPrefs.getKey("key").toByteArray(),"DES")
+//        cipher.init(Cipher.DECRYPT_MODE,secretKeySpec,paramSpec)
+//        return String(cipher.doFinal(Base64.decode(URLDecoder.decode(data),Base64.DEFAULT)))
+//    }catch (e:Exception){
+//        e.printStackTrace()
+//        return ""
+//    }
+//}
 
 fun isWifiProxy():Boolean{
     val proxyHost = System.getProperty("http.proxyHost")

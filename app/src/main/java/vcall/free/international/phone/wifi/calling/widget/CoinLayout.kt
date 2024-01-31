@@ -63,7 +63,6 @@ class CoinLayout(context: Context, attributeSet: AttributeSet?, defStyle: Int) :
 
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        println("$TAG $changed $l,$t,$r,$b")
         if(drawerHeight >= drawerLayout.measuredHeight){
             mapView.layout(0, t, r - l, b - drawerHeight)
             drawerLayout.layout(

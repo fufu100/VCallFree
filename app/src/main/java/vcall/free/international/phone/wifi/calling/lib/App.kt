@@ -32,12 +32,16 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
     }
 
     override fun onActivityResumed(activity: Activity) {
-        println("App onActivityResumed ${activity!!::class.java.canonicalName} ")
+        println("App onActivityResumed ${activity::class.java.canonicalName} ")
         if(isInBackgrounnd){
 //            toast("应用从后台回来了")
             isInBackgrounnd = false
-            if(!activity!!::class.java.canonicalName!!.endsWith("CallActivity") && !activity!!::class.java.canonicalName!!.endsWith("SplashActivity") && !activity!!::class.java.canonicalName!!.endsWith("AdActivity") ) {
-                println("应用从后台回来了 展示广告")
+            if(!activity::class.java.canonicalName!!.endsWith("CallActivity")
+                && !activity::class.java.canonicalName!!.endsWith("SplashActivity")
+                && !activity::class.java.canonicalName!!.endsWith("AdActivity")
+                && !activity::class.java.canonicalName!!.endsWith("RecaptchaActivity")
+                && !activity::class.java.canonicalName!!.endsWith("SetPhoneNumberActivity") ) {
+                println("应用从后台回来了 展示广告 ${activity::class.java.canonicalName}")
                 Dispatcher.dispatch(applicationContext) {
                     action(CallService.ACTION_SHOW_AD)
                 }.send()

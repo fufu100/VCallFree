@@ -147,36 +147,39 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
 
     fun showRewardedAd(v:View){
         if(AdManager.get().rewardedAd != null) {
-            AdManager.get().rewardedAd!!.fullScreenContentCallback = object :FullScreenContentCallback(){
-                override fun onAdDismissedFullScreenContent() {
-                    AdManager.get().rewardedAd = null
-                    AdManager.get().loadRewardedAd(context)
-                }
+            showRewardPointsTipDialog {
+                AdManager.get().rewardedAd!!.fullScreenContentCallback =
+                    object : FullScreenContentCallback() {
+                        override fun onAdDismissedFullScreenContent() {
+                            AdManager.get().rewardedAd = null
+                            AdManager.get().loadRewardedAd(context)
+                        }
 
-                override fun onAdFailedToShowFullScreenContent(p0: AdError) {
-                    AdManager.get().rewardedAd = null
-                }
+                        override fun onAdFailedToShowFullScreenContent(p0: AdError) {
+                            AdManager.get().rewardedAd = null
+                        }
 
-                override fun onAdShowedFullScreenContent() {
-                    Log.d(tag, "onAdShowedFullScreenContent---")
-                }
-            }
-            AdManager.get().rewardedAd!!.show(requireActivity(), OnUserEarnedRewardListener {
-                pointsToAdd = PointStrategy.videoPoints[getVideotPoints()]
-                GameResultDialog(requireContext(),{
-                    if(AdManager.get().interstitialAdMap[AdManager.ad_point] != null) {
-                        adState = 5
-                        AdManager.get().showPointInterstitialAd(activity)
-                    }else{
-                        AdManager.get().loadInterstitialAd(context,AdManager.ad_point)
-                        //如果广告没有加载仍然增加积分
-                        addPoint(pointsToAdd,"reward")
+                        override fun onAdShowedFullScreenContent() {
+                            Log.d(tag, "onAdShowedFullScreenContent---")
+                        }
                     }
+                AdManager.get().rewardedAd!!.show(requireActivity(), OnUserEarnedRewardListener {
+                    pointsToAdd = PointStrategy.videoPoints[getVideotPoints()]
+                    GameResultDialog(requireContext(), {
+                        if (AdManager.get().interstitialAdMap[AdManager.ad_point] != null) {
+                            adState = 5
+                            AdManager.get().showPointInterstitialAd(activity)
+                        } else {
+                            AdManager.get().loadInterstitialAd(context, AdManager.ad_point)
+                            //如果广告没有加载仍然增加积分
+                            addPoint(pointsToAdd, "reward")
+                        }
 
-                }).apply {
-                    setResult("+$pointsToAdd")
-                }.show()
-            })
+                    }).apply {
+                        setResult("+$pointsToAdd")
+                    }.show()
+                })
+            }
         }else{
             Log.d(fragmentTag, "showRewardedAd-- not load ")
             AdManager.get().loadRewardedAd(context)
@@ -329,6 +332,15 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             .show()
     }
 
+    private fun showRewardPointsTipDialog(callback:() -> Unit){
+        AlertDialog.Builder(requireContext()).setMessage(R.string.tip_reward_video)
+            .setPositiveButton("Get it"){_,_ ->
+                callback()
+            }
+            .create()
+            .show()
+    }
+
     private fun wheelStartRotate(duration:Long = 0){
         var endPos = getPoints()
         if(adState == 0){
@@ -403,18 +415,20 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                     addPoint(pointsToAdd, "wheel")
                 }
             }, {
-                pointsToAdd = PointStrategy.points[pos] * 2
-                AdManager.get().rewardedAd?.fullScreenContentCallback = object :FullScreenContentCallback(){
-                    override fun onAdDismissedFullScreenContent() {
-                        AdManager.get().rewardedAd = null
-                        AdManager.get().loadRewardedAd(context)
-                    }
+                showRewardPointsTipDialog {
+                    pointsToAdd = PointStrategy.points[pos] * 2
+                    AdManager.get().rewardedAd?.fullScreenContentCallback = object :FullScreenContentCallback(){
+                        override fun onAdDismissedFullScreenContent() {
+                            AdManager.get().rewardedAd = null
+                            AdManager.get().loadRewardedAd(context)
+                        }
 
-                    override fun onAdFailedToShowFullScreenContent(p0: AdError) {
-                        AdManager.get().rewardedAd = null
+                        override fun onAdFailedToShowFullScreenContent(p0: AdError) {
+                            AdManager.get().rewardedAd = null
+                        }
                     }
+                    AdManager.get().rewardedAd?.show(requireActivity(),rewardedAdCallback)
                 }
-                AdManager.get().rewardedAd?.show(requireActivity(),rewardedAdCallback)
             }).apply {
                 setResult("+${PointStrategy.points[pos]}")
 //            pointsToAdd = min(200,PointStrategy.points[pos] * 2)//如果转到500就不翻倍了
@@ -460,6 +474,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
             .subscribe({
                 loading.dismiss()
                 if (it.errcode == 0) {
+                    Api.ts = ts
                     UserManager.get().user?.points = it.points
                     dataBinding.totalCoins = UserManager.get().user!!.points.toString()
                     val animatorSet = AnimatorSet()

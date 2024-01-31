@@ -13,6 +13,7 @@ import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -148,7 +149,7 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>(),
                     LogUtils.println("$tag FirebaseUser $user")
                     compositeDisposable.add(
                         Api.getApiService()
-                            .bindPhone(UserManager.get().user!!.sip, dataBinding.phoneTv.text.toString())
+                            .bindPhone(UserManager.get().user!!.getDecryptSip(), dataBinding.phoneTv.text.toString())
                             .compose(RxUtils.applySchedulers())
                             .subscribe({it2 ->
                                 if(it2.isSuccessful){
@@ -171,6 +172,7 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>(),
                             })
                     )
                 }else{
+                    it.exception?.printStackTrace()
                     if (it.exception is FirebaseAuthInvalidCredentialsException) {
                         snackBar("Invalid code.")
                     }
@@ -182,6 +184,7 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>(),
     fun getVerCode(){
         val phone = dataBinding.phoneTv.text.toString()
         val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        Log.d(tag, "getVerCode: $phone")
         inputMethodManager.hideSoftInputFromWindow(dataBinding.phoneTv.windowToken,0)
         try {
             val phoneNumberUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
@@ -191,7 +194,14 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>(),
             )
             LogUtils.println("$tag getVerCode ${phoneNumber.rawInput}")
             if(phoneNumberUtil.isValidNumber(phoneNumber)) {
-                PhoneAuthProvider.getInstance().verifyPhoneNumber(phoneNumber.rawInput,60000,TimeUnit.MILLISECONDS,this,callbacks)
+                val options = PhoneAuthOptions.newBuilder(auth)
+                    .setPhoneNumber(phoneNumber.rawInput) // Phone number to verify
+                    .setTimeout(60L, TimeUnit.SECONDS) // Timeout and unit
+                    .setActivity(this) // Activity (for callback binding)
+                    .setCallbacks(callbacks) // OnVerificationStateChangedCallbacks
+                    .build()
+                PhoneAuthProvider.verifyPhoneNumber(options)
+//                PhoneAuthProvider.getInstance().verifyPhoneNumber(phoneNumber.rawInput,60000,TimeUnit.MILLISECONDS,this,callbacks)
                 verificationInProgress = true
             }else{
                 snackBar("Invalid phone number.")
@@ -216,6 +226,7 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>(),
             toast(R.string.tip_auth_fail)
         }else{
             val credential = PhoneAuthProvider.getCredential(storedVerificationId!!, code)
+            Log.d(tag, "bindPhone: $code, $storedVerificationId")
             signInWithPhoneAuthCredential(credential)
         }
     }

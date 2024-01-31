@@ -193,9 +193,16 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>(),InstallState
         appUpdateInfoTask.addOnSuccessListener {appUpdateInfo ->
             println("appUpdateInfo.updateAvailability()=${appUpdateInfo.updateAvailability()}")
 //            toast("addOnSuccessListener ${appUpdateInfo.updateAvailability()}")
-            if(appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)){
+            if(appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE){
                 appUpdateManager.registerListener(this)
-                appUpdateManager.startUpdateFlowForResult(appUpdateInfo,AppUpdateType.FLEXIBLE,this,2)
+                val updatePriority = appUpdateInfo.updatePriority()
+                if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                    appUpdateManager.startUpdateFlowForResult(appUpdateInfo,AppUpdateType.IMMEDIATE,this,2)
+                }else if(appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)){
+                    appUpdateManager.startUpdateFlowForResult(appUpdateInfo,AppUpdateType.FLEXIBLE,this,2)
+                }
+
+
             }else if(appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED){
                 popupSnackBarForUpdateCompletion()
             }

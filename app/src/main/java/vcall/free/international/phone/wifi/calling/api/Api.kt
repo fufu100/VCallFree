@@ -11,15 +11,15 @@ import vcall.free.international.phone.wifi.calling.lib.prefs
 import java.util.concurrent.TimeUnit
 
 object Api {
-    const val baseUrl = "https://zwtestv.xyz/"
+    const val baseUrl = "https://vcallfree.com/"
     private var mRetrofit:Retrofit? = null
 
     var ts:Long = 0L
-    var token = ""
-        get() = prefs.getStringValue("token","")
+    var token = prefs.getStringValue("token","")
         set(value) {
             field = value
             prefs.save("token",value)
+            Log.d("Api", "重新设置token：$value")
         }
 
     fun getApiService():ApiService{

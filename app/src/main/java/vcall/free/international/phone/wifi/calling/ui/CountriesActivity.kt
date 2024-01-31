@@ -59,7 +59,7 @@ class CountriesActivity:BaseBackActivity<ActivityCoutriesBinding>(),BaseAdapter.
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
                 val firstPosition = linearLayoutManager.findFirstVisibleItemPosition()
-                if(firstPosition != -1) {
+                if(firstPosition != -1 && list.size > firstPosition) {
                     if(list[firstPosition].isHot){
                         dataBinding.pinnedLetter.text = "Hot"
                     }else {

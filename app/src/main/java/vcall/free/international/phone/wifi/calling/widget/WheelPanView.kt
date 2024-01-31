@@ -131,7 +131,6 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
         anim.interpolator = TimeInterpolator { t ->
             val f1 =
                 (Math.cos((t + 1) * Math.PI) / 2.0f).toFloat() + 0.5f
-            Log.e("HHHHHHHh", "" + t + "     " + (f[0] - f1))
             f[0] =
                 (Math.cos((t + 1) * Math.PI) / 2.0f).toFloat() + 0.5f
             f[0]

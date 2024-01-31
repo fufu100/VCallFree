@@ -77,7 +77,7 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
             }
         }
     }
-
+//ffffffff-d77d-a764-ffff-ffff9d797e6b
     private fun getContacts(keyword: String = ""):MutableList<Contact>{
         println("getContact ${context != null}")
         val _list = mutableListOf<Contact>()
@@ -144,7 +144,7 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        println("ContractsFragment onRequestPermissionsResult $permissions,$grantResults")
+        println("ContractsFragment onRequestPermissionsResult ${permissions.joinToString(",")},${grantResults.joinToString(",")}")
         GlobalScope.launch {
             val l = getContacts()
             withContext(Dispatchers.Main){
@@ -153,7 +153,7 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
                 dataBinding.recyclerView.adapter?.notifyDataSetChanged()
             }
         }
-        (activity as MainActivity).signup()
+//        (activity as MainActivity).signup()
 
     }
 
