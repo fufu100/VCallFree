@@ -20,7 +20,11 @@ data class Contact(
     var username: String,
     var phone: String,
     var photoId: Long
-):Parcelable
+):Parcelable{
+    override fun equals(other: Any?): Boolean {
+        return other != null && (other as Contact).contractId == this.contractId
+    }
+}
 
 @Parcelize
 data class Record(

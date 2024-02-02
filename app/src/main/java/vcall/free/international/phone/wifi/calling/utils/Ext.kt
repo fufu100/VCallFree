@@ -13,6 +13,7 @@ import android.os.Build
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -165,45 +166,45 @@ fun Context.getSimCountryIso():String{
     return ""
 }
 
-fun Context.getIMEI():String{
-    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-        if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
-            try {
-                val telephoneManager: TelephonyManager =
-                    getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager;
-                return telephoneManager.getDeviceId(0)
-            }catch (e:Exception){
-                e.printStackTrace()
-            }
+//fun Context.getIMEI():String{
+//    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+//        if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
+//            try {
+//                val telephoneManager: TelephonyManager =
+//                    getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager;
+//                return telephoneManager.getDeviceId(0)
+//            }catch (e:Exception){
+//                e.printStackTrace()
+//            }
+//
+//        }
+//    }else{
+//        val telephoneManager: TelephonyManager =
+//            getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager;
+//        return telephoneManager.getDeviceId(0)
+//    }
+//    return ""
+//}
 
-        }
-    }else{
-        val telephoneManager: TelephonyManager =
-            getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager;
-        return telephoneManager.getDeviceId(0)
-    }
-    return ""
-}
-
-fun Context.getSimSerialNumber():String{
-    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-        if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
-            try {
-                val telephoneManager: TelephonyManager =
-                    getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager;
-                return telephoneManager.simSerialNumber
-            }catch (e:Exception){
-                e.printStackTrace()
-            }
-
-        }
-    }else{
-        val telephoneManager: TelephonyManager =
-            getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager;
-        return telephoneManager.simSerialNumber
-    }
-    return ""
-}
+//fun Context.getSimSerialNumber():String{
+//    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+//        if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
+//            try {
+//                val telephoneManager: TelephonyManager =
+//                    getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager;
+//                return telephoneManager.simSerialNumber
+//            }catch (e:Exception){
+//                e.printStackTrace()
+//            }
+//
+//        }
+//    }else{
+//        val telephoneManager: TelephonyManager =
+//            getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager;
+//        return telephoneManager.simSerialNumber
+//    }
+//    return ""
+//}
 
 fun Context.getAndroidID():String{
     return Settings.System.getString(contentResolver, Settings.System.ANDROID_ID)

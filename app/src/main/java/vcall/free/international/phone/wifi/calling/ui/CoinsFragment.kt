@@ -148,7 +148,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
     fun showRewardedAd(v:View){
         if(AdManager.get().rewardedAd != null) {
             showRewardPointsTipDialog {
-                AdManager.get().rewardedAd!!.fullScreenContentCallback =
+                AdManager.get().rewardedAd?.fullScreenContentCallback =
                     object : FullScreenContentCallback() {
                         override fun onAdDismissedFullScreenContent() {
                             AdManager.get().rewardedAd = null
@@ -163,7 +163,7 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                             Log.d(tag, "onAdShowedFullScreenContent---")
                         }
                     }
-                AdManager.get().rewardedAd!!.show(requireActivity(), OnUserEarnedRewardListener {
+                AdManager.get().rewardedAd?.show(requireActivity(), OnUserEarnedRewardListener {
                     pointsToAdd = PointStrategy.videoPoints[getVideotPoints()]
                     GameResultDialog(requireContext(), {
                         if (AdManager.get().interstitialAdMap[AdManager.ad_point] != null) {

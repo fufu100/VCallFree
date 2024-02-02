@@ -124,8 +124,11 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
             if(phone == null){
                 phone = ""
             }
-            _list.add(Contact(phoneId,contactId, username, phone, photoId))
-//            println("$fragmentTag ${phoneCursor.getString(5)}")
+            val contact = Contact(phoneId,contactId, username, phone, photoId)
+            if(!_list.contains(contact)) {
+                _list.add(contact)
+            }
+//            println("$fragmentTag phone $phone $username ${phoneCursor.getString(5)},${_list.last()}")
         }
         phoneCursor?.close()
         return _list

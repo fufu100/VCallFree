@@ -229,6 +229,9 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>(),InstallState
         val isProxy = isWifiProxy()
         println("$tag isProxy=$isProxy ${isDeviceInVPN()} ")
 
+        val savedDeviceId = UUID(getAndroidID().hashCode().toLong(), getSerial().hashCode().toLong()).toString()
+        Log.d("Ext", "getDeviceId: $savedDeviceId , ${getAndroidID().hashCode().toLong()} ${getSerial().hashCode().toLong()} ${getAndroidID()} ${getSerial()} ")
+
     }
 
 
