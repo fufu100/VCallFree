@@ -297,20 +297,20 @@ class CoinsFragment:BaseDataBindingFragment<FragmentTabCoinsBinding>(),CoinLayou
                 }
             }else{
                 LogUtils.println("过期了，重新获取")
-                val map = mutableMapOf<String,String>()
-                map.putAll(App.requestMap)
-                map.put("uuid",requireContext().getDeviceId())
-                Api.getApiService().signup(map)
-                    .compose(RxUtils.applySchedulers())
-                    .subscribe({
-                        if (it.errcode == 0) {
-                            it.time = System.currentTimeMillis()
-                            UserManager.get().user = it
-                            start(v)
-                        }
-                    }, {
-                        it.printStackTrace()
-                    })
+//                val map = mutableMapOf<String,String>()
+//                map.putAll(App.requestMap)
+//                map.put("uuid",requireContext().getDeviceId())
+//                Api.getApiService().signup(map)
+//                    .compose(RxUtils.applySchedulers())
+//                    .subscribe({
+//                        if (it.errcode == 0) {
+//                            it.time = System.currentTimeMillis()
+//                            UserManager.get().user = it
+//                            start(v)
+//                        }
+//                    }, {
+//                        it.printStackTrace()
+//                    })
 
             }
         }

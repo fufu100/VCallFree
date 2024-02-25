@@ -147,30 +147,38 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>(),
                 if (it.isSuccessful) {
                     val user = it.result?.user
                     LogUtils.println("$tag FirebaseUser $user")
-                    compositeDisposable.add(
-                        Api.getApiService()
-                            .bindPhone(UserManager.get().user!!.getDecryptSip(), dataBinding.phoneTv.text.toString())
-                            .compose(RxUtils.applySchedulers())
-                            .subscribe({it2 ->
-                                if(it2.isSuccessful){
-                                    UserManager.get().user?.phone = dataBinding.phoneTv.text.toString()
-                                    GameResultDialog(this,{
-                                        UserManager.get().user!!.points += 1000
-                                        if(AdManager.get().interstitialAdMap[AdManager.ad_point] != null){
-                                            AdManager.get().loadInterstitialAd(this,AdManager.ad_point)
-                                        }else{
-                                            AdManager.get().loadInterstitialAd(this,AdManager.ad_point)
-                                            finish()
-                                        }
-                                    }).apply {
-                                        setResult("+1000")
-                                    }.show()
-                                }
-                            }, {
-                                it.printStackTrace()
-                                snackBar(R.string.net_error)
-                            })
-                    )
+                    if(UserManager.get().user != null) {
+                        compositeDisposable.add(
+                            Api.getApiService()
+                                .bindPhone(
+                                    UserManager.get().user?.getDecryptSip() ?: "",
+                                    dataBinding.phoneTv.text.toString()
+                                )
+                                .compose(RxUtils.applySchedulers())
+                                .subscribe({ it2 ->
+                                    if (it2.isSuccessful) {
+                                        UserManager.get().user?.phone =
+                                            dataBinding.phoneTv.text.toString()
+                                        GameResultDialog(this, {
+                                            UserManager.get().user!!.points += 1000
+                                            if (AdManager.get().interstitialAdMap[AdManager.ad_point] != null) {
+                                                AdManager.get()
+                                                    .loadInterstitialAd(this, AdManager.ad_point)
+                                            } else {
+                                                AdManager.get()
+                                                    .loadInterstitialAd(this, AdManager.ad_point)
+                                                finish()
+                                            }
+                                        }).apply {
+                                            setResult("+1000")
+                                        }.show()
+                                    }
+                                }, {
+                                    it.printStackTrace()
+                                    snackBar(R.string.net_error)
+                                })
+                        )
+                    }
                 }else{
                     it.exception?.printStackTrace()
                     if (it.exception is FirebaseAuthInvalidCredentialsException) {
