@@ -45,7 +45,7 @@ class WheelPanView(context:Context,attributes: AttributeSet?,defStyle:Int):View(
         super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(width,MeasureSpec.EXACTLY))
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val mAngle = 360.0f / count
         var startAngle: Float = -mAngle / 2 - 90

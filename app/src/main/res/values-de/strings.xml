@@ -45,11 +45,11 @@
     <string name="tip_invalid_number">Ungültige Telefonnummer</string>
     <string name="tip_ad_click_limit">Klicken Sie nicht auf Anzeigen, an denen Sie nicht interessiert sind. Dies kann dazu führen, dass Sie nicht mehr Punkte sammeln.</string>
     <string name="tip_vpn">Hinweis: Verwenden Sie nicht die Software "Virtual Private Network", da dies zum Verlust von Punkten oder sogar zur Sperrung des Kontos führen kann.</string>
-    <string name="tip_reward_video">Sehen Sie sich dieses Video jetzt an, um 10~500 Punkte zu verdienen. Viel Glück.</string>
+    <string name="tip_reward_video">Sehen Sie sich dieses Video jetzt an, um 5~500 Punkte zu verdienen. Viel Glück.</string>
     <string name="agree">Zustimmen</string>
     <string name="quit">Verlassen</string>
     <string name="congratulations">HERZLICHE GLÜCKWÜNSCHE</string>
-    <string name="reward_video_points">+10~500</string>
+    <string name="reward_video_points">+5~500</string>
     <string name="close">Schließen</string>
     <string name="check_in">Einchecken</string>
     <string name="don_t_forget_to_set_phone_number">Vergessen Sie nicht, die Telefonnummer einzustellen</string>

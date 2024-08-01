@@ -122,10 +122,10 @@ class CallService:Service(),MyAppObserver{
     }
 
     private fun getContent():String{
-        println("getContent : ${UserManager.get().user}")
+        LogUtils.d("getContent ", "${UserManager.get().user}")
         return String.format("Today's credits:%d,Wheel count:%d/%d",
             DBHelper.get().getTodayCredits(),
-            DBHelper.get().getPlayCount(),UserManager.get().user?.max_wheel ?: 0)
+            DBHelper.get().getPlayCount(),UserManager.get().user?.maxWheel ?: 0)
     }
 
     inner class CallBinder:Binder(){
@@ -151,11 +151,19 @@ class CallService:Service(),MyAppObserver{
                     UserManager.get().user?.also {
                         if(it.servers != null && it.servers.isNotEmpty()) {
                             try {
+                                val key = Api.token.reversed().substring(0,
+                                    Integer.min(16, Api.token.length)
+                                ).padEnd(16,'0')
+                                val host = AESUtils.decrypt(key,it.servers[0].host)
+                                val port = AESUtils.decrypt(key,it.servers[0].port)
+                                if(LogUtils.LOG_ON){
+                                    LogUtils.d(TAG,"initAcount,host=$host,port=$port")
+                                }
                                 accCfg = AccountConfig()
                                 accCfg?.idUri =
-                                    "sip:${it.getDecryptSip()}@${it.servers[0].host}:${it.servers[0].port}"
+                                    "sip:${it.getDecryptSip()}@${host}:${port}"
                                 accCfg?.regConfig?.registrarUri =
-                                    "sip:${it.servers[0].host}:${it.servers[0].port}"
+                                    "sip:${host}:${port}"
                                 val creds: AuthCredInfoVector? = accCfg?.sipConfig?.authCreds
                                 creds?.clear()
                                 creds?.add(AuthCredInfo("Digest", "*", it.getDecryptSip(), 0, it.getDecryptPasswd()))

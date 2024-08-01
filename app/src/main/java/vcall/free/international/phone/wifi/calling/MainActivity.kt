@@ -256,27 +256,29 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>(),InstallState
             }
         }
         loading.show()
-        App.requestMap["from"] = AdManager.get().referrer
+
         val ts = System.currentTimeMillis()
         Api.ts = ts
-        val uuid = getDeviceId()
+        val deviceId = getAppDeviceId()
+        val uuid = "wecall.${EncryptUtils.md5(deviceId)}"
+        App.requestMap["from"] = AESUtils.encrypt(deviceId,AdManager.get().referrer)
         map.putAll(App.requestMap)
         map.put("uuid",uuid)
         map.put("country",country!!)
-        map.put("ts",ts.toString())
+        map.put("key",ts.toString())
         map.put("sign",EncryptUtils.generateSignature(uuid,packageName,ts.toString(),uuid))
-        println("$tag signup $map")
+        println("$tag $deviceId signup $map")
         compositeDisposable.add(Api.getApiService().signup(map)
 //            .delay(4000,TimeUnit.MILLISECONDS)
             .compose(RxUtils.applySchedulers())
             .subscribe({
                 loading.dismiss()
-                if (it.errcode == 0) {
-                    it.time = System.currentTimeMillis()
-                    UserManager.get().user = it
+                if (it.code == 20000) {
+                    it.data.time = System.currentTimeMillis()
+                    UserManager.get().user = it.data
                     (supportFragmentManager.findFragmentByTag("Index") as IndexFragment).refreshUser()
                     dataBinding.navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text =
-                        it.points.toString()
+                        it.data.points.toString()
                     callBinder?.initAccount()
                     Dispatcher.dispatch(this){
                         action("refresh_notification")

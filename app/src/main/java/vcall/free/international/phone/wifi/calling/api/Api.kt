@@ -11,10 +11,11 @@ import vcall.free.international.phone.wifi.calling.lib.prefs
 import java.util.concurrent.TimeUnit
 
 object Api {
-    const val baseUrl = "https://vcallfree.com/"
+    const val baseUrl = "https://zwtestv.xyz/"
     private var mRetrofit:Retrofit? = null
 
     var ts:Long = 0L
+//    var token = ""
     var token = prefs.getStringValue("token","")
         set(value) {
             field = value
@@ -24,7 +25,7 @@ object Api {
 
     fun getApiService():ApiService{
         if(mRetrofit == null) {
-            Log.d("Api","init mRetrofit--")
+//            Log.d("Api","init mRetrofit--")
             val builder: OkHttpClient.Builder = OkHttpClient.Builder()
             if(BuildConfig.DEBUG) {
                 val logging = HttpLoggingInterceptor()

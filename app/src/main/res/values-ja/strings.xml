@@ -45,11 +45,11 @@
     <string name="tip_invalid_number">無効な電話番号</string>
     <string name="tip_ad_click_limit">興味のない広告はクリックしないでください。ポイントを獲得できなくなる可能性があります。</string>
     <string name="tip_vpn">注意：「Virtual Private Network」ソフトウェアを使用しないでください。ポイントが失われたり、アカウントが無効になったりする可能性があります。</string>
-    <string name="tip_reward_video">今すぐこのビデオ広告を見て、10~500ポイントを獲得しよう。</string>
+    <string name="tip_reward_video">今すぐこのビデオ広告を見て、5~500ポイントを獲得しよう。</string>
     <string name="agree">同意する</string>
     <string name="quit">終了する</string>
     <string name="congratulations">おめでとう</string>
-    <string name="reward_video_points">+10~500</string>
+    <string name="reward_video_points">+5~500</string>
     <string name="close">閉じる</string>
     <string name="check_in">チェックイン</string>
     <string name="don_t_forget_to_set_phone_number">電話番号を設定することを忘れないでください</string>

@@ -151,12 +151,11 @@ class SetPhoneNumberActivity:BaseBackActivity<ActivitySetPhoneNumberBinding>(),
                         compositeDisposable.add(
                             Api.getApiService()
                                 .bindPhone(
-                                    UserManager.get().user?.getDecryptSip() ?: "",
                                     dataBinding.phoneTv.text.toString()
                                 )
                                 .compose(RxUtils.applySchedulers())
                                 .subscribe({ it2 ->
-                                    if (it2.isSuccessful) {
+                                    if (it2.code == 20000) {
                                         UserManager.get().user?.phone =
                                             dataBinding.phoneTv.text.toString()
                                         GameResultDialog(this, {

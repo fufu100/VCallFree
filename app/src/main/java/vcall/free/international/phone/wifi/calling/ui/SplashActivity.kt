@@ -143,7 +143,7 @@ class SplashActivity:BaseDataBindingActivity<ActivitySplashBinding>(),AdManager.
             if(consentError != null){
                 Log.w(tag, "${consentError.errorCode}: ${consentError.message}")
             }
-            Log.d(tag, "onCreate googleMobileAdsConsentManager.canRequestAds:${googleMobileAdsConsentManager.canRequestAds}")
+            Log.d(tag, "onCreate googleMobileAdsConsentManager.canRequestAds:${googleMobileAdsConsentManager.canRequestAds},AdManager.get().adData:${AdManager.get().adData}")
             if (googleMobileAdsConsentManager.canRequestAds) {
                 MobileAds.initialize(applicationContext) {
                     if(AdManager.get().adData != null){
@@ -235,11 +235,11 @@ class SplashActivity:BaseDataBindingActivity<ActivitySplashBinding>(),AdManager.
 
     private fun getAdData(){
         Log.d(tag, "getAdData--- ${googleMobileAdsConsentManager.canRequestAds}")
-        compositeDisposable.add(Api.getApiService().getAd()
+        compositeDisposable.add(Api.getApiService().getAd(firstInstallTime())
             .compose(RxUtils.applySchedulers())
             .subscribe({
-                if(it.errcode == 0) {
-                    AdManager.get().adData = it
+                if(it.code == 20000) {
+                    AdManager.get().adData = it.data
 
                     if (googleMobileAdsConsentManager.canRequestAds) {
                         AdManager.get().loadInterstitialAd(this, AdManager.ad_splash)
@@ -278,12 +278,12 @@ class SplashActivity:BaseDataBindingActivity<ActivitySplashBinding>(),AdManager.
 
                             })
 
-//                    AdManager.get().loadInterstitialAd(this, AdManager.ad_preclick)
-//                    AdManager.get().loadInterstitialAd(this, AdManager.ad_point)
-//                    AdManager.get().loadInterstitialAd(this, AdManager.ad_close)
-//                    AdManager.get().loadRewardedAd(this)
-//                    AdManager.get().loadNativeAd(this, AdManager.ad_quite)
-//                    AdManager.get().loadNativeAd(this, AdManager.ad_call_result)
+                        AdManager.get().loadInterstitialAd(this, AdManager.ad_preclick)
+                        AdManager.get().loadInterstitialAd(this, AdManager.ad_point)
+                        AdManager.get().loadInterstitialAd(this, AdManager.ad_close)
+                        AdManager.get().loadRewardedAd(this)
+                        AdManager.get().loadNativeAd(this, AdManager.ad_quite)
+                        AdManager.get().loadNativeAd(this, AdManager.ad_call_result)
                     }
                 }
             },{

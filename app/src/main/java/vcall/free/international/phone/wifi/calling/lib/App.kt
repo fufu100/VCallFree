@@ -101,6 +101,7 @@ class App : Application(),Application.ActivityLifecycleCallbacks{
         prefs = Prefs(applicationContext)
         encryptPrefs = EncryptPrefs()
         requestMap["ver"] = applicationContext.getVersionName()
+        requestMap["versionCode"] = applicationContext.getVersionCode().toString()
         requestMap["pk"] = applicationContext.packageName
         requestMap["country"] = Locale.getDefault().country
         requestMap["lang"] = Locale.getDefault().language

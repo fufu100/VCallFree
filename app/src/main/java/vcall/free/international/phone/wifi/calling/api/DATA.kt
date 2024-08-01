@@ -7,9 +7,10 @@ import vcall.free.international.phone.wifi.calling.utils.AESUtils
 import java.lang.Integer.min
 
 
-open class Base(
-    val errcode:Int = 0,
-    val errormsg: String = ""
+open class Base<T>(
+    val code:Int = -1,
+    val message: String,
+    val data:T
 )/**
  * Created by lyf on 2020/4/29.
  */
@@ -106,37 +107,38 @@ data class User(
     val offer_points:Int,
     val new_user:Int,
     val mode:String,
-    val max_wheel:Int,
+    val maxWheel:Int,
     val wheel_points:Int,
     val max_rate:Float,
     val reward_points:Int,
-    val interval:Int,
+    val rewardInterval:Int,
+    val maxReward:Int,
+    val rewarded:Int,
+    val wheelInterval:Int,
     val invite:String,
-    val invite_country_points:InviteCountryPoints,
+    val inviteCountryPoints:InviteCountryPoints,
     val max_video:Int,
     val video_interval:Int,
     var phone:String,
     val ads_config:AdConfig,
     var time:Long
-):Base(){
+){
     fun getDecryptSip():String{
-        val key = Api.token.substring(0,min(16,Api.token.length)).padEnd(16,'0')
+        val key = Api.token.reversed().substring(0,min(16,Api.token.length)).padEnd(16,'0')
         return AESUtils.decrypt(key,sip)
     }
 
     fun getDecryptPasswd():String{
-        val key = Api.token.substring(0,min(16,Api.token.length)).padEnd(16,'0')
+        val key = Api.token.reversed().substring(0,min(16,Api.token.length)).padEnd(16,'0')
         return AESUtils.decrypt(key,passwd)
     }
 }
 
 data class Price(
-    val errcode:Int,
-    val errmsg:String,
     val phone:String,
     val iso:String,
     val prefix:String,
-    val route_name:String,
+    val routeName:String,
     val points:Int,
     val tz:String,
     val type:String,
@@ -145,15 +147,13 @@ data class Price(
 )
 
 data class AddPointsResp(
-    val errcode:Int,
-    val errormsg:String,
     val sip:String,
     val points:Int
 )
 
 data class AdResp(
     var ads:List<AdCategory>,
-):Base()
+)
 
 data class AdCategory(
     var adPlaceID:String,
@@ -178,4 +178,13 @@ data class IpInfo(
     var loc:String,
     var org:String,
     var timezone:String
+)
+
+data class PreAddPoint(
+    var points: Int, //预增积分值
+    var key: String, //预增积分原始key，为MD5值，长度为32字符
+    var winId: String, //game游戏时中奖的水果id
+    var luckyKey: String, //game游戏时幸运奖的key
+    var count: Int, //计数值，wheel、reward、luc
+    var type: String = ""
 )

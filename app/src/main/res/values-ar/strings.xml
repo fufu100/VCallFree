@@ -45,11 +45,11 @@
     <string name="tip_invalid_number">رقم الهاتف غير صحيح</string>
     <string name="tip_ad_click_limit">يرجى عدم النقر فوق الإعلانات التي لا تهتم بها. قد يؤدي ذلك إلى تفويت فرصة ربح المزيد من النقاط.</string>
     <string name="tip_vpn">ملاحظة: لا تستخدم برنامج "Virtual Private Network" ، فقد يتسبب ذلك في خسارة نقاط أو حتى تعطيل الحساب.</string>
-    <string name="tip_reward_video">شاهد هذا الفيديو الإعلاني الآن لتكسب 10 إلى 500 نقطة، حظاً موفقاً.</string>
+    <string name="tip_reward_video">شاهد هذا الفيديو الإعلاني الآن لتكسب 5 إلى 500 نقطة، حظاً موفقاً.</string>
     <string name="agree">يوافق على</string>
     <string name="quit">يترك</string>
     <string name="congratulations">تهانينا</string>
-    <string name="reward_video_points">+10~500</string>
+    <string name="reward_video_points">+5~500</string>
     <string name="close">قريب</string>
     <string name="check_in">تحقق في</string>
     <string name="don_t_forget_to_set_phone_number">لا تنس تحديد رقم الهاتف</string>

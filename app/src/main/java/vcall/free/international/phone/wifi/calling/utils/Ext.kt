@@ -248,7 +248,7 @@ fun Context.getSerial():String{
     return m_szDevIDShort
 }
 
-fun Context.getDeviceId():String{
+fun Context.getAppDeviceId():String{
     var savedDeviceId = prefs.getStringValue("device_id","")
     if(savedDeviceId.isEmpty()) {
         savedDeviceId = UUID(getAndroidID().hashCode().toLong(), getSerial().hashCode().toLong()).toString()

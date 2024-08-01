@@ -97,9 +97,9 @@ class CallRatesActivity : BaseBackActivity<ActivityCallRatesBinding>() , TextWat
                     .subscribe({
                         dataBinding.loading.hide()
                         dataBinding.pinnedLetter.visibility = View.VISIBLE
-                        if (it.errcode == 0) {
+                        if (it.code == 20000) {
                             list.clear()
-                            list.addAll(it.rates)
+                            list.addAll(it.data)
                             dataBinding.recyclerView.adapter?.notifyDataSetChanged()
 //                            if(list.size > 0) {
 //                                dataBinding.pinnedLetter.text = list[0][3].substring(0, 1)

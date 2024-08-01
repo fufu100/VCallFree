@@ -29,19 +29,20 @@ class EncryptInterceptor : Interceptor {
             }
             response = chain.proceed(newRequest.build())
         } else if (request.url().host() == "zwtestv.xyz") {
-            val array = request.url().toString().split("?")
-            val map = mapOf(
-                "signup" to "signup",
-                "addpoints" to "addPoints",
-                "setphone" to "setPhone",
-                "price" to "getPrice",
-                "rates" to "getRates",
-                "adclick" to "adClick",
-                "param" to "adParam"
-            )
-            val m = array[1].split("&").find { it.startsWith("m=") }!!.split("=")[1]
-            val newRequest = request.newBuilder().url("${Api.baseUrl}api/${map[m]}?${array[1].replace("m=${m}&","")}")
-            if (Api.token.isNotEmpty() && m != "signup") {
+//            val array = request.url().toString().split("?")
+//            val map = mapOf(
+//                "signup" to "signup",
+//                "addpoints" to "addPoints",
+//                "setphone" to "setPhone",
+//                "price" to "getPrice",
+//                "rates" to "getRates",
+//                "adclick" to "adClick",
+//                "param" to "adParam"
+//            )
+//            val m = array[1].split("&").find { it.startsWith("m=") }!!.split("=")[1]
+//            val newRequest = request.newBuilder().url("${Api.baseUrl}api/${map[m]}?${array[1].replace("m=${m}&","")}")
+            val newRequest = request.newBuilder()
+            if (Api.token.isNotEmpty()) {
                 newRequest.header("Authorization", "Bearer ${Api.token}")
             }
             response = chain.proceed(newRequest.build())

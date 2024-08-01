@@ -65,14 +65,14 @@ class CallDialog(context: Context,val makeCall:(callRate:Int) -> Unit):Dialog(co
         disposable = Api.getApiService().getPrice(country!!.iso,country?.code + phone)
             .compose(RxUtils.applySchedulers())
             .subscribe({
-                if(it.errcode == 0){
-                    rate = it.points
-                    dataBinding.callRate.text = it.points.toString()
-                    dataBinding.timeRemaining.text = ((UserManager.get().user?.points ?: 0) / it.points).toString()
+                if(it.code == 20000){
+                    rate = it.data.points
+                    dataBinding.callRate.text = it.data.points.toString()
+                    dataBinding.timeRemaining.text = ((UserManager.get().user?.points ?: 0) / it.data.points).toString()
                     dataBinding.progressBar1.visibility = View.GONE
                     dataBinding.progressBar2.visibility = View.GONE
                 }else{
-                    context.toast(it.errmsg)
+                    context.toast(it.message)
                     dismiss()
                 }
             },{

@@ -61,7 +61,7 @@ class InviteFriendsActivity:BaseBackActivity<ActivityInviteFriendsBinding>() {
                 }
                 dataBinding.gridLayout.addView(tv,lp)
             }
-            DBHelper.get().getCountriesByISOs(UserManager.get().user?.invite_country_points?._3000).forEachIndexed { i, country ->
+            DBHelper.get().getCountriesByISOs(UserManager.get().user?.inviteCountryPoints?._3000).forEachIndexed { i, country ->
                 withContext(Dispatchers.Main){
                     val tv = TextView(this@InviteFriendsActivity,null,R.style.RewardItem)
                     tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.blue_dot,0,0,0)
@@ -78,7 +78,7 @@ class InviteFriendsActivity:BaseBackActivity<ActivityInviteFriendsBinding>() {
                     dataBinding.gridLayout.addView(tv,lp)
                 }
             }
-            val row = (UserManager.get().user?.invite_country_points?._3000?.size ?:0) / 3 + 2
+            val row = (UserManager.get().user?.inviteCountryPoints?._3000?.size ?:0) / 3 + 2
             withContext(Dispatchers.Main){
                 val tv = TextView(this@InviteFriendsActivity)
                 tv.setTextColor(getColorFromRes(R.color.text_normal))
@@ -97,7 +97,7 @@ class InviteFriendsActivity:BaseBackActivity<ActivityInviteFriendsBinding>() {
                 dataBinding.gridLayout.addView(tv,lp)
             }
 //
-            DBHelper.get().getCountriesByISOs(UserManager.get().user?.invite_country_points?._10000).forEachIndexed { i, country ->
+            DBHelper.get().getCountriesByISOs(UserManager.get().user?.inviteCountryPoints?._10000).forEachIndexed { i, country ->
                 withContext(Dispatchers.Main){
                     val tv = TextView(this@InviteFriendsActivity,null,R.style.RewardItem)
                     tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.blue_dot,0,0,0)

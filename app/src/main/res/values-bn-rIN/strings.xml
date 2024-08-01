@@ -45,11 +45,11 @@
     <string name="tip_invalid_number">অচল ফোন নম্বর</string>
     <string name="tip_ad_click_limit">আপনার আগ্রহী নয় এমন বিজ্ঞাপনে ক্লিক করুন না This এটি আপনাকে আরও পয়েন্ট অর্জন করতে মিস করতে পারে।</string>
     <string name="tip_vpn">দ্রষ্টব্য: "ভার্চুয়াল প্রাইভেট নেটওয়ার্ক" সফ্টওয়্যার ব্যবহার করবেন না, এটি আপনাকে পয়েন্ট বা এমনকি অ্যাকাউন্টটি অক্ষম করতে পারে।</string>
-    <string name="tip_reward_video">10~500 পয়েন্ট অর্জন করতে এখনই এই ভিডিও বিজ্ঞাপনটি দেখুন, শুভকামনা৷</string>
+    <string name="tip_reward_video">5~500 পয়েন্ট অর্জন করতে এখনই এই ভিডিও বিজ্ঞাপনটি দেখুন, শুভকামনা৷</string>
     <string name="agree">একমত</string>
     <string name="quit">ছাড়ো</string>
     <string name="congratulations">অভিনন্দন</string>
-    <string name="reward_video_points">+10~500</string>
+    <string name="reward_video_points">+5~500</string>
     <string name="close">বন্ধ</string>
     <string name="check_in">চেক ইন</string>
     <string name="don_t_forget_to_set_phone_number">ফোন নম্বর সেট করতে ভুলে যাবেন না</string>

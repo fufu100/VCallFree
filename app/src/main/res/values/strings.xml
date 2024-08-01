@@ -46,11 +46,11 @@
     <string name="tip_invalid_number">Invalid phone number</string>
     <string name="tip_ad_click_limit">Please do not click on ads that you are not interested in. This may cause you to miss to earn more points.</string>
     <string name="tip_vpn">Note: Do not use the "Virtual Private Network" software, it may cause you to lose points or even the  account to be disabled.</string>
-    <string name="tip_reward_video">Watch this video ad now to earn 10~500 points, Good luck.</string>
+    <string name="tip_reward_video">Watch this video ad now to earn 5~500 points, Good luck.</string>
     <string name="agree">Agree</string>
     <string name="quit">Quit</string>
     <string name="congratulations">CONGRATULATIONS</string>
-    <string name="reward_video_points">+10~500</string>
+    <string name="reward_video_points">+5~500</string>
     <string name="close">Close</string>
     <string name="check_in">Check in</string>
     <string name="don_t_forget_to_set_phone_number">Don\'t forget to set phone number</string>

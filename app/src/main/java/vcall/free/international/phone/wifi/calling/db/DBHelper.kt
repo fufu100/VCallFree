@@ -31,12 +31,14 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
 
 //        db?.execSQL(PlayCountTable.newDeleteTableString())
 //        db?.execSQL(PlayCountTable.newCreateTableString())
-        if(newVersion == 7){
+        if(newVersion == 7 ){
             db?.execSQL("alter table ${PlayCountTable.TB_NAME} add column ${PlayCountTable.AD_CLICK_COUNT} integer")
         }else if(newVersion == 8){
             db?.execSQL("alter table ${PlayCountTable.TB_NAME} add column ${PlayCountTable.CLICK_COUNT_LIMIT_TIME} integer")
         }else if(newVersion == 9){
             db?.execSQL("alter table ${PlayCountTable.TB_NAME} add column ${PlayCountTable.LUCKY_CREDITS_CLICK_COUNT} integer")
+        }else if(newVersion == 10){
+            db?.execSQL("alter table ${PlayCountTable.TB_NAME} add column ${PlayCountTable.REWARD_COUNT} integer")
         }
 
         println("DBHelper onUpgrade $oldVersion $newVersion")
@@ -44,7 +46,7 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
 
     companion object {
         private val DATABASE_NAME = "vcallfree_database.db"  //数据库名
-        private val DATABASE_VERSION = 9    //数据库版本
+        private val DATABASE_VERSION = 10    //数据库版本
         var instance: DBHelper? = null
             get() {
                 if (field == null) {
@@ -68,20 +70,20 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         while (cursor.moveToNext()) {
             list.add(
                 Record(
-                    cursor.getLong(cursor.getColumnIndex(RecordTable.ID)),
-                    cursor.getLong(cursor.getColumnIndex(RecordTable.PHONE_ID)),
-                    cursor.getLong(cursor.getColumnIndex(RecordTable.CONTRACT_ID)),
-                    cursor.getString(cursor.getColumnIndex(RecordTable.PHONE)),
-                    cursor.getString(cursor.getColumnIndex(RecordTable.ISO)),
-                    cursor.getString(cursor.getColumnIndex(RecordTable.CODE)),
-                    cursor.getString(cursor.getColumnIndex(RecordTable.PREFIX)),
-                    cursor.getString(cursor.getColumnIndex(RecordTable.USERNAME)),
-                    cursor.getLong(cursor.getColumnIndex(RecordTable.USER_PHOTO)),
-                    cursor.getLong(cursor.getColumnIndex(RecordTable.ADD_TIME)),
-                    cursor.getLong(cursor.getColumnIndex(RecordTable.DURATION)),
-                    cursor.getInt(cursor.getColumnIndex(RecordTable.RATE)),
-                    cursor.getInt(cursor.getColumnIndex(RecordTable.COIN_COST)),
-                    cursor.getInt(cursor.getColumnIndex(RecordTable.STATE))
+                    cursor.getLong(cursor.getColumnIndexOrThrow(RecordTable.ID)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(RecordTable.PHONE_ID)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(RecordTable.CONTRACT_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(RecordTable.PHONE)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(RecordTable.ISO)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(RecordTable.CODE)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(RecordTable.PREFIX)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(RecordTable.USERNAME)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(RecordTable.USER_PHOTO)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(RecordTable.ADD_TIME)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(RecordTable.DURATION)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(RecordTable.RATE)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(RecordTable.COIN_COST)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(RecordTable.STATE))
                 )
             )
         }
@@ -127,11 +129,11 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         while (cursor.moveToNext()) {
             list.add(
                 Country(
-                    cursor.getString(cursor.getColumnIndex(CountryTable.COUNTRY)),
-                    cursor.getString(cursor.getColumnIndex(CountryTable.ISO)),
-                    cursor.getString(cursor.getColumnIndex(CountryTable.CODE)),
-                    cursor.getInt(cursor.getColumnIndex(CountryTable.LENGTH)),
-                    cursor.getString(cursor.getColumnIndex(CountryTable.PREFIX))
+                    cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.COUNTRY)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.ISO)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.CODE)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(CountryTable.LENGTH)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.PREFIX))
                 )
             )
         }
@@ -149,10 +151,10 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         while (cursor.moveToNext()) {
             list.add(
                 arrayOf(
-                    cursor.getString(cursor.getColumnIndex(CountryTable.ISO)),
-                    cursor.getString(cursor.getColumnIndex(CountryTable.CODE)),
-                    cursor.getString(cursor.getColumnIndex(CountryTable.CODE)),
-                    cursor.getString(cursor.getColumnIndex(CountryTable.COUNTRY))
+                    cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.ISO)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.CODE)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.CODE)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.COUNTRY))
                 )
             )
         }
@@ -166,11 +168,11 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
             while (cursor.moveToNext()) {
                 list.add(
                     Country(
-                        cursor.getString(cursor.getColumnIndex(CountryTable.COUNTRY)),
-                        cursor.getString(cursor.getColumnIndex(CountryTable.ISO)),
-                        cursor.getString(cursor.getColumnIndex(CountryTable.CODE)),
-                        cursor.getInt(cursor.getColumnIndex(CountryTable.LENGTH)),
-                        cursor.getString(cursor.getColumnIndex(CountryTable.PREFIX))
+                        cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.COUNTRY)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.ISO)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.CODE)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(CountryTable.LENGTH)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.PREFIX))
                     )
                 )
             }
@@ -182,11 +184,11 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         val cursor = queryAndAll(CountryTable.TB_NAME,CountryTable.ISO,iso)
         if(cursor?.moveToNext() == true){
             return Country(
-                cursor.getString(cursor.getColumnIndex(CountryTable.COUNTRY)),
-                cursor.getString(cursor.getColumnIndex(CountryTable.ISO)),
-                cursor.getString(cursor.getColumnIndex(CountryTable.CODE)),
-                cursor.getInt(cursor.getColumnIndex(CountryTable.LENGTH)),
-                cursor.getString(cursor.getColumnIndex(CountryTable.PREFIX))
+                cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.COUNTRY)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.ISO)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.CODE)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(CountryTable.LENGTH)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.PREFIX))
             )
         }
         return null
@@ -196,11 +198,11 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         val cursor = queryAndAll(CountryTable.TB_NAME,CountryTable.CODE,code)
         if(cursor?.moveToNext() == true){
             return Country(
-                cursor.getString(cursor.getColumnIndex(CountryTable.COUNTRY)),
-                cursor.getString(cursor.getColumnIndex(CountryTable.ISO)),
-                cursor.getString(cursor.getColumnIndex(CountryTable.CODE)),
-                cursor.getInt(cursor.getColumnIndex(CountryTable.LENGTH)),
-                cursor.getString(cursor.getColumnIndex(CountryTable.PREFIX))
+                cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.COUNTRY)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.ISO)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.CODE)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(CountryTable.LENGTH)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CountryTable.PREFIX))
             )
         }
         return null
@@ -243,7 +245,25 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         println("getPlayCount date=$date")
         val cursor = queryAndAll(PlayCountTable.TB_NAME,PlayCountTable.DATE,date)
         if(cursor?.moveToNext() == true){
-            return cursor.getInt(cursor.getColumnIndex(PlayCountTable.COUNT))
+            return cursor.getInt(cursor.getColumnIndexOrThrow(PlayCountTable.COUNT))
+        }
+        return 0
+    }
+
+    fun addRewardCount(count:Int){
+        val cv = ContentValues()
+        val format = SimpleDateFormat("yyyyMMdd",Locale.ENGLISH)
+        cv.put(PlayCountTable.REWARD_COUNT,count)
+        cv.put(PlayCountTable.DATE,format.format(Date()))
+        updateOrInsert(PlayCountTable.TB_NAME,cv,PlayCountTable.DATE)
+    }
+    fun getRewardCount():Int{
+        val format = SimpleDateFormat("yyyyMMdd",Locale.ENGLISH)
+        val date = format.format(Date())
+        println("getPlayCount date=$date")
+        val cursor = queryAndAll(PlayCountTable.TB_NAME,PlayCountTable.DATE,date)
+        if(cursor?.moveToNext() == true){
+            return cursor.getInt(cursor.getColumnIndexOrThrow(PlayCountTable.REWARD_COUNT))
         }
         return 0
     }
@@ -254,7 +274,7 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         println("getTodayCredits date=$date")
         val cursor = queryAndAll(PlayCountTable.TB_NAME,PlayCountTable.DATE,date)
         if(cursor?.moveToNext() == true){
-            return cursor.getInt(cursor.getColumnIndex(PlayCountTable.CREDITS))
+            return cursor.getInt(cursor.getColumnIndexOrThrow(PlayCountTable.CREDITS))
         }
         return 0
     }
@@ -273,8 +293,8 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         println("getAdClickCount date=$date")
         val cursor = queryAndAll(PlayCountTable.TB_NAME,PlayCountTable.DATE,date)
         if(cursor?.moveToNext() == true){
-            val count = cursor.getInt(cursor.getColumnIndex(PlayCountTable.AD_CLICK_COUNT))
-            val t = cursor.getLong(cursor.getColumnIndex(PlayCountTable.CLICK_COUNT_LIMIT_TIME))
+            val count = cursor.getInt(cursor.getColumnIndexOrThrow(PlayCountTable.AD_CLICK_COUNT))
+            val t = cursor.getLong(cursor.getColumnIndexOrThrow(PlayCountTable.CLICK_COUNT_LIMIT_TIME))
             if(count > 15 && System.currentTimeMillis() - t > 3600 * 1000){
                 val cv = ContentValues()
                 cv.put(PlayCountTable.AD_CLICK_COUNT,0)
@@ -309,7 +329,7 @@ class DBHelper : CommonDB(App.context!!, DATABASE_NAME, DATABASE_VERSION) {
         println("getLuckyCreditsClickCount date=$date")
         val cursor = queryAndAll(PlayCountTable.TB_NAME,PlayCountTable.DATE,date)
         if(cursor?.moveToNext() == true){
-            val count = cursor.getInt(cursor.getColumnIndex(PlayCountTable.LUCKY_CREDITS_CLICK_COUNT))
+            val count = cursor.getInt(cursor.getColumnIndexOrThrow(PlayCountTable.LUCKY_CREDITS_CLICK_COUNT))
             return count
         }
         return 0

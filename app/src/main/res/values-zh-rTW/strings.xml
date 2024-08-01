@@ -45,11 +45,11 @@
     <string name="tip_invalid_number">無效的電話號碼</string>
     <string name="tip_ad_click_limit">請不要點擊您不感興趣的廣告。這可能會導致您錯過獲得更多積分的機會。</string>
     <string name="tip_vpn">注意：不要使用"虛擬私人網路"軟體，它會導致你失去積分，甚至帳戶被禁用</string>
-    <string name="tip_reward_video">立即觀看此視頻廣告，賺取10~500積分，祝妳好運。</string>
+    <string name="tip_reward_video">立即觀看此視頻廣告，賺取5~500積分，祝妳好運。</string>
     <string name="agree">同意</string>
     <string name="quit">結束</string>
     <string name="congratulations">恭喜</string>
-    <string name="reward_video_points">+10~500</string>
+    <string name="reward_video_points">+5~500</string>
     <string name="close">關閉</string>
     <string name="check_in">報到</string>
     <string name="don_t_forget_to_set_phone_number">不要忘記設置電話號碼</string>
