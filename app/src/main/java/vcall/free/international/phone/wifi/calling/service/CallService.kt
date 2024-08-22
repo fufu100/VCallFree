@@ -157,7 +157,7 @@ class CallService:Service(),MyAppObserver{
                                 val host = AESUtils.decrypt(key,it.servers[0].host)
                                 val port = AESUtils.decrypt(key,it.servers[0].port)
                                 if(LogUtils.LOG_ON){
-                                    LogUtils.d(TAG,"initAcount,host=$host,port=$port")
+                                    LogUtils.d(TAG,"initAcount,host=$host,port=$port，${it.getDecryptSip()},${it.getDecryptPasswd()}")
                                 }
                                 accCfg = AccountConfig()
                                 accCfg?.idUri =

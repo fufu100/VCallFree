@@ -260,7 +260,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>(),InstallState
         val ts = System.currentTimeMillis()
         Api.ts = ts
         val deviceId = getAppDeviceId()
-        val uuid = "wecall.${EncryptUtils.md5(deviceId)}"
+        val uuid = "vcall.${EncryptUtils.md5(deviceId)}"
         App.requestMap["from"] = AESUtils.encrypt(deviceId,AdManager.get().referrer)
         map.putAll(App.requestMap)
         map.put("uuid",uuid)
