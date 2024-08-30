@@ -94,10 +94,17 @@ class SplashActivity:BaseDataBindingActivity<ActivitySplashBinding>(),AdManager.
             }
         }
         bindService(Intent(this, CallService::class.java), conn, Context.BIND_AUTO_CREATE)
-        registerReceiver(receiver,IntentFilter().apply {
-            addAction(CallService.ACTION_ON_AD_CLOSE)
-            addAction(CallService.ACTION_ON_AD_SHOW)
-        })
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(receiver,IntentFilter().apply {
+                addAction(CallService.ACTION_ON_AD_CLOSE)
+                addAction(CallService.ACTION_ON_AD_SHOW)
+            }, RECEIVER_NOT_EXPORTED)
+        }else{
+            registerReceiver(receiver,IntentFilter().apply {
+                addAction(CallService.ACTION_ON_AD_CLOSE)
+                addAction(CallService.ACTION_ON_AD_SHOW)
+            })
+        }
 
         LogUtils.d(tag,"onCreate--- onlyShowAd=$onlyShowAd")
         if(onlyShowAd){

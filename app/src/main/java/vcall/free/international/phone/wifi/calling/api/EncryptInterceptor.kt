@@ -30,6 +30,9 @@ class EncryptInterceptor : Interceptor {
             val newRequest = request.newBuilder()
             if (Api.token.isNotEmpty()) {
                 newRequest.header("Authorization", "Bearer ${Api.token}")
+                println("Authorization:Bearer ${Api.token}")
+            }else{
+                println("Api.token is EMPTY")
             }
             response = chain.proceed(newRequest.build())
         } else if (request.url().host() == "zwtestv.xyz") {

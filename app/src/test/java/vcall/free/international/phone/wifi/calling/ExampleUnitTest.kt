@@ -25,11 +25,8 @@ import java.util.*
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        val date = Date()
-        val c = Calendar.getInstance(Locale.US)
-        val format = SimpleDateFormat("E,MM dd hh:mm a z", Locale.CHINA)
-        println(format.format(Date(c.timeInMillis)))
-        assertEquals(4, 2 + 2)
+        val uuid = UUID(1L,1L);
+        println(uuid.toString())
     }
 
     @Test

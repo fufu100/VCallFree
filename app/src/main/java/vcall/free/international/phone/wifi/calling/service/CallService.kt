@@ -79,7 +79,11 @@ class CallService:Service(),MyAppObserver{
         intentFilter.addAction(ACTION_SHOW_AD)
         intentFilter.addAction("refresh_notification")
         intentFilter.addAction("stop")
-        registerReceiver(receiver, intentFilter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(receiver, intentFilter, RECEIVER_NOT_EXPORTED)
+        }else{
+            registerReceiver(receiver, intentFilter)
+        }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
             connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             connectivityManager.registerDefaultNetworkCallback(networkCallback)
@@ -196,8 +200,12 @@ class CallService:Service(),MyAppObserver{
 
         fun makeCall(phone: String):Boolean{
             if(!LogUtils.test && accout != null) {
-                val buddyURI =
-                    "sip:$phone@${UserManager.get().user?.servers!![0].host}:${UserManager.get().user?.servers!![0].port}"
+                val key = Api.token.reversed().substring(0,
+                    Integer.min(16, Api.token.length)
+                ).padEnd(16,'0')
+                val host = AESUtils.decrypt(key,UserManager.get().user!!.servers[0].host)
+                val port = AESUtils.decrypt(key,UserManager.get().user!!.servers[0].port)
+                val buddyURI = "sip:$phone@${host}:${port}"
                 LogUtils.println("$TAG buddyURI=$buddyURI")
                 addBuddy(buddyURI)
                 val call = MyCall(accout, -1)

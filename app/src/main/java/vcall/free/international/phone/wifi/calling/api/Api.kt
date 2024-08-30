@@ -27,12 +27,12 @@ object Api {
         if(mRetrofit == null) {
 //            Log.d("Api","init mRetrofit--")
             val builder: OkHttpClient.Builder = OkHttpClient.Builder()
+            builder.addInterceptor(EncryptInterceptor())
             if(BuildConfig.DEBUG) {
                 val logging = HttpLoggingInterceptor()
                 logging.level = HttpLoggingInterceptor.Level.BODY
                 builder.addInterceptor(logging)
             }
-            builder.addInterceptor(EncryptInterceptor())
             builder.connectTimeout(40, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS)
             mRetrofit = Retrofit.Builder().client(builder.build())
                 .addConverterFactory(GsonConverterFactory.create())

@@ -15,17 +15,16 @@ import android.os.PowerManager
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
-import vcall.free.international.phone.wifi.calling.db.DBHelper
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.*
 import org.pjsip.pjsua2.*
-import org.pjsip.pjsua2.pjmedia_type
-import org.pjsip.pjsua2.pjsua_call_media_status
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.api.Record
 import vcall.free.international.phone.wifi.calling.databinding.ActivityCallBinding
+import vcall.free.international.phone.wifi.calling.db.DBHelper
 import vcall.free.international.phone.wifi.calling.lib.BaseBackActivity
 import vcall.free.international.phone.wifi.calling.pjsua.MyApp
 import vcall.free.international.phone.wifi.calling.service.CallService
@@ -87,11 +86,19 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         bindService(Intent(this, CallService::class.java), conn, Context.BIND_AUTO_CREATE)
         dialEffectHelper = DialEffectHelper(this)
         headsetPlugReceiver = HeadsetPluginReceiver()
-        registerReceiver(headsetPlugReceiver, IntentFilter().apply {
-            addAction(Intent.ACTION_HEADSET_PLUG)
-            addAction(CallService.ACTION_ON_AD_LOAD_FAIL)
-            addAction(CallService.ACTION_ON_AD_SHOW)
-        })
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(headsetPlugReceiver, IntentFilter().apply {
+                addAction(Intent.ACTION_HEADSET_PLUG)
+                addAction(CallService.ACTION_ON_AD_LOAD_FAIL)
+                addAction(CallService.ACTION_ON_AD_SHOW)
+            }, RECEIVER_NOT_EXPORTED)
+        }else{
+            registerReceiver(headsetPlugReceiver, IntentFilter().apply {
+                addAction(Intent.ACTION_HEADSET_PLUG)
+                addAction(CallService.ACTION_ON_AD_LOAD_FAIL)
+                addAction(CallService.ACTION_ON_AD_SHOW)
+            })
+        }
         username = intent.getStringExtra("username")?:""
         phone = intent.getStringExtra("phone")?:""
         rate = intent.getIntExtra("rate", 0)
@@ -147,6 +154,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         v.isSelected = !v.isSelected
     }
     //点击外放按钮
+    @RequiresApi(Build.VERSION_CODES.S)
     fun horn(v: View) {
         v.isSelected = !v.isSelected
         audioManager.isSpeakerphoneOn = v.isSelected
@@ -172,7 +180,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 
     //挂断电话，通话中挂断会回调到下面到onDisconnect方法，如果没有打通电话就手动调用onDisconnect方法
     fun hangup(flag: Boolean = true) {
-        dataBinding.hangupIv.isClickable = false
+//        dataBinding.hangupIv.isClickable = false
         LogUtils.println("hangup flat=$flag ${callBinder?.getCurrentCall() == null}")
         if(LogUtils.test){
             onDisconnect()
@@ -217,6 +225,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             if (UserManager.get().user != null) {
                 UserManager.get().user!!.points -= coin_cost
             }
+            toneGeneratorHelper?.stopRingingTone()
             Log.d(TAG, "after cut points")
             DBHelper.get().addCallRecord(record)
             Log.d(TAG, "after add Record ${AdManager.get().interstitialAdMap[AdManager.ad_close] == null}")

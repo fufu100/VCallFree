@@ -81,8 +81,9 @@ class CallDialog(context: Context,val makeCall:(callRate:Int) -> Unit):Dialog(co
     }
 
     fun call(v:View){
-        LogUtils.println("call-$rate")
-        if(rate != 0) {
+        val s = dataBinding.timeRemaining.text
+        LogUtils.println("CallDialog call-$rate,s=$s")
+        if(rate != 0 && s != "0") {
             makeCall(rate)
             dismiss()
         }
