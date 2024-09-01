@@ -293,7 +293,7 @@ fun Context.hasSim():Boolean{
 }
 
 fun Context.getCountry():String?{
-    if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
+//    if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
         val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         val simState = telephonyManager.simState
         println("getCountry simState=$simState")
@@ -304,7 +304,7 @@ fun Context.getCountry():String?{
             return telephonyManager.simCountryIso.toUpperCase(Locale.ENGLISH)
 //            return null
         }
-    }else {
-        return null
-    }
+//    }else {
+//        return null
+//    }
 }

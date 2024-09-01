@@ -27,6 +27,9 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.databinding.ActivityMainBinding
 import vcall.free.international.phone.wifi.calling.lib.App
@@ -44,7 +47,6 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>(),InstallState
 
     // 所需的全部权限
     private val PERMISSIONS = arrayOf(
-        Manifest.permission.READ_PHONE_STATE,
         Manifest.permission.READ_CONTACTS
     )
     private lateinit var appUpdateManager:AppUpdateManager
@@ -121,16 +123,19 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>(),InstallState
 
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 callBinder = service as CallService.CallBinder
-                callBinder?.setOnGetIpInfoListener(object : CallService.OnGetIpInfo {
-                    override fun onGetIpInfo(ip: String?) {
-                        println("$tag onGetIpInfo $ip")
-                        signup()
+                callBinder?.setSignupListener(object :CallService.OnSignup{
+                    override fun onSignup() {
+                        (supportFragmentManager.findFragmentByTag("Index") as IndexFragment).refreshUser()
+                        dataBinding.navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text =
+                            UserManager.get().user?.points.toString()
                     }
+
                 })
+                callBinder?.signup()
                 Log.d(tag, "onServiceConnected:${callBinder?.getGetIpStatus()} ${getCountry()}")
-                if(getCountry() == null){
-                    callBinder?.getIpInfo()
-                }
+//                if(getCountry() == null){
+//                    callBinder?.getIpInfo()
+//                }
                 if (!NotificationUtils.get().areNotificationsEnable()) {
                     NotificationUtils.get().remindOpenNotification(this@MainActivity)
                 }else{
@@ -216,15 +221,15 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>(),InstallState
 //            ATSDK.integrationChecking(applicationContext)
 //        }
 
-        if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
-            Log.d(tag, " 已经有权限 开始signup---")
-            signup()
-            val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            println("simCountryIso:${telephonyManager.simCountryIso}")
-//            println("simSerialNumber:${telephonyManager.simSerialNumber}")
-        }else{
-            println("$tag onCreate 没有READ_PHONE_STATE权限！！")
-        }
+//        if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
+//            Log.d(tag, " 已经有权限 开始signup---")
+//            signup()
+//            val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+//            println("simCountryIso:${telephonyManager.simCountryIso}")
+////            println("simSerialNumber:${telephonyManager.simSerialNumber}")
+//        }else{
+//            println("$tag onCreate 没有READ_PHONE_STATE权限！！")
+//        }
 
         val isProxy = isWifiProxy()
         println("$tag isProxy=$isProxy ${isDeviceInVPN()} ")
@@ -276,13 +281,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>(),InstallState
                 if (it.code == 20000) {
                     it.data.time = System.currentTimeMillis()
                     UserManager.get().user = it.data
-                    (supportFragmentManager.findFragmentByTag("Index") as IndexFragment).refreshUser()
-                    dataBinding.navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text =
-                        it.data.points.toString()
-                    callBinder?.initAccount()
-                    Dispatcher.dispatch(this){
-                        action("refresh_notification")
-                    }.send()
+
                 }
             }, {
                 it.printStackTrace()

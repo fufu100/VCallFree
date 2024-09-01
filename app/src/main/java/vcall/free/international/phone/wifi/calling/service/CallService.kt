@@ -17,6 +17,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import android.widget.TextView
 import androidx.core.app.NotificationCompat
 import vcall.free.international.phone.wifi.calling.db.DBHelper
 import kotlinx.coroutines.GlobalScope
@@ -27,6 +28,7 @@ import vcall.free.international.phone.wifi.calling.MainActivity
 import vcall.free.international.phone.wifi.calling.R
 import vcall.free.international.phone.wifi.calling.api.Api
 import vcall.free.international.phone.wifi.calling.pjsua.*
+import vcall.free.international.phone.wifi.calling.ui.IndexFragment
 import vcall.free.international.phone.wifi.calling.ui.SplashActivity
 import vcall.free.international.phone.wifi.calling.utils.*
 import java.util.*
@@ -40,7 +42,7 @@ class CallService:Service(),MyAppObserver{
     var accout:MyAccount? = null
     var accCfg:AccountConfig? = null
     var receiver:MyBroadcastReceiver? = null
-    private val lastRegStatus = ""
+    private var signupStatus = 0
     private var showAdOnLoad = true
     private var regStatus = -1
     private lateinit var connectivityManager:ConnectivityManager
@@ -50,6 +52,7 @@ class CallService:Service(),MyAppObserver{
     var ipCountry:String? = null
     var getIpStatus = -1
     var onGetIpInfo:OnGetIpInfo? = null
+    var onSignup:OnSignup? = null
     var registerStartTime = 0L
     override fun onBind(intent: Intent?): IBinder? {
         return CallBinder()
@@ -269,6 +272,10 @@ class CallService:Service(),MyAppObserver{
             onGetIpInfo = listener
         }
 
+        fun setSignupListener(listener:OnSignup){
+            onSignup = listener
+        }
+
         fun getRegStatus():Int{
             return regStatus
         }
@@ -310,7 +317,8 @@ class CallService:Service(),MyAppObserver{
                     })
             }else{
                 if(ipCountry != null) {
-                    onGetIpInfo?.onGetIpInfo(ipCountry)
+//                    onGetIpInfo?.onGetIpInfo(ipCountry)
+                    signup()
                 }
             }
         }
@@ -322,6 +330,63 @@ class CallService:Service(),MyAppObserver{
 
         fun createNotification(){
             this@CallService.createNotification()
+        }
+
+        @SuppressLint("CheckResult")
+        fun signup() {
+            if(signupStatus == 1){
+                LogUtils.d(TAG,"正在注册中---")
+                return
+            }else if(signupStatus == 2){
+                LogUtils.d(TAG,"已经注册成功---")
+                return
+            }
+            val map = mutableMapOf<String,String>()
+            var country:String? = getCountry()
+            if(country == null){
+                println("尝试通过IP获取国家。。。 ${getIpCountry()}")
+                if(getIpCountry() != null){
+                    country = getIpCountry()
+                }else {
+                    println("$TAG getIpInfo")
+                    getIpInfo()
+                    return
+                }
+            }
+            val ts = System.currentTimeMillis()
+            Api.ts = ts
+            val deviceId = getAppDeviceId()
+            val uuid = "vcall.${EncryptUtils.md5(deviceId)}"
+            App.requestMap["from"] = AESUtils.encrypt(deviceId,AdManager.get().referrer)
+            map.putAll(App.requestMap)
+            map.put("uuid",uuid)
+            map.put("country",country!!)
+            map.put("key",ts.toString())
+            map.put("sign",EncryptUtils.generateSignature(uuid,packageName,ts.toString(),uuid))
+            signupStatus = 1
+            LogUtils.d(TAG,"$deviceId signup $map")
+            Api.getApiService().signup(map)
+//            .delay(4000,TimeUnit.MILLISECONDS)
+                .compose(RxUtils.applySchedulers())
+                .subscribe({
+                    signupStatus = 2
+                    if (it.code == 20000) {
+                        it.data.time = System.currentTimeMillis()
+                        UserManager.get().user = it.data
+                        onSignup?.onSignup()
+//                        (supportFragmentManager.findFragmentByTag("Index") as IndexFragment).refreshUser()
+//                        dataBinding.navigationView.getHeaderView(0).findViewById<TextView>(R.id.coin_num).text =
+//                            it.data.points.toString()
+                        initAccount()
+                        Dispatcher.dispatch(this@CallService){
+                            action("refresh_notification")
+                        }.send()
+                    }
+                }, {
+                    signupStatus = 0
+                    it.printStackTrace()
+                })
+
         }
     }
 
@@ -451,5 +516,9 @@ class CallService:Service(),MyAppObserver{
 
     interface OnGetIpInfo{
         fun onGetIpInfo(ip:String?)
+    }
+
+    interface OnSignup{
+        fun onSignup()
     }
 }

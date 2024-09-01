@@ -36,7 +36,6 @@ class ContractsFragment : BaseDataBindingFragment<FragmentTabContractsBinding>()
     val list: MutableList<Contact> = mutableListOf()
     var contractsObserver:ContractsObserver? = null
     private val PERMISSIONS = arrayOf(
-        Manifest.permission.READ_PHONE_STATE,
         Manifest.permission.READ_CONTACTS
     )
     override fun getLayoutResId(): Int = R.layout.fragment_tab_contracts

@@ -85,11 +85,20 @@ class SplashActivity:BaseDataBindingActivity<ActivitySplashBinding>(),AdManager.
             override fun onServiceDisconnected(name: ComponentName?) {}
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 callBinder = service as CallService.CallBinder
-                if(ContextCompat.checkSelfPermission(this@SplashActivity,
-                        Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
-                    if(callBinder?.getGetIpStatus() == -1 && getCountry() == null) {
-                        callBinder?.getIpInfo()
-                    }
+//                if(ContextCompat.checkSelfPermission(this@SplashActivity,
+//                        Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
+//                    if(callBinder?.getGetIpStatus() == -1 && getCountry() == null) {
+//                        callBinder?.getIpInfo()
+//                    }
+//                }
+                if(!onlyShowAd) {
+                    callBinder?.setSignupListener(object : CallService.OnSignup {
+                        override fun onSignup() {
+                            getAdData()
+                        }
+
+                    })
+                    callBinder?.signup()
                 }
             }
         }
@@ -134,14 +143,11 @@ class SplashActivity:BaseDataBindingActivity<ActivitySplashBinding>(),AdManager.
                     }
                 }
             })
-        }else {
-            getAdData()
         }
         AdManager.get().interstitialAdListener[AdManager.ad_splash] = this
         //for test
 //        prefs.save("last_check_day","20200826")
 //        prefs.save("check_max_day",1)
-
 
     }
 
