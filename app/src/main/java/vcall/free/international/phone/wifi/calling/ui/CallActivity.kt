@@ -56,6 +56,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
     var wakeLock: PowerManager.WakeLock? = null
     var headsetPlugReceiver: HeadsetPluginReceiver? = null
     var maxmiumDistance = 0f
+    var sensor:Sensor? = null
     var dialEffectHelper: DialEffectHelper? = null
     override fun getLayoutRes(): Int = R.layout.activity_call
 
@@ -69,7 +70,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         audioManager.isSpeakerphoneOn = false
         if (!LogUtils.test) {
             sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-            val sensor:Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
+            sensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
             maxmiumDistance = sensor?.maximumRange?:10f
             println("$tag maxmiumDistance=$maxmiumDistance")
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
@@ -117,6 +118,10 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 
     override fun onDestroy() {
         AdManager.get().interstitialAdListener.remove(AdManager.ad_close)
+        if (!LogUtils.test) {
+            LogUtils.d(TAG,"onDestroy---移除sensor listener--")
+            sensorManager.unregisterListener(this,sensor)
+        }
         super.onDestroy()
         if (::conn.isInitialized) {
             callBinder?.removeCallStateChangeListener(this)
@@ -129,9 +134,6 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         toneGeneratorHelper?.stopRingingTone()
         if (disposable?.isDisposed == false) {
             disposable?.dispose()
-        }
-        if (!LogUtils.test) {
-            sensorManager.unregisterListener(this)
         }
     }
 
@@ -180,7 +182,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 
     //挂断电话，通话中挂断会回调到下面到onDisconnect方法，如果没有打通电话就手动调用onDisconnect方法
     fun hangup(flag: Boolean = true) {
-//        dataBinding.hangupIv.isClickable = false
+        dataBinding.hangupIv.isClickable = false
         LogUtils.println("hangup flat=$flag ${callBinder?.getCurrentCall() == null}")
         if(LogUtils.test){
             onDisconnect()
@@ -272,7 +274,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
                         callState = callInfo.stateText
                         LogUtils.println("$TAG 对方未接")
                         if (callInfo.state == pjsip_inv_state.PJSIP_INV_STATE_EARLY) {
-                            toneGeneratorHelper?.startRingingTone()
+//                            toneGeneratorHelper?.startRingingTone()
                         }
                     }
                 } else if (callInfo.state
@@ -394,14 +396,14 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 
     override fun onSensorChanged(event: SensorEvent?) {
         val b = hasWireHeadSet()
-        LogUtils.println("$TAG onSensorChanged $b")
-        if (b) {
+        LogUtils.println("$TAG onSensorChanged ${isDestroyed} $b ${callBinder?.getCurrentCall()?.info?.state}")
+        if (b || isDestroyed) {
             return
         }
-//        if(callBinder?.getCurrentCall()?.info?.state == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED || LogUtils.test){
-        val distance = event?.values?.get(0) ?: 0f
-        LogUtils.println("$TAG distance $distance $maxmiumDistance")
-        setScreenOnOff(distance >= maxmiumDistance)
+//        if(callBinder?.getCurrentCall()?.info?.state !== null && callBinder?.getCurrentCall()?.info?.state != pjsip_inv_state.PJSIP_INV_STATE_NULL && callBinder?.getCurrentCall()?.info?.state !== pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED){
+            val distance = event?.values?.get(0) ?: 0f
+            LogUtils.println("$TAG distance $distance $maxmiumDistance")
+            setScreenOnOff(distance >= maxmiumDistance)
 //        }
     }
 
