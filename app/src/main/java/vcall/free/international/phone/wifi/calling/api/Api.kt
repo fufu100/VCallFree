@@ -11,8 +11,8 @@ import vcall.free.international.phone.wifi.calling.lib.prefs
 import java.util.concurrent.TimeUnit
 
 object Api {
-    const val baseUrl = "https://vcallfree.com/"
-//    const val baseUrl = "https://zwtestv.xyz/"
+//    const val baseUrl = "https://vcallfree.com/"
+    const val baseUrl = "https://zwtestv.xyz/"
     private var mRetrofit:Retrofit? = null
 
     var ts:Long = 0L

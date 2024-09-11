@@ -74,6 +74,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
             maxmiumDistance = sensor?.maximumRange?:10f
             println("$tag maxmiumDistance=$maxmiumDistance")
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+            wakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, TAG)
         }
         conn = object : ServiceConnection {
             override fun onServiceDisconnected(name: ComponentName?) {}
@@ -121,6 +122,12 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         if (!LogUtils.test) {
             LogUtils.d(TAG,"onDestroy---移除sensor listener--")
             sensorManager.unregisterListener(this,sensor)
+            if(wakeLock != null){
+                if(wakeLock!!.isHeld){
+                    wakeLock!!.release()
+                }
+                wakeLock = null
+            }
         }
         super.onDestroy()
         if (::conn.isInitialized) {
@@ -353,20 +360,20 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
         }
     }
 
-    @SuppressLint("InvalidWakeLockTag")
-    private fun setScreenOnOff(flag: Boolean) {
-        LogUtils.println("$TAG setScreenOnOff $flag")
-        if (wakeLock == null) {
-            wakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, TAG)
-        }
-        if (flag) {
-            wakeLock?.acquire()
-        } else {
-            wakeLock?.setReferenceCounted(false)
-            wakeLock?.release()
-            wakeLock = null
-        }
-    }
+//    @SuppressLint("InvalidWakeLockTag")
+//    private fun setScreenOnOff(flag: Boolean) {
+//        LogUtils.println("$TAG setScreenOnOff $flag")
+//        if (wakeLock == null) {
+//            wakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, TAG)
+//        }
+//        if (flag) {
+//            wakeLock?.acquire()
+//        } else {
+//            wakeLock?.setReferenceCounted(false)
+//            wakeLock?.release()
+//            wakeLock = null
+//        }
+//    }
 
     inner class HeadsetPluginReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -394,16 +401,30 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
 
     }
 
-    override fun onSensorChanged(event: SensorEvent?) {
+    override fun onSensorChanged(event: SensorEvent) {
         val b = hasWireHeadSet()
         LogUtils.println("$TAG onSensorChanged ${isDestroyed} $b ${callBinder?.getCurrentCall()?.info?.state}")
         if (b || isDestroyed) {
             return
         }
 //        if(callBinder?.getCurrentCall()?.info?.state !== null && callBinder?.getCurrentCall()?.info?.state != pjsip_inv_state.PJSIP_INV_STATE_NULL && callBinder?.getCurrentCall()?.info?.state !== pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED){
-            val distance = event?.values?.get(0) ?: 0f
-            LogUtils.println("$TAG distance $distance $maxmiumDistance")
-            setScreenOnOff(distance >= maxmiumDistance)
+        val its = event.values;
+        if(its != null && event.sensor.type == Sensor.TYPE_PROXIMITY) {
+            if (its[0] == 0.0f) {
+                if(wakeLock?.isHeld == true){
+                    return
+                }else{
+                    wakeLock?.acquire()
+                }
+            }else{
+                if(wakeLock?.isHeld == true){
+                    return
+                }else{
+                    wakeLock?.setReferenceCounted(false)
+                    wakeLock?.release()
+                }
+            }
+        }
 //        }
     }
 
