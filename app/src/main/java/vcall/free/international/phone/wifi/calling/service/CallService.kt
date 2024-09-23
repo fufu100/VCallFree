@@ -231,7 +231,8 @@ class CallService:Service(),MyAppObserver{
         fun hangup(){
             if(currentCall != null){
                 val prm = CallOpParam()
-                prm.statusCode = pjsip_status_code.PJSIP_SC_DECLINE
+                prm.statusCode = pjsip_status_code.PJSIP_SC_REQUEST_TERMINATED
+//                prm.statusCode = pjsip_status_code.PJSIP_SC_DECLINE
                 try {
                     println("hangup 挂断电话---")
                     currentCall?.hangup(prm)
@@ -473,6 +474,7 @@ class CallService:Service(),MyAppObserver{
     }
 
     override fun notifyCallState(call: MyCall?) {
+        Log.d(TAG, "notifyCallState: --- ${call?.id}, ${currentCall?.id}")
         if(currentCall?.id != call?.id){
             return
         }
@@ -481,6 +483,7 @@ class CallService:Service(),MyAppObserver{
             ci = call?.info
         }catch (e:Exception){
             ci = null
+            e.printStackTrace()
         }
         callStateChangeListeners.forEach {
             it.onCallStateChange(ci)

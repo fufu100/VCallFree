@@ -243,6 +243,7 @@ class CallActivity : BaseBackActivity<ActivityCallBinding>(), CallService.CallSt
                 isAdShowing = true
             } else {
                 AdManager.get().loadInterstitialAd(this, AdManager.ad_close)
+                Log.e(TAG,"跳转CallResultActivity----- $record")
                 Dispatcher.dispatch(this) {
                     navigate(CallResultActivity::class.java)
                     extra("record", record!!)
